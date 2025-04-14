@@ -1,0 +1,145 @@
+
+database produk (pr_produk): id, nama_produk, deskripsi, kategori_id, satuan hpp, harga jual, foto
+database produk (pr_kategori): id, nama_kategori, pr_divisi_id
+database produk (pr_divisi): id, nama_divisi
+=====clear====
+buatkan halaman login, dan selanjutnya buat semua halaman dengan fungsi login
+tabel abs_pegawai => id, nama, divisi_id (divisi pegawai bukan divisi produk => 1. OFFICE, 2. BAR, 3. KITCHEN, 99. CEO(superadmin)),..., username, password (tabel database sudah ada tidak perlu buat lagi) 
+buatkan POS nya lengkap
+
+user kasir:
+
+tabel transaksi :
+pr_transaksi=>id, tanggal, no_transaksi (generate otomatis, CS/date/id 4 angka=> contoh CS/63/250101/0001), waktu_order (waktu taking order (saat menyimpan order)), waktu_bayar (waktu pembayaran), jenis_order_id, coustumer (bisa menulis, bisa ambil dari nama pr_costumer), nomor meja, total_penjualan, metode_pembayaran, kasir_order, kasir_bayar 
+
+tabel detail transaksi
+pr_detail_transaksi =>id, pr_transaksi_id, pr_produk_id, jumlah, harga, subtotal, 
+
+tabel metode_pembayaran
+pr_metode_pembayaran => id, metode_pembayaran, bl_rekening_id
+
+tabel jenis order
+pr_jenis_order => id, jenis_order
+
+pindah ke transaksi. 
+- modifikasi database pr_transaksi, tambahkan kolom total_pembayaran (penjualan - diskon)
+
+
+
+tabel - tabel diatas sudah ada dan tidak perlu dibuat lagi.
+pr_pengaturan: id 	nama_outlet 	alamat 	email 	no_telepon 	logo 	teks_header 	teks_footer 	show_logo 	show_outlet 	show_address 	show_email 	show_phone 	show_invoice 	show_cashier 	show_customer 	show_footer
+
+pr_transaksi:
+id 	tanggal 	no_transaksi 	waktu_order 	waktu_bayar 	jenis_order_id 	customer 	nomor_meja 	total_penjualan 	metode_pembayaran_id 	kasir_order 	kasir_bayar 	kode_voucher 	diskon 	total_pembayaran
+
+pr_detail_transaksi:
+id 	pr_transaksi_id 	pr_produk_id 	jumlah 	harga 	subtotal 	catatan
+
+perbaikan:
+- bisakah tanpa refresh?
+revisi tampilan menjadi:
+
+tab header :
+===informasi outlet===
+Logo
+Nama Outlet
+Alamat
+Email
+No. Telepon
+Teks Header Custom (dengan text area dibawahnya)
+
+===informasi transaksi=== > diambilkan dari tabel pr_transaksi. namun untuk previewnya tampilkan template
+Nomor Transaksi (no_transaksi) ==> preview: CS/63/250101/0001
+Waktu Transaksi (waktu_bayar) ==> preview: 2025-01-28 01:11:28
+Nama Kasir Order (kasir_order) ==> preview: Pevita
+Nama Kasir Bayar (kasir_bayar) ==> preview: Pevita
+Customer (Customer) ==> preview: John Doe
+Jenis Order (jenis_order)  ==> preview: Dine In
+Nomor Meja (nomor_meja) ==> preview: 5
+
+tab body => terkait informasi Produk, yang diambil dari pr_detail_transaksi sesuai dengan pr_transaksi_id. (contoh template preview seperti gambar)
+- nama produk (pr_produk_id join pr_produk => nama_produk)
+- catatan masing-masing produk (jika ada)
+- jumlah beli dan harga satuan
+- subtotal
+- Diskon
+- Total_tagihan
+- metode_pembayaran
+
+tab footer seperti gambar
+
+
+
+
+sekarang kita pindah ke fungsi printer.
+buatkan halaman manajemen printer, halaman ini berfungsi untuk menambahkan printer ke masing-masing divisi. ada beberapa lokasi printer, kasir, bar, kitchen, waiters. halaman manajemen printer berfungsi untuk melakukan setting printer default yang digunakan untuk masing-masing lokasi.
+pola kerjanya:
+- halaman manajemen printer:
+    => tambahkan printer (lakukan scan, pilih printer, seting printer untuk divisi tertentu)
+- halaman kasir :
+    => pilih daftar order => pilih cetak => muncul pilihan divisi (kasirm, bar, kitchem dan seterusnya) => pilih salah satu divisi dan printer akan mencetak sesuai divisi
+
+
+
+
+
+
+
+
+
+
+
+
+buatkan laporan :
+- detail penjualan, seperti contoh pada gambar 1 dengan penyesuaian sesuai database yang ada. kolom yang dibuat : NO TRANSAKSI, WAKTU ORDER, WAKTU BAYAR, JENIS ORDER, TOTAL PENJUALAN
+- Detail transaksi, seperti contoh pada gambar 2 yang muncul ketika transaksin di klik, dengan penyesuaian sesuai database yang ada. 
+
+format database yang ada dan digunakan adalah:
+
+pr_transaksi : 	id 	customer_id 	tanggal 	no_transaksi 	waktu_order 	waktu_bayar 	jenis_order_id 	customer 	nomor_meja 	total_penjualan 	kasir_order 	kasir_bayar 	kode_voucher 	diskon 	total_pembayaran 	sisa_pembayaran 	status_pembayaran 	created_at 	updated_at
+
+pr_detail_transaksi :	id 	pr_transaksi_id 	pr_produk_id 	jumlah 	harga 	subtotal 	catatan 	is_printed 	status 	created_at 	updated_at 
+
+pr_pembayaran (metode pembayaran ):  id 	transaksi_id 	metode_id 	jumlah 	waktu_bayar 	keterangan 	kasir_id
+
+pr_metode_pembayaran :	id 	metode_pembayaran 	bl_rekening_id 	created_at 	updated_at
+
+pr_produk :	id 	nama_produk 	sku 	deskripsi 	kategori_id 	satuan 	hpp 	harga_jual 	monitor_persediaan 	tampil 	foto 	created_at 	updated_at
+
+pr_kategori :	id 	nama_kategori 	created_at 	updated_at
+
+pr_costumer : id 	nama 	kode_pelanggan 	jenis_kelamin 	tanggal_lahir 	alamat 	telepon 	email 	foto 	created_at 	updated_at 	level 	
+
+pr_costumer_poin : 	id 	customer_id 	transaksi_id 	jumlah_poin 	jenis 	sumber 	tanggal_kedaluwarsa 	status 	created_at 	updated_at
+
+pr_void:	id 	pr_transaksi_id 	no_transaksi 	detail_transaksi_id 	pr_produk_id 	nama_produk 	jumlah 	harga 	subtotal 	catatan 	alasan 	void_by 	waktu 	created_at 	updated_at 	
+
+pr_refund:	id 	pr_transaksi_id 	pr_detail_transaksi_id 	no_transaksi 	nama_produk 	jumlah 	harga 	subtotal 	catatan 	alasan 	refund_by 	waktu_refund 	created_at 	updated_at 	
+
+pr_divisi : id 	nama_divisi 	urutan_tampilan 	created_at 	updated_at
+
+
+
+bl_db_belanja:	id 	nama_barang 	nama_bahan_baku 	id_kategori 	id_tipe_produksi 	is_gudang 	tanggal_update 	created_at 	updated_at 	
+
+bl_db_purchase:	id 	bl_db_belanja_id 	merk 	keterangan 	ukuran 	unit 	pack 	harga_satuan 	hpp 	tanggal 	created_at 	updated_at 	
+
+bl_jenis_pengeluaran:	id 	nama_jenis_pengeluaran 	created_at 	updated_at 	
+
+bl_divisi: id 	nama_divisi 	created_at 	updated_at
+bl_kategori: id 	nama_kategori 	created_at 	updated_at 	
+bl_purchase: id 	tanggal 	jenis_pengeluaran 	bl_db_belanja_id 	bl_db_purchase_id 	kuantitas 	total_unit 	total_harga 	hpp 	status 	pengusul 	metode_pembayaran 	created_at 	updated_at 	
+bl_store_request: 	id 	tanggal 	jenis_pengeluaran 	bl_db_purchase_id 	kuantitas 	created_at 	updated_at
+buatkan halamannya secara jelas. termukan relasi antar tabelnya. jika ada yang kurang jelas tanyakan
+
+
+sekarang, saya ingin membuat halaman resep produk, yang nantinya akan dihubungkan dengan penjualan sehingga dapat menghitung sisa stok.
+ketentuan resepn n dari produk saya adalah:
+- ada resep produk yang langsung dibuat dari bahan baku
+- ada resep "base" yang harus diolah dahulu dari bahan baku, untuk kemudian dapat diolah menjadi resep produk
+- manajemen bahan baku otomatis terhubung dari data perbelanjaan yang sudah dibuat
+- bahan baku didapat dari purchase dan store request
+
+dari tabel database yang saya kirim dibawah, coba buatkan skemanya. mulai dari buat resep dulu
+
+kejutkan saya!

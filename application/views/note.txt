@@ -1,0 +1,478 @@
+database yang saya inginkan berisi:
+
+bl_tipe_produksi berisi : id, nama_tipe_produksi V
+bl_kategori: id, nama_kategori V
+bl_jenis_pengeluaran : id, nama_jenis_pengeluaran (STOREROOM. BAR. KITCHEN, SERVER, EVENT, OFFICE, LISTRIK, AIR, INTERNET, LPG, 
+                                HIBURAN, BENSIN, PARKIR, SAMPAH, MAINTENANCE, GAJI, UANG MAKAN,PAJAK, ASET, OTHER) V
+bl_rekening : id, nama_rekening berisi :(brankas, BCA, MANDIRI, BRI, BPD JATENG, dll) V
+database belanja (data nama barang yang dijadikan dasar saat melakukan belanja)
+-> bl_db_belanja berisi : id, nama barang, nama bahan baku, id_kategori(diambil dari id bl_tipe_produksi),
+    id_tipe_produksi (diambil dr tabel bl_tipe_produksi), tanggal_update (tanggal barang diinput pertama kali) V
+database purchase ( data barang yang dijadikan dasar saat melakukan belanja) 
+-> bl_db_purchase berisi : id, bl_db_belanja_id (id barang dari bl_db_belanja), merk, keterangan, ukuran, unit (berisi ukuran unit seperti gr/ml/dll),
+    pack (berisi bentuk pack barang seperti botol, pack dll), harga_satuan, hpp (harga_satuan dibagi ukuran ) V
+database persediaan awal -> bl_persediaan_awal : tanggal, bl_jenis_pengeluaran, bl_db_belanja_id, bl_db_purchase_id, kuantitas, total_harga ( kuantitas x harga_satuan di bl_db_purchase) V
+buatkan halaman persediaan awal
+database purchase -> bl_purchase berisi : id, tanggal_pembelian, jenis_pengeluaran (diambil dari bl_jenis_pengeluaran), 
+                    bl_db_belanja_id, bl_db_purchase_id, kuantitas (jumlah pembelian), total_unit (kuantitas x ukuran pada bl_db_purchase) total_harga (kuantitas x harga_satuan pada bl_db_purchase), hpp (total_harga / total_unit_unit)
+                    metode_pembayaran (mengambil data dari bl_rekening) V
+database purchase order bar -> bl_purchase_bar berisi : id, tanggal_pembelian, jenis_pengeluaran (otomatis BAR), 
+                    bl_db_belanja_id, bl_db_purchase_id, kuantitas (jumlah pembelian), total_unit (kuantitas x ukuran pada bl_db_purchase) total_harga (kuantitas x harga_satuan pada bl_db_purchase), hpp (total_harga / total_unit_unit), status (pending/verified) v
+database purchase order KITCHEN -> bl_purchase_kitchen berisi : id, tanggal_pembelian, jenis_pengeluaran (otomatis KITCHEN), 
+                    bl_db_belanja_id, bl_db_purchase_id, kuantitas (jumlah pembelian), total_unit (kuantitas x ukuran pada bl_db_purchase) total_harga (kuantitas x harga_satuan pada bl_db_purchase), hpp (total_harga / total_unit_unit), status (pending/verified) V
+===============GUDANG=============
+===============GUDANG=============
+database gudang (kalkulasi data dari gudang_awal di awal bulan (bila ada), stok opname bulan sebelumnya, bl_daily_inventory, bl_store_request)
+            -> bl_gudang : bl_db_belanja_id, bl_db_purchase_id, stok_awal (bl_persediaan_awal dengan jenis_pengeluaran "STOREROOM" tanggal 1 bulan berkenaan + stok opname bulan sebelumnya), stok_masuk (bl_daily_inventory), stok_keluar (bl_store_request),
+                 stok_terbuang (bl_stok_waste + bl_stok_spoil), penyesuaian (bl_penyesuaian pada bulan bereknaan) 
+                stok_akhir (stok_awal + stok_masuk - stok_keluar - stok_terbuang + penyesuaian)
+buatkan database gudang (bl_gudang) dengan ketentuan kolom:
+bl_db_belanja_id (diambil dari bl_db_belanja)
+bl_db_purchase_id (diambil dari bl_db_purchase)
+stok_awal (gudang_awal di bulan berkenaan + stok_opname_gudang di bulan sebelumnya)
+stok_masuk (bl_purchase dengan jenis pengeluaran STOREROOM(id=1))
+stok_keluar (bl_store_request)
+stok_terbuang (bl_stok_waste +bl_stok_spoil)
+stok_penyesuaian (bl_penyesuaian pada bulan berekenaan) 
+stok_akhir (stok_awal + stok_masuk - stok_keluar - stok_terbuang + stok_penyesuaian)
+tanggal
+buatkan tampilan halamannya dengan data yang ditampilkan:             
+KATEGORI (diambil dari bl_kategori), NAMA BARANG (diambil dari bl_db_belanja) NAMA BAHAN BAKU (diambil dari bl_db_belanja) TYPE (diambil dari bl_tipe_produksi)	MERK (diambil dari bl_db_purchase),	UKURAN (diambil dari bl_db_purchase),	UNIT(diambil dari bl_db_purchase),	PACK(diambil dari bl_db_purchase),HARGA(diambil dari bl_db_purchase),	STOK AWAL,		STOK MASUK,	STOK KELUAR, STOK TERBUANG, PENYESUAIAN,	STOK AKHIR, UNIT TOTAL (stok_akhir * ukuran) 	NILAI TOTAL (stok_akhir * harga satuan)
+- buat pagination
+- buat opsi jumlah baris per halaman
+- buatkan fungsi sortir dengan urutan maksimal 4 kriteria ( dengan sortir default berdasarkan kategori, nama barang, nama bahan baku, tipe)
+- rumus stok akhir di database = stok_awal+stok_masuk+ stok_keluar-stok_terbuang+ penyesuaian (sesuaikan rumus databasenya)
+- rumus total unit = stok akhir * ukuran
+- rumus nilai total = stok akhir * harga
+- stok_masuk diambil dari data purchase dengan jenis_pengeluaran STOREROOM (id 1)
+- sesuaikan controller dan model purchase jika diperlukan agar data dapat secara otomatis masuk ke stok_masuk
+- jika belanja purchase merupakan barang baru (bl_db_belanja_id atau bl_db_purchase_id baru) langsung tambahkan ke gudang dengan stok awal 0
+buatkan tabel bl_stock_opname dengan data:
+Id Kategori, bl_db_belanja_id ,bl_db_purchase_id,Tipe,Merk,Ukuran,Unit,Pack,Harga,Stok Awal,Stok Masuk,Stok Keluar,Stok Terbuang,Penyesuaian,Stok Akhir,Unit Total,Nilai Total
+data tersebut di create dari data gudang. buatkan tambol generate di halaman gudang untuk membuat data stok opname
+- stok_keluar bada bl_gudang merupakan data dari bl_store_request,
+- buatkan tabel bl_store_request berisi : id, tanggal, jenis_pengeluaran, bl_db_purchase_id, kuantitas
+- buatkan halaman store request dengan ketentuan:
+    - input barang dengan metode pencarian ajax dengan mencari nama barang (sesuai bl_db_purchase_id) yang ada di tabel bl_gudang
+    - tampilkan preview pencarian = nama barang&merk&keterangan&ukuran-unit&harga satuan& "SISA STOK="&stok_akhir(existing pada bl_gudang) 
+    - setelah barang dipilih tampilkan data yang dicari pada form input dengan menambahkan  input jenis_pengeluaran(nama_jenis_pengeluaran) dan  kuantitas
+    - setelah data disimpan, simpan data pada kolom stok_keluar bl_gudang dan tampilkan pada tabel bl_store_request dengan tampilan halaman tabel = No, tanggal, nama barang, merk, keterangan, ukuran, unit, pack, harga satuan, kuantitas, tota_unit, total_harga, hpp, aksi (edit dan hapus)
+    - buat filtrasi rang tanggal (tanggal awal dan tanggal akhir) dengan default hari ini
+    - buatkan pagination dengan pilihan jumlah baris tiap halaman
+preview belum muncul
+coba rubah pola:
+- default jenis pengeluaran adalah STOREROOM (ID 1)
+- default metode pembayaran adalah BRANKAS (ID 1)
+- tampilkan preview pencarian = nama barang&merk&keterangan&ukuran-unit&harga satuan& "SISA STOK="&stok_akhir(existing pada bl_gudang) 
+- tabel nama barang yang dicari adalah bl_gudang
+- nama barang diambil dari kolom bl_db_belanja_id di tabel bl_gudang join ke tabel bl_db_belanja.
+- merk, keterangan, ukuran, harga satuan diambil dari bl_db_purchase_id di tabel bl_gudang join ke tabel bl_db_purchase dan tabel terkait
+- setelah barang dipilih tampilkan data yang dicari pada form input dengan menambahkan  input jenis_pengeluaran(nama_jenis_pengeluaran) dan  kuantitas
+- setelah data disimpan, simpan data pada kolom stok_keluar bl_gudang dan tampilkan pada tabel bl_store_request dengan tampilan halaman tabel = No, tanggal, nama barang, merk, keterangan, ukuran, unit, pack, harga satuan, kuantitas, tota_unit, total_harga, hpp, aksi (edit dan hapus)
+
+
+===============GUDANG=============
+===============GUDANG=============
+========================================CLEAR========================================
+========================================CLEAR========================================
+========================================CLEAR========================================
+========================================CLEAR========================================
+========================================CLEAR========================================
+========================================CLEAR========================================
+database Store Request ( transaksi pengambilan barang dari STOREROOM (bl_gudang) ) bl_store_request : id, tanggal, jenis_pengeluaran, id_barang, kuantitas v
+database Store Request BAR bl_store_request_bar : id, tanggal, jenis_pengeluaran (otomatis bar), id_barang, kuantitas v
+
+-buatkan halaman Store Request BAR yang mirip dengan halaman Store Request dengan struktur database:
+id,Tanggal, Jenis Pengeluaran(otomatis BAR (id =2)), bl_db_purchase_id, Kuantitas, catatan, Status (pending, verified, rejected)
+
+- form input dengan pencarian ajax 
+- tampilkan preview pencarian = nama barang&merk&keterangan&ukuran-unit&harga satuan& "SISA STOK="&stok_akhir(existing pada bl_gudang) 
+- tabel nama barang yang dicari adalah bl_gudang
+- nama barang diambil dari kolom bl_db_belanja_id di tabel bl_gudang join ke tabel bl_db_belanja.
+- merk, keterangan, ukuran, harga satuan diambil dari bl_db_purchase_id di tabel bl_gudang join ke tabel bl_db_purchase dan tabel terkait
+- setelah barang dipilih tampilkan data yang dicari pada form input dengan menambahkan  input jenis_pengeluaran(nama_jenis_pengeluaran) dan  kuantitas
+- setelah data disimpan, simpan data pada kolom stok_keluar bl_gudang dan tampilkan pada tabel bl_store_request dengan tampilan halaman tabel = No, tanggal, nama barang, merk, keterangan, ukuran, unit, pack, harga satuan, kuantitas, tota_unit, total_harga, hpp, aksi (edit dan hapus)
+- filtrasi tanggal (tanggal awal dan tanggal akhir) dengan default hari ini
+- pagination dengan pilihan jumlah baris tiap halaman
+- tambahkan status pending, verified, rejected pada tabel bl_store_request_bar
+- tambahkan catatan pada tabel bl_store_request_bar
+- ketika data di verifikasi, maka data masuk ke bl_store_request
+database Store Request KITCHEN bl_store_request_kitchen : id, tanggal, jenis_pengeluaran (otomatis kitchen), id_barang, kuantitas v
+database bl_daily_inventory -> menarik data bl_purchase dengan jenis_pengeluaran STOREROOM -> id, tanggal_pembelian, bl_purchase_id
+buatakan halaman daily inventory
+- buatkan database bl_daily_inventory -> menarik data bl_purchase dengan jenis_pengeluaran STOREROOM -> id, tanggal_pembelian, bl_purchase_id
+- buatakan tampilan halaman daily inventory dengan tampilan :tanggal, no, jenis pengeluaran, nama barang, nama bahan baku, kategori, tipe produksi, merk, keterangan, ukuran, unit, pack, harga satuan, kuantitas, total unit, total harga, hpp,.
+- filtrasi per bulan
+rubah pola: ketika melakukan input di halaman purchase (bl_purchase), maka data dengan jenis pengeluaran STOREROOM (id 1) otomatis terinput juga di bl_daily_inventory,
+- buatakan tampilan halaman daily inventory dengan tampilan :tanggal, no, jenis pengeluaran, nama barang, nama bahan baku, kategori, tipe produksi, merk, keterangan, ukuran, unit, pack, harga satuan, kuantitas, total unit, total harga, hpp,.
+
+database bl_daily_kitchen -> (menarik data bl_purchase dengan jenis_pengeluaran KITCHEN + bl_store_request dengan jenis_pengeluaran KITCHEN) -> id, tanggal_pembelian, bl_db_belanja_id, bl_db_purchase_id, kuantitas, total_harga (kuantitas x harga_satuan pada bl_db_belanja), hpp (total_harga / ukuran_unit pada bl_db_belanja), hpp_average v
+database bl_daily_bar -> (menarik data bl_purchase dengan jenis_pengeluaran BAR + bl_store_request dengan jenis_pengeluaran BAR)-> id, tanggal_pembelian, bl_db_belanja_id, bl_db_purchase_id, kuantitas, total_harga (kuantitas x harga_satuan pada bl_db_belanja), hpp (total_harga / ukuran_unit pada bl_db_belanja) v
+bl_stok_spoil : id,  tanggal, bl_db_belanja_id, bl_db_purchase_id, kuantitas, alasan
+bl_stok_waste : id,  tanggal, bl_db_belanja_id, bl_db_purchase_id, kuantitas, alasan
+bl_penyesuaian : id,  tanggal, bl_db_belanja_id, bl_db_purchase_id, kuantitas, alasan
+bl_stok_opname_store : create table bl_stok_opname_store setiap awal bulan(id, tanggal, bl_db_belanja_id, bl_db_purchase_id, kuantitas, harga_satuan, total_harga)
+bl_stok_opname_bar : create table bl_stok_opname_store setiap awal bulan(id, tanggal, bl_db_belanja_id, bl_db_purchase_id, kuantitas, harga_satuan, total_harga)
+bl_stok_opname_kitchen : create table bl_stok_opname_store setiap awal bulan(id, tanggal, bl_db_belanja_id, bl_db_purchase_id, kuantitas, harga_satuan, total_harga)
+abs_pegawai : nama, divisi_id, jabatan1_id, jabatan2_id, kode_user (admin, spv, hod, pegawai)
+abs_divisi : id, nama_divisi (OFFICE, BAR, KITCHEN) --> PEGAWAI DEngan divisi office dapat melakukan input semua kegiatan di atas, 
+            pegawai dengan divisi BAR dan KITCHEN dapat melakukan STORE REQUEST dan PURCHASE ORDER. bl_stok_spoil, bl_stok_waste, bl_penyesuaian, bl_stok_opname_bar, bl_daily_kitchen
+pertama buatkan dulu halaman database belanja dengan database bl_db_belanja.
+rapikan halaman dan tabel. buatkan form input di div sebelah kiri atau sebelah atas.
+buatkan pagianation.
+kolom fitur pencarian ajax
+fungsi edit dan hapus
+sekarang buatkan halaman database purchase. dengan konsep tampilan halaman seperti halaman database belanja sebagaimana terlampir
+rapikan halaman dan tabel.
+buatkan form input di div sebelah kiri atau sebelah atas.
+buatkan pagianation.
+kolom fitur pencarian ajax
+fungsi edit dan hapus
+catatan tambahan : saat melakukan input, menarik data nama barang dari bl_db_belanja, form input berisi:
+- nama barang (kolom pencarian ajax dari bl_db_belanja, dengan tomobol pilih sebelah kanan.
+                - saat melakukan input, jika nama barang tidak ada di bl_db_belanja berarti barang tersebut adalah barang baru, jadi input barang baru tersebut di bl_db_belanja dan bl_db_purchase)
+- nama bahan baku (sesuai dengan bl_db_belanja, input manual jika nama barang tidak ada di bl_db_belanja berarti barang tersebut adalah barang baru, jadi input barang baru tersebut di bl_db_belanja dan bl_db_purchase)
+- nama kategori (sesuai dengan bl_db_belanja dan bl_kategori, 
+                input manual jika nama barang tidak ada di bl_db_belanja berarti barang tersebut adalah barang baru,
+                jadi input barang baru tersebut di bl_db_belanja dan bl_db_purchase, dengan pilihan kategori dropdown dari db bl_kategori)
+- tipe produksi (sesuai dengan bl_db_belanja dan bl_tipe_produksi,
+                                input manual jika nama barang tidak ada di bl_db_belanja berarti barang tersebut adalah barang baru,
+                jadi input barang baru tersebut di bl_db_belanja dan bl_db_purchase, dengan pilihan kategori dropdown dari db bl_tipe_produksi)
+- Merk (input manual)
+- keterangan (input manual)
+- ukuran (input manual)
+- unit (input manual)
+- pack (input manual)
+- harga_satuan (input manual)
+- hpp (rumus harga satuan/ukuran)
+== perbaikan dan tambahan==
+- tambahan kolom tanggal di bl_db_purchase dengan default tanggak hari ini. tambahkan juga fungsi input
+- pada saat cari nama barang yang akan diinput, nama barang yang dicari belum keluar
+perbarui pola, saat melakukan edit, periksa juga bl_db_belanja, ketika ada barang dengan nama barang & nama bahan baku & kategori & tipe produksi baru, maka tambahkan ke bl_db_belanja
+====================
+buatkan halaman purchase, purchase bar, dan purchase kitchen dengan ketentuan:
+sekema alur proses bisnis mirip dengan halaman dbpurchase dengan perubahan:
+halaman purchase:
+metode input dengan pencarian ajax mirip dbpurchase dengan mengambil data dari dbpurchase, preview yang ditampilkan bukan hanya nama barang, tapi juga :
+        nama barang - merk - ukuran&" "& unit - harga_satuan
+        dengan tambahan form : kuantitas, total unit (unit x kuantitas),
+        total harga (harga satuan x kuantitas), hpp ( total harga / total_unit). metode_pembayaran (mengambil nama bl_rekening dari tabel bl_rekening sesuai id)
+
+        data yang ditampilkan ditabel adalah data yang di input purchase dan data yang dinput purchase bar dan purchase kitchen
+        sebelah kanan aksi, tambah kolom keterangan (penginput - purchase/bar/kitchen) dan kolom verifikasi, untuk memverifikasi atau menolak data yang diinput oleh purchase bar dan purchase kitchen,
+        jika diverifikasi data akan masuk ke bl_purchase, jika ditolak, data tidak muncul di halaman purchase dan status data di bar dan kitchen ditolak 
+        (tambhakan status rejected pada status purchase bar dan purchase kitchen, sebelumnya baru verified dan pending dan sesuaikan tabel database lain jika diperlukan)
+
+        saat melakukan input dan edit periksa juga bl_db_belanja dan bl_db_purchase, ketika ada data baru nama nama barang & nama bahan baku & kategori & tipe produksi baru, maka tambahkan ke bl_db_belanja dan bl_db_purchase
+                ketika ada data baru  merk, keterangan, ukuran, unit, pack, dan harga satuan pada nama barang yang sudah ada, makan tambahan data ke bl_db_purchase
+buatkan halaman purchase bar :
+metode input mirip halaman purchase, 
+kolom : No, Tanggal, Jenis Pengeluaran, Nama Barang, Nama Bahan Baku, Kategori, Tipe Produksi, Merk, Keterangan, Ukuran, Unit, Pack, Harga Satuan, Kuantitas, Total Unit, Total Harga, HPP, Status
+alur penginputan sama dengan purchase
+metode input dengan pencarian ajax mirip mengambil data dari bl_db_belanja dan bl_db_purchase,
+preview yang ditampilkan :nama barang - merk - keterangan - ukuran&" "& unit - harga_satuan
+form input berisi Tanggal, Jenis Pengeluaran, Nama Barang, Nama Bahan Baku, Kategori, Tipe Produksi, Merk, Keterangan, Ukuran, Unit, Pack, Harga Satuan, Kuantitas, Total Unit
+data yang diinput hanya akan disimpan di tabel bl_purchase_bar dan tidak akan berpengaruh ke tabel lain
+dengan tambahan kolom status, status saat input adalah pending, dan akan menjadi verified setelah di verifikasi
+halaman purchase kitchen :
+metode mirip dengan halaman input dbpurchase, dengan tambahan kolom status, status saat input adalah pending, dan akan menjadi verified setelah di verifikasi
+setelah diverifikasi, data akan masuk ke halaman purchase
+rev:
+metode input dengan pencarian ajax mirip dengan mengambil data dari dbpurchase, preview yang ditampilkan bukan hanya nama barang, tapi juga :
+        nama barang - merk - ukuran&" "& unit - harga_satuan
+=== pada kolom keterangan di bl_purchase ganti nama kolom pengusul, akan divisi yang melakukan input ( purchase / bar/ kithcen) sesuai halaman input dilakukan. jika penginputan dari halaman puchase, maka pengusul adalah penginput, jika penginputan dari halaman purchase bar, maka pengusul adalah puchase, jika penginputan dari halaman purchase bar/kitchen, maka pengusul adalah bar/kitchen
+warning === db belanja dan db purchase hanya dapat diakses admin
+form input tambah tanggal, tanggal default adalah hari ini
+tambahkan kolom jenis_pengeluaran
+pagination
+ganti bl_purchase jadi bl_purchase_bar dan Purchase_model jad PurchaseBar_model, untuk metode insert maupun update hilangkan variabel metode_pembayaran karena di tabel bl_puchase_bar tidak ada kolom metode_pembayaran. folder diganti dari purchase menjadi purchase_bar
+- ganti bl_purchase jadi bl_purchase_bar dan Purchase_model jadi PurchaseBar_model,
+- untuk metode insert maupun update hilangkan variabel metode_pembayaran karena di tabel bl_puchase_bar tidak ada kolom metode_pembayaran.
+- folder diganti dari purchase menjadi purchase_bar
+- input data maupun perubahan data hanya diinput di bl_purchase_bar tanpa merubah bl_db_belanja maupun bl_db_purchase
+- tetap aktifkan fungsi search ajax form input
+sortitr tanggal
+buatkan halaman purchase pending dengan skema:
+dengan halaman mirip dengan halaman purchase, halaman ini untuk melakukan input purchase sementara yang membutuhkan verifikasi terlebih dahulu.
+dalam melakukan input purchase pending pegawai dapat melakukan penyesuaian maupun input data baru yang belum ada di bl_db_belanja dan bl_db_purchase.
+buatkan database khusus untuk halaman purchase pending, dengan nama bl_purchase_pending, tanpa mempengaruhi tabel lain.
+metode verifikasi ada 2 opsi (verifikasi, tolak). saat melakukan verifikasi, purchase dapat melakukan penyesian yang kemudian data akan disimpan 
+ke halaman purchase (bl_purchase) dengan penyesuaian di bl_db_belanja dan bl_db_purchase bila diperlukan.
+metode dan form input di purchase pending mirip dengan metode input di purchase, dengan pencarian ajax dan memilih barang yang dimaksud.
+- kolom yang di tampilkan di view purchase pending sama dengan purchase
+- database yang dibuat sudah sebelumnya benar
+- metode pencarian barang yang diinput dengan ajax dari bl_db_belanja dan bl_db_purchase.
+- data form yang diinput sama dengan halaman purchase
+buatkan halaman verifikasi dengan skema:
+klik verifikasi dan masukan data ke bl_purchase dengan ketentuan:
+- periksa nama barang&nama bahan baku&id kategori&id tipe produksi dan cocokan dengan data di bl_db_belanja, jika data belum ada, maka tambahkan data baru
+- periksa nama barang&nama bahan baku&id kategori&id tipe produksi&merk&unit&pack&harga satuan dan cocokan dengan data di bl_db_purchase, jika data belum ada, maka tambahkan data baru
+- tambahkan data yang telah diverifikasi ke bl_purchase dengan memperhatikan 2 hal diatas
+form persediaan
+buatkan halaman Gudang Awal dengan ketentuan:
+- tabel database (bl_gudang_awal) berisi: id, tanggal, bl_db_belanja_id (id bl_db_belanja sesuai barang yang dipilih), bl_db_purchase_id (id bl_db_purchase sesuai barang yang dipilih), kuatitas, total_unit (kuantitas x unit sesuai bl_db_purchase_id barang yang dipilih), total_harga (kuantitas x harga_satuan pada bl_db_purchase sesuai barang yang dipilih),  hpp (total_harga / total_unit)
+- skema input barang mirip dengan halaman purchase (bl_purchase) dilakukan dengan metode pencarian barang secara ajax ke bl_db_purchase, kemudian preview data muncul (nama barang&nama bahan baku&merk&ukuran&harga satuan) dan dipilih kemudian data yang dipilih masuk ke masing-masing form input. 
+- data yang dipilih kemudian muncul pada kolom form input (Nama barang, nama bahan baku, merk, ukuran, harga satuan, kuantitas (data yang input)) dan diisi dengan data yang dipilih.
+-form input yang ditampilkan di atas tabel adalah:  nama barang, nama bahan baku, merk, ukuran, harga satuan, kuantitas (sesuai id bl_db_belanja dan bl_db_purchase yang dipilih)
+- data yang ditampilkan di tabel : No , Nama Barang (sesuai id barang pada bl_db_belanja), Nama Bahan Baku (sesuai id barang pada bl_db_belanja), merk (sesuai id barang pada bl_db_purchase), ukuran (sesuai id barang pada bl_db_purchase), harga satuan (sesuai id barang pada bl_db_purchase), kuantitas, total unit,total harga, hpp, aksi (edit dan hapus)
+- tabel yang kemungkinan terkait: bl_db_belanja (belanja_model) dan bl_db_purchase (DbPurchase_model) --- join tabel nama barang dan nama bahan baku dengan bl_db_belanja_id pada tabel bl_db_purchase sesuai id yang dipilih
+-buatkan script nya secara lengkap (routes, controller, model, dan view ) agar berjalan sempurna
+rev
+-form input yang ditampilkan di atas tabel adalah: cari barang(form pencarian) ===> nama barang, nama bahan baku, merk, ukuran, harga satuan, (sesuai id bl_db_belanja dan bl_db_purchase preview yang dipilih), kuantitas.
+- data yang tersimpan tidak sesuai data yang dipilih
+- periksa juga id bl_db_belanja
+- pastikan bl_db_belanja_id dan bl_db_purchase_id yang diinput di database sesuai dengan id bl_db_belanja dan bl_db_purchase yang dipilih
+=========STOK TERBUANG==========
+=========STOK TERBUANG==========
+=========STOK TERBUANG==========
+- preview tampilan ajax belum berhasil
+- tampilkan preview pencarian = nama barang&merk&keterangan&ukuran-unit&harga satuan& "SISA STOK="&stok_akhir(existing pada bl_gudang) 
+- buatkan juga tabel tampilan dibawah dengan tampilan: No, Tanggal Nama Barang, Merk, Ukuran-unit, Harga, Kuantitas, tota_unit, Nilai Total
+- buatkan pagination dengan pilihan jumlah baris tiap halaman
+- tabel nama barang yang dicari adalah bl_gudang
+- nama barang diambil dari kolom bl_db_belanja_id di tabel bl_gudang join ke tabel bl_db_belanja.
+- merk, keterangan, ukuran, harga satuan diambil dari bl_db_purchase_id di tabel bl_gudang join ke tabel bl_db_purchase dan tabel terkait
+- setelah barang dipilih tampilkan data yang dicari pada form input (Nama Barang, Merk, Ukuran-unit, Harga) dengan menambahkan input kuantitas
+=========STOK TERBUANG==========
+=========STOK TERBUANG==========
+=========STOK TERBUANG==========
+==== penjualan===
+buatkan tampilan untuk halaman penjualan dengan  ketentuan:
+- database bl_penjualan_majoo, dengan tabel :  	date, no_nota, waktu_order, waktu_bayar, outlet, jenis_order, penjualan, metode_pembayaran, rekening_id, penyesuaian,selisih
+- database sudah ada, tidak perlu dibuat
+- tampilkan data penjualan dengan tanggal, no nota, waktu order, waktu bayar, penjualan (Rp), rekening (ambil dari nama_rekening dari bl_rekening sesuai id ) penyesuaian, selisih, Keterangan, aksi (tombol "kirim mutasi")
+- data awal dari kolom penyesuaian adalah kosong, ketika halaman di buka, maka isikan sama dengan data penjualan. tampilan pada kolom penyesuaian adalah kolom yang dapat diedit secara langsung dengan ajax (seperti excel)
+- data awal dari kolom selisih adalah kosong, ketika halaman di buka, maka isikan sama dengan data penjualan - penyesuaian. tampilan pada kolom selisih adalah kolom yang dapat diedit secara langsung dengan ajax (seperti excel) yang otomatis menghitung selisih penjualan dan penyesuaian
+- ketika tombo "kirim mutasi" di klik, maka kirim data selisih ke tabel bl_mutasi_kas (id, tanggal (sesuai tanggal penjualan), bl_rekening_id, jenis_mutasi (masuk/keluar) ==> jika nilai positif makan masuk, jika nilai negatif maka keluar, jumlah (nilai dari selisih tanpa negatif), keterangan)
+- buatkan filtrasi range tanggal
+- buatkan filter rekeneing
+- buatkan pagination halaman
+- ketika halaman dibuka, periksa apakah, kolom penyesuaian dan selisih di database bl_penjualan_majoo sudah ada nilainya atau null, jika null maka create data penyesuaian  sesuai penjualan dan data selisih adalah penyesian - penjualan. jika sudah ada datanya, maka tampilkan data yang ada di database.
+- ketika mengedit data di kolom penyesuaian dan berpindah cell, maka inputkan data sesuai yang ditulis ke database, dan hitung selisihnya secara otomatis tanpa perlu refresh
+==== penjualan===
+===saldo kas====
+buatkan halaman Saldo Kas berjalan dengan ketentuan:
+- data diambil dari bl_kas (untuk saldo awal masing-masing rekening), bl_purchase (untuk mengambil data metode_pembayaran (metode_pembayaran=rekening_id) dan total_harga), bl_penjualan_majoo (untuk mengambil rekening_id dan penjualan), bl_mutasi_kas ( untuk mengambil bl_rekening, jenis_mutasi, dan jumlah) 
+- kolom berisi: tanggal, nama_rekening (id 1 sampai dengan id terakhir ke kanan), total
+- baris pertama body berisi saldo awal masing-masing nama_rekening (sesuai filter bulan)
+- baris kedua dan seterusnya adalah tanggal 1 - terakhir setiap bulan kebawah, ke kanan adalah saldo rekening berjalan untuk masing-masing nama rekening
+- perhitungan nilai = saldo awal + penjulanan bl_penjualan_majoo sesuai rekening_id - total_harga bl_purchase sesuai metode_pembayaran + total bl_mutasi_kas sesuai rekening_id dan jumlah (jika jenis_mutasi = masuk berarti ditambah, jika keluar berarti dikurangkan)
+-nilai yang ditampilkan di masing-masing cell adalah penjumlahan, dari tanggal sebelumnya untuk masing-masing rekening. dimulai dari saldo awal, kemudian di tanggal 1 dan seterusnya adalah Saldo Awal + Penjualan - Pembelian + Mutasi Masuk - Mutasi Keluar akumulasi tanggal. 
+- urutan dari tanggal 1 ke tanggal akhir bulan ke bawah
+database yang dipakai adalah:
+bl_kas => tanggal, bl_rekening_id dan jumlah (untuk saldo awal)
+bl_purchase =>tanggal,  metode_pembayaran dan (metode_pembayaran=rekening_id) 
+bl_penjualan_majoo =>tanggal,  rekening_id dan penjualan
+bl_mutasi_kas =>tanggal,  bl_rekening, jenis_mutasi, dan jumlah
+----
+buatkan halaman saldo berjalan untuk masing-masing rekening, dimulai dari saldo awal masing-masing rekening, kemudian ditambah dengan transaksi rekening setiap harinya, dengan filtrasi bulan tahun
+- saldo awal adalah bl_kas
+- transaksi harian adalah: penjualan (bl_penjualan_majoo) + mutasi masuk (bl_mutasi_kas jenis_mutasi masuk) - mutasi keluar (bl_mutasi_kas jenis_mutasi keluar) - pembelian (bl_purchase ) setiap harinya 
+database yang dipakai adalah:
+bl_kas => tanggal, bl_rekening_id dan jumlah (untuk saldo awal)
+bl_purchase =>tanggal,  metode_pembayaran (metode_pembayaran=rekening_id), DAN total_harga
+bl_penjualan_majoo =>tanggal,  rekening_id dan penjualan
+bl_mutasi_kas =>tanggal,  bl_rekening_id, jenis_mutasi, dan jumlah
+===saldo kas====
+Buatkan database rekap rekening
+bl_rekap_rekening dengan kolom: id, tanggal, rekening_id, nilai
+data diambil dari:
+bl_purchase =>tanggal, metode_pembayaran (metode_pembayaran=bl_rekening.id), dan total_harga (nilai)
+bl_penjualan_majoo =>tanggal,  rekening_id (bl_rekening.id) dan penjualan (nilai)
+bl_mutasi_kas =>tanggal,  bl_rekening_id (bl_rekening.id), jenis_mutasi (masuk), dan jumlah (nilai)
+bl_mutasi_kas =>tanggal,  bl_rekening_id (bl_rekening.id), jenis_mutasi (keluar), dan jumlah (nilai dikali-1)
+join tabel : bl_rekening (id, nama_rekening)
+buat data tergenerate secara otomatis atau terjadwal
+tampilan halaman: tanggal menurun kebawaah, nama rekening berjajar ke kanan (kebawaah adalah nilai masing-masing rekening masing-2 tanggal), total
+===KASBON===
+Diatas adalah controller , model dan view index halaman purchase.
+analisa dan revisi dengan ketentuan:
+- Jika jenis pengeluaran yang di pilih adalah "KASBON" (ID=17), maka tambahkan form input "Pilih Pegawai" dengan pilihan dropdown diambil dari tabel abs_pegawai (id, nama_pegawai) dan sembunyikan form input keterangan. 
+- pada saat disimpan, nama pegawa yang dipilih di simpan di kolom keterangan.
+- simpan juga data di abs_kasbon, (id (auto), pegawai_id (sesuai id nama_pegawai yang dipilih), tanggal (sesuai tanggal input), nilai (total_harga di bl_purchase), keterangan (sesuai kolom keterangan), jenis ("kasbon"))
+=====KASBON CLEAR======
+====refund====
+buatkan halaman refund:
+- tabel bl_refund (id, kode, tanggal, nilai, rekening, (sesuai id bl_rekening), Keterangan)
+- filtrasi range tanggal
+- tambahkan fungsi edit dan hapus
+====LAPORAN KEUANGAN====
+buatkan halaman laporan keuangan dengan ketentuan:
+- TANGGAL (menurun kebawah), Penjualan (diambil dari rekap bl_penjualan_majoo - bl_refund per tanggal ),  Pengeluaran (diambil dari bl_purchase per tanggal), Pendapatan Kotor (bold)(Penjualan - Pengeluaran), estimasi gaji, Estimasi Pendapatan Final (pendapatan kotor-estimasi gaji)
+- filtrasi bulan
+- berikan total dibawah
+- Estimasi gaji diambil dari:
+    abs_rekap_absensi total_gaji per tanggal + abs_lembur total_gaji_lembur per tanggal + abs_pegawai kolom tunjangan (dihitung sekali setiap tanggal 1)+ abs_tambahan_lain nilai_tambahan per tanggal - abs_deposit nilai per tanggal - abs_potongan nilai_potongan per tanggal - abs_kasbon nilai jenis "bayar"
+========clear====
+====cost produksi====
+buatkan halaman cost produksi dengan filter bulan dropdown:
+- tabel bl_purchase (tanggal, jenis_pengeluaran, total_harga)
+- tabel bl_jenis_pengeluaran (id, nama_jenis_pengeluaran)
+- tabel bl_store_request (tanggal, jenis_pengeluaran, kuantitas)
+- tabel bl_penjualan_produk (tanggal,sku, penjualan)
+- tabel bl_produk (sku, divisi_id)
+- tabel bl_divisi (id, nama_divisi)
+header tabel 1: tanggal, bar (dibawahnya ada 3 sub kolom - cost, revenue, %), kitchen (dibawahnya ada 3 sub kolom - cost, revenue, %), event (dibawahnya ada 3 sub kolom - cost, revenue, %), total (dibawahnya ada 3 sub kolom - cost, revenue, %)
+- cost diambil dari jumlah purchase + jumlah store request per tanggal (bl_purchase, bl_db_purchase, bl_store_request)
+- revenue diambil dari penjualan produk (bl_penjualan_produk, bl_produk, bl_divisi)
+- % diambil dari prosentase cost dan revenues
+Cost bar:
+bl_purchase jumlah kolom total_harga dan kolom jenis_pengeluaran id 2 (bar) per tanggal + bl_store_request jenis_pengeluaran id 2 (bar) dan kuantitas. nilai store request diambil dengan bl_store_request (bl_db_purchase_id) join bl_db_purchase (id) * kuantitas bl_store_request
+revenue bar:
+- revenue bar diambil dari bl_penjualan_produk kolom penjualan, dengan sku yang id divisi nya = 1.
+- id divisi diambil dari join bl_produk dan bl_divisi dengan kolom yang sama adalah sku.
+- % adalah persentase cost dibanding revenue   
+Cost kitchen:
+bl_purchase jumlah kolom total_harga dan kolom jenis_pengeluaran id 3 (kitchen) per tanggal + bl_store_request jenis_pengeluaran id 3 (kitchen) dan kuantitas. nilai store request diambil dengan bl_store_request (bl_db_purchase_id) join bl_db_purchase (id) * kuantitas bl_store_request
+revenue kitchen:
+- revenue kitchen diambil dari bl_penjualan_produk kolom penjualan, dengan sku yang id divisi nya = 2.
+- id divisi diambil dari join bl_produk dan bl_divisi dengan kolom yang sama adalah sku.
+- % adalah persentase cost dibanding revenue   
+Cost event:
+bl_purchase jumlah kolom total_harga dan kolom jenis_pengeluaran id 5 (event) per tanggal + bl_store_request jenis_pengeluaran id 5 (event) dan kuantitas. nilai store request diambil dengan bl_store_request (bl_db_purchase_id) join bl_db_purchase (id) * kuantitas bl_store_request
+revenue event:
+- revenue kitchen diambil dari bl_penjualan_produk kolom penjualan, dengan sku yang id divisi nya = 5.
+- id divisi diambil dari join bl_produk dan bl_divisi dengan kolom yang sama adalah sku.
+- % adalah persentase cost dibanding revenue   
+- cost total diambil dari bl_purchase jenis_pengeluaran id 2+3+5 per tanggal + bl_store_request jenis_pengeluaran id 2+3+5
+- revenue total diambil dari bl_penjualan_produk kolom penjualan - bl_refund kolom nilai 
+- % adalah persentase cost dibanding revenue   
+nb:
+bl_db_purchase digunakan untuk menghitung cost, tidak perlu mengakses sku.
+sku berada di bl_produk yang digunakan untuk menghitung revenue, dengan join bl_divisi untuk mendapatkan divis_id sku
+buatkan controller, model dan vie nya
+- perbaiki rumus revenue:
+- revenue diambil dari penjualan produk (bl_penjualan_produk join bl_produk join bl_divisi)
+- nilai revenue diambil dari bl_penjualan_produk kolom penjualan per tanggal
+- revenue bar dengan bl_penjualan_produk.sku = bl_produk.sku dan bl_produk.divis_id = bl_divisi.id kemudian mengambil jumlah penjualan per tanggal dengan id divisi 1
+untuk kitchen id divisi 2
+revenue kitchen:
+- revenue kitchen diambil dari bl_penjualan_produk kolom penjualan, dengan sku yang id divisi nya = 2.
+- id divisi diambil dari join bl_produk dan bl_divisi dengan kolom yang sama adalah sku.
+revenue event:
+- revenue kitchen diambil dari bl_penjualan_produk kolom penjualan, dengan sku yang id divisi nya = 5.
+- id divisi diambil dari join bl_produk dan bl_divisi dengan kolom yang sama adalah sku.
+- revenue total diambil dari bl_penjualan_produk kolom penjualan - bl_refund kolom nilai 
+perbaiki logika untuk cost:
+cost = purchase + store request
+ => purchase = bl_purchase kolom total harga dengan jenis pengeluaran (BAR=2, Kitchen=3, EVENT=5) dengan id_tipe_produksi dari bl_db_belanja = 1. bl_purchase.bl_db_belanja_id =bl_db_belanja.id   
+    -> bl_purchase.jenis_pengeluaran =(BAR=2, Kitchen=3, EVENT=5), bl_purchase.total_harga, bl_purchase.bl_db_belanja_id = bl_db_belanja.id, bl_db_belanja.id_tipe_produksi = 1
+ => store request = bl_store_request kolom jenis_pengeluaran (BAR=2, Kitchen=3, EVENT=5), dan kolom kuantitas * bl_db_purchase harga_satuan
+    bl_store_request.bl_db_purchase_id = bl_db_purchase.id
+    bl_store_request.jenis_pengeluaran, bl_store_request.kuantitas * bl_db_purchase.harga_satuan
+rumus store request masih belum tepat:
+store request bar = bl_store_request.kuantitas * bl_db_purchase.harga_satuan
+=========================CLEAR================
+=====LAPORAN SR=============
+buatkan halaman laporan SR (Store Request) 
+controller yang sudah dibuat: StoreRequest
+model yang sudah dibuat: StoreRequest_model
+database: bl_store_request (id, tanggal, jenis_pengeluaran, bl_db_purchase_id, kuantitas)
+            bl_jenis_pengeluaran (id, nama_jenis_pengeluaran)
+            bl_db_purchase (id, ....., harga_satuan)
+            bl_store_request.bl_db_purchase_id = bl_db_purchase.id, bl_store_request.jenis_pengeluaran = bl_jenis_pengeluaran.id
+            nilai total = bl_store_request.kuantitas * bl_db_purchase.harga_satuan
+tampilan halaman:
+kolom: tanggal (1- terakhir menurun kebawah), nama_jenis_pengeluaran (nilai menurun kebawah per tanggal), jumlah (jumlah masing-masing tanggal)
+        dibawah tambahkan baris total masing-masing kolom
+- filter bulan dengan dropdown
+- tabel responsif, freeze kolom tanggal, stickye judul tabel ketika di scroll ke bawah
+=======CLEAR=========
+buatkan halaman Laporan Brankas:
+tabel yang digunakan: 
+- bl_kas (bl_rekening_id=1, tanggal sesuai filter, jumlah) untuk Saldo awal brankas setiap bulan
+- bl_penjualan_majoo (rekening_id=1, tanggal sesuai filter , penjualan)
+- bl_mutasi_kas (bl_rekening_id=1, tanggal sesuai rekening, jenis_mutasi = keluar/masuk,jumlah)
+- bl_mutasi_kas_rekening (bl_rekening_id_sumber=1/ bl_rekening_id_tujuan=1, tanggal sesuai rekening, jumlah)
+- bl_purchase (metode_pembayaran =1, tanggal sesuai filter, total_harga)
+- bl_refund (rekening = 1, tanggal sesuai filter, nilai)
+tampilan halaman:
+JUDUL TABEL : TANGGAL (tanggal 1 s/d terakhir menurun kebawah), SALDO AWAL (untuk tanggal 1 saldo awal = bl_kas, tanggal 2 saldo awal = TOTAL BRANKAS tanggal 1, dan seterusnya), pendapatan (bl_penjualan_majoo, kolom penjualan rekening_id =1), mutasi kas (bl_mutasi_kas masuk - bl_mutasi_kas keluar + bl_mutasi_kas_rekening bl_rekening_id_tujuan=1 - bl_mutasi_kas_rekening bl_rekening_id_sumber=1), refund (bl_refund, rekening = 1, nilai), BELANJA  (bl_purchase, metode_pembayaran =1, tanggal sesuai filter, total_harga), TOTAL BRANKAS ( saldo awal + mutasi kas + pendapatan + mutasi kas - refund - belanja) 
+- buatkan halamannya
+- filter bulan dropdown
+- tabel responsif, freeze kolom tanggal, sticky judul di atas
+=========clear========
+======mutasi rekening====
+buatkan halaman mutasi rekening
+- tabel yang digunakan = bl_mutasi_kas_rekening (id, tanggal, bl_rekening_id_sumber, bl_rekening_id_tujuan, jumlah, keterangan)
+- buatkan halaman input dan halaman laporan dalam 1 halaman, fungsi edit dan hapus dengan modal
+- filter bulan dropdown
+=== clear=====
+===gudang ver 2====
+buatkan halaman gudang ver 2 dengan ketentuan:
+- buat tampilan dan fungsi pencatian mirip view diatas
+- hanya tampilkan data bl_gudang yang kolom (database bl_db_belanja.id) is_gudang = 1 => bl_db_belanja.id = bl_gudang.bl_db_belanja_id, bl_db_belanja = 1
+- hanya tampilkan bl_db_belanja, jumlahkan semua data dengan item dengan bl_db_belanja_id sama ( kategori, nama barang, nama bahan baku, tipe produksi, stok_awal, stok_masuk, stok_keluar, stok_terbuang, stok_penyesuaian, stok akhir, unit total, nilai total)
+- jangan kurango fungsi yang sudah ada, buat fungsi baru jika diperlukan
+jika ada lebih dari 1 bl_db_belanja_id yang sama dengan bl_db_purchase_id yang berbeda, hanya tampilkan yang kolom stok_akhir tidak sama dengan 0
+- jika ada bl_db_belanja yang stok_akhir = 0, tampilkan juga
+===gudang ver 3====
+buatkan halaman gudang ver 2 dengan ketentuan:
+- hanya tampilkan data bl_gudang yang kolom (database bl_db_belanja.id) is_gudang = 1 => bl_db_belanja.id = bl_gudang.bl_db_belanja_id, bl_db_belanja = 1
+- jika ada lebih dari 1 bl_db_belanja_id yang sama dengan bl_db_purchase_id yang berbeda, hanya tampilkan yang kolom stok_akhir tidak sama dengan 0
+- jika ada bl_db_belanja yang stok_akhir = 0, tampilkan juga
+- buatkan halaman stok penyesian, dengan skema sama dengan stok_terbuang, namun kuantitas bisa positif (untuk penyesuaian bertambah ) dan negatif (untuk penyesuaian berkurang)
+- tabel database: id, tanggal, bl_db_purchase_id, kuantitas, alasan
+-
+===BL KAS===
+buatkan tabel bl_kas dengan kolom:
+id, bl_rekening_id, tanggal, jumlah
+===BL MUTASI KAS===
+buatkan tabel bl_mutasi_kas dengan kolom:
+id, tanggal, bl_rekening_id,  jenis_mutasi (masuk/keluar), jumlah, keterangan
+buatkan halaman untuk menambahkan data bl_kas dan bl_mutasi_kas
+buatkan halaman rekapitulasi metode_pembayaran purchase tanpa membuat database baru dengan halaman:
+- hari / tanggal (urut kebawah tanggal 1 - terakhir), rekening (dijabarkan masing-masing rekening), nilai nominal dibawah masing-masing rekening
+- filtrasi range tanggal
+buatkan halaman rekapitulasi metode_pembayaran penjualan tanpa membuat database baru dengan halaman:
+- hari / tanggal (urut kebawah tanggal 1 - terakhir), rekening (dijabarkan masing-masing rekening), nilai nominal dibawah masing-masing rekening
+- filtrasi range tanggal
+- tambahkan fitur kolom pencarian ajax pada filter produk dan kategori yang sudah dibuat. data yang dicari diambil dari kolom produk dan kolom kategori tabel itu sendiri (bl_penjualan_produk).
+ - pencarian form cari produk dengan ajax
+- filter divisi belum berfungsi
+===stock_opname========
+diatas adalah model generate stock opname dari controller gudang. sempurnakan script nya:
+ 	id 	kategori_id 	bl_db_belanja_id 	bl_db_purchase_id 	tipe 	merk 	ukuran 	keterangan 	unit 	pack 	harga 	stok_awal 	stok_masuk 	stok_keluar 	stok_terbuang 	penyesuaian 	stok_akhir 	unit_total 	nilai_total 	tanggal 	
+- data digenerate dari data yang ditampilkan di halaman index gudang
+- pada saat klik generate stok opname, tanggal stock opname adalah tanggal terakhir bulan yang ditampilkan di halaman gudang
+- buatkan halaman stokck opnamenya dengan filter bulan
+====clear===
+===generate stok awal====
+ketentuan generate stok awal:
+- mengenerate bl_gudang baru, buatkan opsi tanggal bl_gudang saat generate stok awal ( pilihan tanggal bl_gudang dibuat tanggal berapa, misal 1 februari, 1 maret, dst)
+- stok_awal digenerate dari stok_akhir bl_stok_opname akhir bulan sebelum tanggal yang dipilih diatas, hanya ambil data dengan stok_akhir dari bl_db_purchase_id nya tidak sama dengan 0.
+- misal data_awal yang ingin digenerate adalah tanggal 1 februari 2025, maka data yang digunakan adalah stok_akhir dari bl_stok_opname 31 januari 2025.
+- buatkan fungsi baru jika diperlukan
+===clear===
+===revisi purchase-gudang===
+lakukan modifikasi:
+- ketika melakukan add purchase, jangan lakukan update tanggal pada bl_gudang, biarkan pada tanggal bl_gudang semula
+- ketika melakukan add purchase, lakukan update masuk bl_db_purchase_id bl_gudang yang bulannya sama dengan yang diinput di bl_purchase (cek kolom tanggal bl_purchase, bukan tanggal saat ini). begitu juga fungsi edit dan hapusnya
+- contoh kasus: sekarang tanggal 19 januari 2025, tapi saya melakukan input purchase dengan tanggal 2 februari 2025, maka update stok_masuk bl_gudang dengan db_bl_purchase_id yang bulannya sama di bulan februari (1 februari 2025) .
+- jangan update tanggal bl-gudang ke tanggal sekarang, tanggal bl_gudang tetap seperti semula
+===celar===
+
+
+LIST PR!!!
+pagination db belanja, purchase, gudang awal opsi per halaman
+history total
+purchase order total
+daily inventory dengan id purchase
+export google sheet
+judul halaman yang belum sesuai
+laporan_keuangan => estimasi gaji belum sesuai
+fungsi hapus mutasi kas
+ajax selisih rincian sales belum realtime
+ajax search purchase belum menyeluruh tanggal
+mutasi kas
+penjualan extra
+CEK UNIT PRODUKSI ULANG SESUAI RESEP DAN PERBELANJAAN
+-cetak PO SR export PDF
+
+user login v
+== buatkan form login dengan 3 hak akses
+1. pegawai dengan jabatan1_id 99 (CEO) adalah superadmin dapat mengakses seluruh halaman 
+2. pegawai dengan jabatan1_id 1 adalah supervisor dapat mengakses sebagian besar halaman (halaman purchase dan yang lain ditentukan kemudian )
+3. pegawai dengan jabatan1_id 2 adalah purchase dapat mengakses sebagian besar halaman (halaman purchase dan yang lain ditentukan kemudian )
+4. pegawai dengan divisi_id 2 adalah bar , dapat mengakses purchase bar
+6. pegawai dengan divisi_id 3 adalah kitchen , dapat mengakses purchase kitchen
