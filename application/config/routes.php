@@ -149,7 +149,7 @@ $route['member'] = 'member';
 $route['data_awal'] = 'data_awal';
 
 $route['halaman'] = 'halaman';
-$route['default_controller'] = 'beranda';
+$route['default_controller'] = 'kasir';
 
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;

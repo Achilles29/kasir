@@ -143,3 +143,34 @@ ketentuan resepn n dari produk saya adalah:
 dari tabel database yang saya kirim dibawah, coba buatkan skemanya. mulai dari buat resep dulu
 
 kejutkan saya!
+
+
+SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE pr_detail_extra;
+TRUNCATE TABLE pr_detail_transaksi;
+TRUNCATE TABLE pr_transaksi;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+
+
+
+
+
+
+PERLU PERBAIKAN:
+FORM TOTAL PEMBAYARAN TIDAK FORMAT RUPIAH
+TAMBAHKAN TOMBOL SESUAI KEKURANGAN SAAT PEMBAYARAN SEHINGGA TIDAK PERLU KETIK ULANG
+LOG PENGGUNAAN jumlah_poin
+
+TAMPILAN RINCIAN PESANAN BUAT GRUP
+MODAL PEMBAYARAN PERBAIKI
+
+CLEAR PENCARIAN PRODUK SAAT SUDAH KLIK TOMBOL PRODUK
+NOTIF WARNING REFRESH / MENINGGALKAN HALAMAN KASIR SAAT KERANJANG ADA ISINYA
+
+saat buka transaksi baru voucher yang digunakan sebelumnya masih muncul
+
+perbaiki halaman voucher
+
+

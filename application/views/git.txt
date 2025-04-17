@@ -1,0 +1,27 @@
+awal
+
+C:/xampp/htdocs/kasir
+
+cd /c/xampp/htdocs/kasir
+git init
+git remote add origin https://github.com/Achilles29/kasir.git
+git add .
+git commit -m "init commit dari laptop"
+git branch -M main
+git push -u origin main
+
+TARIK KE LOKAL
+
+cd C:/xampp/htdocs/
+git clone https://github.com/Achilles29/kasir.git kasir
+
+TARIK KE VPS
+cd /var/www/html/
+git clone https://github.com/Achilles29/kasir.git kasir
+
+UPDATE
+
+git add .
+git commit -m "update fitur A"
+git push origin main
+git pull origin main

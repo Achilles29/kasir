@@ -139,33 +139,38 @@ public function simpan_transaksi()
         return;
     }
 
-    $is_edit = isset($order_data['transaksi_id']) && !empty($order_data['transaksi_id']);
+    
+    // $is_edit = isset($order_data['transaksi_id']) && !empty($order_data['transaksi_id']);
+    $is_edit = isset($order_data['transaksi_id']) && intval($order_data['transaksi_id']) > 0;
+
     $transaksi_id = $is_edit ? intval($order_data['transaksi_id']) : null;
 
     $customer_id = ($order_data['customer_type'] !== 'walkin' && !empty($order_data['customer_id']))
         ? intval($order_data['customer_id']) : null;
 
-    $kode_voucher = $order_data['kode_voucher'] ?? null;
-    $diskon = intval($order_data['diskon'] ?? 0);
+    // $kode_voucher = $order_data['kode_voucher'] ?? null;
+    // $diskon = intval($order_data['diskon'] ?? 0);
 
-    $total_penjualan = 0;
-    foreach ($order_data['items'] as $item) {
-        $subtotal_produk = $item['harga'] * $item['jumlah'];
-        $subtotal_extra = 0;
+        $total_penjualan = 0;
+        foreach ($order_data['items'] as $item) {
+            $subtotal_produk = $item['harga'] * $item['jumlah'];
+            $subtotal_extra = 0;
 
-        if (!empty($item['extra'])) {
-            foreach ($item['extra'] as $extra) {
-                $subtotal_extra += $extra['harga'] * $extra['jumlah'];
+            if (!empty($item['extra'])) {
+                foreach ($item['extra'] as $extra) {
+                    $subtotal_extra += $extra['harga'] * $extra['jumlah'];
+                }
             }
+
+            $total_penjualan += $subtotal_produk + $subtotal_extra;
         }
 
-        $total_penjualan += $subtotal_produk + $subtotal_extra;
-    }
 
 
-    $total_pembayaran = $total_penjualan - $diskon;
+    $total_pembayaran = $total_penjualan;// - $diskon;
 
     $this->db->trans_start();
+
 
     if ($is_edit) {
         $transaksi = $this->Kasir_model->get_transaksi_by_id($transaksi_id);
@@ -180,8 +185,8 @@ public function simpan_transaksi()
             'customer' => $order_data['customer'],
             'nomor_meja' => $order_data['nomor_meja'] ?? null,
             'total_penjualan' => $total_penjualan,
-            'diskon' => $diskon,
-            'kode_voucher' => $kode_voucher,
+            // 'diskon' => $diskon,
+            // 'kode_voucher' => $kode_voucher,
             'total_pembayaran' => $total_pembayaran,
             'updated_at' => date('Y-m-d H:i:s')
         ];
@@ -199,8 +204,8 @@ public function simpan_transaksi()
             'customer' => $order_data['customer'],
             'nomor_meja' => $order_data['nomor_meja'] ?? null,
             'total_penjualan' => $total_penjualan,
-            'kode_voucher' => $kode_voucher,
-            'diskon' => $diskon,
+            // 'kode_voucher' => $kode_voucher,
+            // 'diskon' => $diskon,
             'total_pembayaran' => $total_pembayaran,
             'kasir_order' => $kasir_id,
             'created_at' => date('Y-m-d H:i:s')
@@ -219,10 +224,8 @@ public function simpan_transaksi()
     } else {
         echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan transaksi']);
     }
+
 }
-
-
-
 
     public function load_pending_orders() {
         $this->db->select('id, no_transaksi, customer, total_pembayaran');
@@ -244,7 +247,8 @@ public function get_detail_transaksi() {
 
             foreach ($extras as &$ex) {
                 $extra_info = $this->db->get_where('pr_produk_extra', ['id' => $ex['pr_produk_extra_id']])->row_array();
-                $ex['nama_extra'] = $extra_info['nama_extra'] ?? $ex['sku'];
+                $ex['id'] = $ex['pr_produk_extra_id'];
+                $ex['nama'] = $extra_info['nama_extra'] ?? $ex['sku'];
             }
 
             $item['extra'] = $extras;
@@ -252,8 +256,10 @@ public function get_detail_transaksi() {
         echo json_encode($transaksi);
     } else {
         echo json_encode(['error' => 'Transaksi tidak ditemukan']);
+
     }
 }
+
 
 public function update_order() {
     $transaksi_id = $this->input->post('transaksi_id');
@@ -313,33 +319,46 @@ public function update_order() {
 }
 
 
-public function cek_voucher() {
+public function cek_voucher()
+{
     $kode_voucher = $this->input->post('kode_voucher');
-    $items = json_decode($this->input->post('items'), true); // Ambil daftar produk dalam transaksi
+    $items = json_decode($this->input->post('items'), true);
     $total_penjualan = intval($this->input->post('total'));
 
-    // Cari voucher yang sesuai
-    $this->db->where('kode_voucher', $kode_voucher);
-    $this->db->where('status', 'aktif');
-    $this->db->where('tanggal_mulai <=', date('Y-m-d'));
-    $this->db->where('tanggal_berakhir >=', date('Y-m-d'));
-    $voucher = $this->db->get('pr_voucher')->row_array();
+    $voucher = $this->db
+        ->where('kode_voucher', $kode_voucher)
+        ->where('status', 'aktif')
+        ->where('tanggal_mulai <=', date('Y-m-d'))
+        ->where('tanggal_berakhir >=', date('Y-m-d'))
+        ->get('pr_voucher')
+        ->row_array();
 
     if (!$voucher) {
-        echo json_encode(['status' => 'error', 'message' => 'Kode voucher tidak valid atau sudah kedaluwarsa!']);
+        echo json_encode([
+            'status' => 'error',
+            'message' => '❌ Kode voucher tidak ditemukan atau sudah tidak aktif'
+        ]);
+        return;
+    }
+
+    // ❗ Cek apakah sisa voucher masih ada
+    if (isset($voucher['sisa_voucher']) && $voucher['sisa_voucher'] <= 0) {
+        echo json_encode([
+            'status' => 'error',
+            'message' => '❌ Voucher sudah habis digunakan'
+        ]);
         return;
     }
 
     $diskon = 0;
 
-    // Jika voucher berlaku hanya untuk produk tertentu
+    // === Jika voucher hanya untuk produk tertentu
     if (!empty($voucher['produk_id'])) {
         $subtotal_produk = 0;
 
-        // Periksa apakah produk yang dimaksud ada dalam transaksi
         foreach ($items as $item) {
             if ($item['pr_produk_id'] == $voucher['produk_id']) {
-                $subtotal_produk = $item['subtotal'];
+                $subtotal_produk = $item['subtotal']; // nilai subtotal harus dikirim dari frontend
                 break;
             }
         }
@@ -347,26 +366,27 @@ public function cek_voucher() {
         if ($subtotal_produk == 0) {
             echo json_encode([
                 'status' => 'error',
-                'message' => 'Voucher ini hanya berlaku untuk produk tertentu yang tidak ada dalam pesanan.'
+                'message' => '❌ Voucher ini hanya berlaku untuk produk tertentu yang tidak ada dalam pesanan.'
             ]);
             return;
         }
 
-        // Hitung diskon berdasarkan subtotal produk tertentu
+        // Hitung diskon untuk produk
         if ($voucher['jenis'] == 'persentase') {
             $diskon = ($voucher['nilai'] / 100) * $subtotal_produk;
             if (!empty($voucher['max_diskon']) && $diskon > $voucher['max_diskon']) {
                 $diskon = $voucher['max_diskon'];
             }
-        } elseif ($voucher['jenis'] == 'nominal') {
-            $diskon = min($voucher['nilai'], $subtotal_produk); // Pastikan diskon tidak lebih besar dari harga produk
+        } else if ($voucher['jenis'] == 'nominal') {
+            $diskon = min($voucher['nilai'], $subtotal_produk);
         }
-    } else {
-        // Jika voucher berlaku untuk semua produk dalam transaksi
+    }
+    // === Jika voucher berlaku untuk semua produk
+    else {
         if ($total_penjualan < intval($voucher['min_pembelian'])) {
             echo json_encode([
                 'status' => 'error',
-                'message' => 'Voucher hanya berlaku untuk pembelian minimal Rp ' . number_format($voucher['min_pembelian'], 0, ',', '.')
+                'message' => '❌ Voucher hanya berlaku untuk minimal belanja Rp ' . number_format($voucher['min_pembelian'], 0, ',', '.')
             ]);
             return;
         }
@@ -376,20 +396,26 @@ public function cek_voucher() {
             if (!empty($voucher['max_diskon']) && $diskon > $voucher['max_diskon']) {
                 $diskon = $voucher['max_diskon'];
             }
-        } elseif ($voucher['jenis'] == 'nominal') {
-            $diskon = $voucher['nilai'];
+        } else if ($voucher['jenis'] == 'nominal') {
+            $diskon = min($voucher['nilai'], $total_penjualan);
         }
     }
 
-    // Hitung total bayar setelah diskon
+    $diskon = round($diskon);
     $total_bayar = max(0, $total_penjualan - $diskon);
 
     echo json_encode([
         'status' => 'success',
+        'message' => '✅ Voucher berhasil digunakan',
+        'kode_voucher' => $voucher['kode_voucher'],
         'diskon' => $diskon,
-        'total_bayar' => $total_bayar
+        'total_bayar' => $total_bayar,
+        'total_penjualan' => $total_penjualan
     ]);
 }
+
+
+
 public function get_extra_list() {
     $this->db->select('id, sku, nama_extra, satuan, harga, hpp');
     $this->db->from('pr_produk_extra');
@@ -530,7 +556,7 @@ public function cetak_pesanan_baru() {
 
     // Update status is_printed di detail transaksi
     $this->db->where('pr_transaksi_id', $transaksi_id);
-    $this->db->where('is_printed IS NULL');
+    $this->db->where('is_printed', 0); // ubah dari IS NULL ke = 0
     $this->db->update('pr_detail_transaksi', ['is_printed' => 1]);
 
     echo json_encode([
@@ -569,5 +595,156 @@ public function preview_struk_printer() {
 
     $this->load->view('kasir/preview_struk_printer', $data);
 }
+
+public function get_metode_pembayaran() {
+    $metode = $this->db->get('pr_metode_pembayaran')->result();
+    echo json_encode($metode);
+}
+
+public function simpan_pembayaran()
+{
+    $transaksi_id = $this->input->post('transaksi_id');
+    $pembayaran = json_decode($this->input->post('pembayaran'), true);
+    $kasir_id = $this->session->userdata('pegawai_id');
+
+    // Ambil input voucher dan diskon (dari frontend)
+    $kode_voucher = $this->input->post('kode_voucher');
+    $diskon = intval($this->input->post('diskon'));
+
+    $total_dibayar = 0;
+    foreach ($pembayaran as $p) {
+        $total_dibayar += intval($p['jumlah']);
+    }
+
+    // Ambil data transaksi
+    $transaksi = $this->db->get_where('pr_transaksi', ['id' => $transaksi_id])->row();
+    $total_penjualan = $transaksi->total_penjualan;
+
+    // Cek validitas voucher (jika ada)
+    $voucher = null;
+    if (!empty($kode_voucher)) {
+        $voucher = $this->db->get_where('pr_voucher', ['kode_voucher' => $kode_voucher])->row();
+        if (!$voucher || ($voucher->sisa_voucher ?? $voucher->jumlah_diskon) <= 0) {
+            echo json_encode(['status' => 'error', 'message' => 'Voucher tidak valid atau habis.']);
+            return;
+        }
+    }
+
+    // Hitung sisa pembayaran berdasarkan total_penjualan - diskon
+    $sisa_pembayaran = ($total_penjualan - $diskon) - $total_dibayar;
+    if ($sisa_pembayaran <= 0) {
+        $sisa_pembayaran = 0;
+        $status_pembayaran = 'LUNAS';
+    } else {
+        $status_pembayaran = 'SEBAGIAN';
+    }
+
+    // Update transaksi
+    $this->db->update('pr_transaksi', [
+        'kasir_bayar' => $kasir_id,
+        'waktu_bayar' => date('Y-m-d H:i:s'),
+        'total_pembayaran' => $total_dibayar,
+        'sisa_pembayaran' => $sisa_pembayaran,
+        'status_pembayaran' => $status_pembayaran,
+        'kode_voucher' => $kode_voucher,
+        'diskon' => $diskon,
+        'updated_at' => date('Y-m-d H:i:s')
+    ], ['id' => $transaksi_id]);
+
+    // Simpan metode pembayaran
+    foreach ($pembayaran as $p) {
+        $this->db->insert('pr_pembayaran', [
+            'transaksi_id' => $transaksi_id,
+            'metode_id' => $p['metode_id'],
+            'jumlah' => $p['jumlah'],
+            'keterangan' => $p['keterangan'],
+            'kasir_id' => $kasir_id,
+            'waktu_bayar' => date('Y-m-d H:i:s')
+        ]);
+    }
+
+    // Update status detail transaksi
+    $this->db->where('pr_transaksi_id', $transaksi_id);
+    $this->db->update('pr_detail_transaksi', ['status' => 'BERHASIL']);
+
+    // Tambah poin (jika ada customer)
+    if ($transaksi->customer_id) {
+        $detail = $this->db->get_where('pr_detail_transaksi', [
+            'pr_transaksi_id' => $transaksi_id,
+            'status' => 'BERHASIL'
+        ])->result();
+
+        $poin_data = [];
+
+        // 1. Per produk
+        foreach ($detail as $d) {
+            $poin = $this->db->get_where('pr_poin', [
+                'jenis_point' => 'per_produk',
+                'produk_id' => $d->pr_produk_id
+            ])->row();
+
+            if ($poin) {
+                $poin_data[] = [
+                    'customer_id' => $transaksi->customer_id,
+                    'transaksi_id' => $transaksi_id,
+                    'jumlah_poin' => $poin->nilai_point * $d->jumlah,
+                    'jenis' => 'per_produk',
+                    'sumber' => $d->pr_produk_id,
+                    'tanggal_kedaluwarsa' => date('Y-m-d', strtotime("+{$poin->kedaluwarsa_hari} days")),
+                    'status' => 'aktif',
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ];
+            }
+        }
+
+        // 2. Per pembelian
+        $poin_beli = $this->db->query("SELECT * FROM pr_poin WHERE jenis_point = 'per_pembelian' ORDER BY min_pembelian DESC")->result();
+        foreach ($poin_beli as $p) {
+            if ($total_penjualan >= $p->min_pembelian) {
+                $poin_data[] = [
+                    'customer_id' => $transaksi->customer_id,
+                    'transaksi_id' => $transaksi_id,
+                    'jumlah_poin' => $p->nilai_point,
+                    'jenis' => 'per_pembelian',
+                    'sumber' => null,
+                    'tanggal_kedaluwarsa' => date('Y-m-d', strtotime("+{$p->kedaluwarsa_hari} days")),
+                    'status' => 'aktif',
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ];
+                break;
+            }
+        }
+
+        if (!empty($poin_data)) {
+            $this->db->insert_batch('pr_customer_poin', $poin_data);
+        }
+    }
+
+    // Simpan log voucher dan update sisa voucher
+    if (!empty($kode_voucher) && $voucher) {
+        $sisa_voucher = max(0, ($voucher->sisa_voucher ?? 1) - 1); // ❗ KURANGI 1 saja, bukan nilai diskon
+
+        $this->db->insert('pr_log_voucher', [
+            'voucher_id' => $voucher->id,
+            'transaksi_id' => $transaksi_id,
+            'detail_transaksi_id' => null,
+            'customer_id' => $transaksi->customer_id,
+            'kode_voucher' => $kode_voucher,
+            'jumlah_diskon' => $diskon,
+            'sisa_voucher' => $sisa_voucher,
+            'created_at' => date('Y-m-d H:i:s')
+        ]);
+
+        $this->db->update('pr_voucher', ['sisa_voucher' => $sisa_voucher], ['id' => $voucher->id]);
+    }
+
+
+    echo json_encode(['status' => 'success', 'message' => 'Pembayaran berhasil disimpan.']);
+}
+
+
+
 
 }

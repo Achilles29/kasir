@@ -3,47 +3,86 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Kasir_model extends CI_Model {
 
+    // public function simpan_transaksi($data_transaksi, $items) {
+    //     $this->db->trans_begin();
+
+    //     $this->db->insert('pr_transaksi', $data_transaksi);
+    //     $transaksi_id = $this->db->insert_id();
+
+    //     $detail_id = $this->db->insert_id();
+    //     if (!empty($item['extra'])) {
+    //         $this->simpan_detail_extra($detail_id, $item['extra']);
+    //     }
+
+    //     if (!$transaksi_id) {
+    //         $this->db->trans_rollback();
+    //         return false;
+    //     }
+
+    //     foreach ($items as $item) {
+    //         $this->db->insert('pr_detail_transaksi', [
+    //             'pr_transaksi_id' => $transaksi_id,
+    //             'pr_produk_id' => $item['pr_produk_id'],
+    //             'jumlah' => $item['jumlah'],
+    //             'harga' => $item['harga'],
+    //             'subtotal' => $item['harga'] * $item['jumlah'],
+    //             'catatan' => $item['catatan'] ?? null,
+    //             'status' => null,
+    //             'created_at' => date('Y-m-d H:i:s')
+    //         ]);
+
+
+    //         $detail_id = $this->db->insert_id();
+
+    //         // ✅ Tambahkan pemanggilan penyimpanan extra
+    //         if (!empty($item['extra'])) {
+    //             $this->simpan_detail_extra($detail_id, $item['extra']);
+    //         }
+
+    //     }
+
+    //     $this->db->trans_commit();
+    //     return $transaksi_id;
+    // }
     public function simpan_transaksi($data_transaksi, $items) {
-        $this->db->trans_begin();
+    $this->db->trans_begin();
 
-        $this->db->insert('pr_transaksi', $data_transaksi);
-        $transaksi_id = $this->db->insert_id();
+    $this->db->insert('pr_transaksi', $data_transaksi);
+    $transaksi_id = $this->db->insert_id();
 
-        $detail_id = $this->db->insert_id();
-        if (!empty($item['extra'])) {
-            $this->simpan_detail_extra($detail_id, $item['extra']);
-        }
+    if (!$transaksi_id) {
+        $this->db->trans_rollback();
+        return false;
+    }
 
-        if (!$transaksi_id) {
-            $this->db->trans_rollback();
-            return false;
-        }
+    foreach ($items as $item) {
+        $detail_unit_id = uniqid(); // Untuk grup 1 produk
 
-        foreach ($items as $item) {
+        for ($i = 0; $i < $item['jumlah']; $i++) {
             $this->db->insert('pr_detail_transaksi', [
                 'pr_transaksi_id' => $transaksi_id,
                 'pr_produk_id' => $item['pr_produk_id'],
-                'jumlah' => $item['jumlah'],
+                'jumlah' => 1,
                 'harga' => $item['harga'],
-                'subtotal' => $item['harga'] * $item['jumlah'],
                 'catatan' => $item['catatan'] ?? null,
                 'status' => null,
-                'created_at' => date('Y-m-d H:i:s')
+                'detail_unit_id' => $detail_unit_id,
+                'is_printed' => 0,
+                'created_at' => date('Y-m-d H:i:s'),
             ]);
-
 
             $detail_id = $this->db->insert_id();
 
-            // ✅ Tambahkan pemanggilan penyimpanan extra
             if (!empty($item['extra'])) {
                 $this->simpan_detail_extra($detail_id, $item['extra']);
             }
-
         }
-
-        $this->db->trans_commit();
-        return $transaksi_id;
     }
+
+    $this->db->trans_commit();
+    return $transaksi_id;
+}
+
     public function simpan_detail_extra($detail_id, $extras) {
         foreach ($extras as $extra) {
             $this->db->insert('pr_detail_extra', [
@@ -71,92 +110,145 @@ public function get_detail_transaksi($transaksi_id) {
 }
 
 
-public function update_detail_transaksi($transaksi_id, $items_baru, $transaksi)
-{
-    $kasir_id = $this->session->userdata('pegawai_id');
 
-    $items_lama = $this->db->where('pr_transaksi_id', $transaksi_id)
-        ->get('pr_detail_transaksi')->result_array();
+public function update_detail_transaksi($transaksi_id, $items, $transaksi) {
+    $this->db->where('pr_transaksi_id', $transaksi_id)->where('status IS NULL');
+    $existing = $this->db->get('pr_detail_transaksi')->result_array();
 
-    $map_lama = [];
-    foreach ($items_lama as $item) {
-        $map_lama[$item['pr_produk_id']] = $item;
+    // Group existing per detail_unit_id
+    $existing_by_unit = [];
+    foreach ($existing as $row) {
+        $existing_by_unit[$row['detail_unit_id']][] = $row;
     }
 
-    foreach ($items_baru as $item) {
-        $produk_id = $item['pr_produk_id'];
-        $jumlah_baru = intval($item['jumlah']);
-        $harga = intval($item['harga']);
-        $catatan = $item['catatan'] ?? null;
-        $subtotal = $jumlah_baru * $harga;
+    $existing_used = [];
 
-        if (isset($map_lama[$produk_id])) {
-            $item_lama = $map_lama[$produk_id];
-            $jumlah_lama = $item_lama['jumlah'];
+    foreach ($items as $item) {
+        if (!empty($item['detail_id']) && isset($existing_by_unit[$item['detail_id']])) {
+            $unit_rows = $existing_by_unit[$item['detail_id']];
+            $existing_count = count($unit_rows);
+            $requested = intval($item['jumlah']);
 
-            if ($jumlah_baru < $jumlah_lama) {
-                // VOID
-                $this->db->insert('pr_void', [
-                    'pr_transaksi_id' => $transaksi_id,
-                    'no_transaksi' => $transaksi['no_transaksi'],
-                    'detail_transaksi_id' => $item_lama['id'],
-                    'pr_produk_id' => $produk_id,
-                    'nama_produk' => $item_lama['nama_produk'],
-                    'jumlah' => $jumlah_lama - $jumlah_baru,
-                    'harga' => $harga,
-                    'subtotal' => ($jumlah_lama - $jumlah_baru) * $harga,
-                    'catatan' => $item_lama['catatan'],
-                    'alasan' => 'Jumlah dikurangi saat ubah pesanan',
-                    'void_by' => $kasir_id,
-                    'waktu' => date('Y-m-d H:i:s'),
-                    'created_at' => date('Y-m-d H:i:s'),
-                    'updated_at' => date('Y-m-d H:i:s')
-                ]);
-            } elseif ($jumlah_baru > $jumlah_lama) {
-                // ⛔ Tidak boleh menambah jumlah
-                throw new Exception("Tidak boleh menambah kuantitas langsung.");
+            // ❗ Jika sudah diprint, abaikan perubahan
+            if (!empty($unit_rows[0]['is_printed']) && $unit_rows[0]['is_printed'] == 1) {
+                $existing_used[] = $item['detail_id'];
+                continue;
             }
 
-            $this->db->where('id', $item_lama['id'])->update('pr_detail_transaksi', [
-                'jumlah' => $jumlah_baru,
-                'subtotal' => $subtotal,
-                'catatan' => $catatan,
-                'updated_at' => date('Y-m-d H:i:s')
-            ]);
+            // ✅ Update jumlah jika sama
+            if ($requested == $existing_count) {
+                $existing_used[] = $item['detail_id'];
 
-            $this->db->where('detail_transaksi_id', $item_lama['id'])->delete('pr_detail_extra');
-            if (!empty($item['extra'])) {
-                $this->simpan_detail_extra($item_lama['id'], $item['extra']);
+                // Update extra & catatan
+                foreach ($unit_rows as $row) {
+                    $this->db->where('id', $row['id'])->update('pr_detail_transaksi', [
+                        'catatan' => $item['catatan'] ?? null,
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ]);
+                    $this->db->delete('pr_detail_extra', ['detail_transaksi_id' => $row['id']]);
+
+                    if (!empty($item['extra'])) {
+                        $this->simpan_detail_extra($row['id'], $item['extra']);
+                    }
+                }
+
+            } elseif ($requested < $existing_count) {
+                $existing_used[] = $item['detail_id'];
+
+                // Batalkan sisa
+                $to_cancel = array_slice($unit_rows, $requested);
+                foreach ($to_cancel as $cancel_row) {
+                    $this->db->where('id', $cancel_row['id'])->update('pr_detail_transaksi', [
+                        'status' => 'BATAL',
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ]);
+                }
+
+                // Update sisa yang tetap
+                $remain = array_slice($unit_rows, 0, $requested);
+                foreach ($remain as $row) {
+                    $this->db->where('id', $row['id'])->update('pr_detail_transaksi', [
+                        'catatan' => $item['catatan'] ?? null,
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ]);
+                    $this->db->delete('pr_detail_extra', ['detail_transaksi_id' => $row['id']]);
+
+                    if (!empty($item['extra'])) {
+                        $this->simpan_detail_extra($row['id'], $item['extra']);
+                    }
+                }
+
+            } elseif ($requested > $existing_count) {
+                $existing_used[] = $item['detail_id'];
+
+                // Tambah sisanya
+                $detail_unit_id = $item['detail_id'];
+                for ($i = 0; $i < ($requested - $existing_count); $i++) {
+                    $this->db->insert('pr_detail_transaksi', [
+                        'pr_transaksi_id' => $transaksi_id,
+                        'pr_produk_id' => $item['pr_produk_id'],
+                        'jumlah' => 1,
+                        'harga' => $item['harga'],
+                        'catatan' => $item['catatan'] ?? null,
+                        'status' => null,
+                        'detail_unit_id' => $detail_unit_id,
+                        'is_printed' => 0,
+                        'created_at' => date('Y-m-d H:i:s')
+                    ]);
+
+                    $new_id = $this->db->insert_id();
+                    if (!empty($item['extra'])) {
+                        $this->simpan_detail_extra($new_id, $item['extra']);
+                    }
+                }
             }
-
         } else {
             // Produk baru
-            $this->db->insert('pr_detail_transaksi', [
-                'pr_transaksi_id' => $transaksi_id,
-                'pr_produk_id' => $produk_id,
-                'jumlah' => $jumlah_baru,
-                'harga' => $harga,
-                'subtotal' => $subtotal,
-                'catatan' => $catatan,
-                'created_at' => date('Y-m-d H:i:s')
-            ]);
-            $detail_id = $this->db->insert_id();
+            if (!empty($item['detail_id'])) continue; // ❗ Jangan insert ulang produk yang sudah ada
 
-            if (!empty($item['extra'])) {
-                $this->simpan_detail_extra($detail_id, $item['extra']);
+            $detail_unit_id = uniqid();
+            for ($i = 0; $i < $item['jumlah']; $i++) {
+                $this->db->insert('pr_detail_transaksi', [
+                    'pr_transaksi_id' => $transaksi_id,
+                    'pr_produk_id' => $item['pr_produk_id'],
+                    'jumlah' => 1,
+                    'harga' => $item['harga'],
+                    'catatan' => $item['catatan'] ?? null,
+                    'status' => null,
+                    'detail_unit_id' => $detail_unit_id,
+                    'is_printed' => 0,
+                    'created_at' => date('Y-m-d H:i:s')
+                ]);
+                $new_id = $this->db->insert_id();
+                if (!empty($item['extra'])) {
+                    $this->simpan_detail_extra($new_id, $item['extra']);
+                }
             }
         }
     }
+    
+    // Hapus baris dengan detail_unit_id yang tidak digunakan, dan belum dicetak
+    foreach ($existing_by_unit as $unit_id => $rows) {
+        if (!in_array($unit_id, $existing_used)) {
+            foreach ($rows as $row) {
+                if ($row['is_printed'] == 0) {
+                    // Hapus extra terlebih dahulu
+                    $this->db->where('detail_transaksi_id', $row['id'])->delete('pr_detail_extra');
+                    // Hapus detail transaksi
+                    $this->db->where('id', $row['id'])->delete('pr_detail_transaksi');
+                }
+            }
+        }
+    }
+
 }
-
-
 
 
 
 public function get_transaksi_by_id($id) {
     $this->db->select('t.*, o.jenis_order, 
-                    po.username AS kasir_order_username, 
-                    pb.username AS kasir_bayar_username');
+                       po.username AS kasir_order_username, 
+                       pb.username AS kasir_bayar_username');
     $this->db->from('pr_transaksi t');
     $this->db->join('pr_jenis_order o', 't.jenis_order_id = o.id', 'left');
     $this->db->join('abs_pegawai po', 't.kasir_order = po.id', 'left');
@@ -164,17 +256,21 @@ public function get_transaksi_by_id($id) {
     $this->db->where('t.id', $id);
     $transaksi = $this->db->get()->row_array();
 
-
     if ($transaksi) {
-        $this->db->select('d.*, p.nama_produk');
-        $this->db->from('pr_detail_transaksi d');
-        $this->db->join('pr_produk p', 'd.pr_produk_id = p.id');
-        $this->db->where('d.pr_transaksi_id', $id);
-        $transaksi['items'] = $this->db->get()->result_array();
+        // ✅ Ganti query ini agar subtotal dihitung langsung
+        $transaksi['items'] = $this->db
+            ->select('d.*, p.nama_produk, (d.jumlah * d.harga) AS subtotal')
+            ->from('pr_detail_transaksi d')
+            ->join('pr_produk p', 'd.pr_produk_id = p.id')
+            ->where('d.pr_transaksi_id', $id)
+            ->where('d.status IS NULL') // jika hanya ingin item aktif
+            ->get()->result_array();
     }
 
     return $transaksi;
 }
+
+
 public function get_pending_orders() {
     return $this->db->select('id, no_transaksi, customer, total_pembayaran')
                     ->from('pr_transaksi')
@@ -320,6 +416,35 @@ private function center_text($text, $width = 32) {
     return str_repeat(' ', max(0, $padding)) . $text;
 }
 
+
+public function simpan_pembayaran($transaksi_id, $pembayaran, $kasir_id, $total_bayar) {
+    $this->db->trans_start();
+
+    foreach ($pembayaran as $p) {
+        $this->db->insert('pr_pembayaran', [
+            'transaksi_id' => $transaksi_id,
+            'metode_id' => $p['metode_id'],
+            'jumlah' => $p['jumlah'],
+            'waktu_bayar' => date('Y-m-d H:i:s'),
+            'keterangan' => $p['keterangan'],
+            'kasir_id' => $kasir_id
+        ]);
+    }
+
+    $this->db->where('id', $transaksi_id)->update('pr_transaksi', [
+        'kasir_bayar' => $kasir_id,
+        'waktu_bayar' => date('Y-m-d H:i:s'),
+        'total_pembayaran' => $total_bayar,
+        'sisa_pembayaran' => 0,
+        'status_pembayaran' => 'LUNAS',
+        'updated_at' => date('Y-m-d H:i:s')
+    ]);
+
+    $this->db->where('pr_transaksi_id', $transaksi_id)
+             ->update('pr_detail_transaksi', ['status' => 'BERHASIL']);
+
+    $this->db->trans_complete();
+}
 
 
 }

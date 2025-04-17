@@ -13,7 +13,7 @@ class Auth extends CI_Controller {
     public function index() {
         // Jika sudah login, redirect ke beranda
         if ($this->session->userdata('logged_in')) {
-            redirect('beranda');
+            redirect('kasir');
         }
 
         $this->load->view('auth/login');
@@ -51,7 +51,7 @@ class Auth extends CI_Controller {
             }
 
             // Redirect ke dashboard jika bukan request API
-            redirect('beranda');
+            redirect('kasir');
         } else {
             if ($this->input->is_ajax_request()) {
                 echo json_encode(['status' => 'error', 'message' => 'Username atau password salah']);
