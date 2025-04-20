@@ -22,4 +22,5 @@ class Void_model extends CI_Model {
             'updated_at'          => date('Y-m-d H:i:s')
         ]);
     }
+
 }

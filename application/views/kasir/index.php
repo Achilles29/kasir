@@ -29,8 +29,7 @@
     <!-- <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script> -->
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
     <style>
@@ -166,6 +165,59 @@
         border-bottom: 1px dashed #ccc;
         padding: 2px 0;
     }
+
+
+    /* Produk utama */
+    .list-group-item.produk {
+        font-weight: bold;
+        border-bottom: 1px solid #eee;
+        transition: background 0.3s;
+    }
+
+    /* Extra */
+    .list-group-item.extra {
+        background-color: #f8f9fa;
+        padding-left: 2rem;
+        font-size: 0.9rem;
+        transition: background 0.3s;
+    }
+
+    /* Item batal (sudah void) */
+    /* Produk batal (text-muted + background-light) */
+    .list-group-item.batal {
+        background-color: #f8f9fa;
+        color: #6c757d;
+        pointer-events: none;
+    }
+
+    /* Hover efek lebih soft */
+    .list-group-item:hover {
+        background-color: #f1f1f1;
+    }
+
+    /* Checkbox centang efek glow */
+    input.checkbox-void:checked+label,
+    .list-group-item input:checked {
+        box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
+    }
+
+    /* Badge harga */
+    .badge-produk {
+        background-color: #007bff;
+        color: white;
+    }
+
+    /* Warna badge harga extra */
+    .badge-extra {
+        background-color: #6c757d;
+        color: white;
+    }
+
+
+    .badge-voided {
+        background-color: #dc3545;
+        /* merah VOIDED */
+    }
     </style>
 </head>
 
@@ -197,6 +249,9 @@
                 <button id="faktur" class="btn btn-info">Faktur</button>
                 <button id="tagihan" class="btn btn-success">Tagihan</button>
                 <button id="batalkan-pesanan" class="btn btn-danger">Batalkan Pesanan</button>
+                <button id="btnVoidPilihanModal" class="btn btn-danger">
+                    <i class="fas fa-times-circle"></i> Void Pesanan
+                </button>
             </div>
         </div>
 
@@ -250,17 +305,6 @@
                         <input type="text" id="nomor-meja" class="form-control"
                             placeholder="Masukkan nomor meja (jika ada)">
                     </div>
-                    <!-- <div class="form-group">
-                        <label>Kode Voucher</label>
-                        <div class="input-group">
-                            <input type="text" id="kode-voucher" class="form-control"
-                                placeholder="Masukkan kode voucher">
-                            <div class="input-group-append">
-                                <button class="btn btn-primary" id="cek-voucher">Gunakan</button>
-                            </div>
-                        </div>
-                        <p id="voucher-message" class="text-success"></p>
-                    </div> -->
 
                     <table class="table mt-3">
                         <thead>
@@ -333,27 +377,6 @@
         </div>
     </div>
 
-    <!-- Modal Konfirmasi Void Produk Lama -->
-    <div class="modal fade" id="modalVoidConfirm" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-danger text-white py-2">
-                    <h5 class="modal-title">Konfirmasi Penghapusan</h5>
-                </div>
-                <div class="modal-body text-center">
-                    <p>Produk ini sudah dicetak dan akan di-VOID.</p>
-                    <p class="text-danger mb-0"><small>Pastikan Anda konfirmasi ke dapur/bar terlebih dahulu.</small>
-                    </p>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary btn-sm" data-dismiss="modal">Batal</button>
-                    <button class="btn btn-danger btn-sm" id="confirm-void-btn">Lanjutkan</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
     <!-- Modal Cetak Per Divisi (Berdasarkan Printer) -->
     <div class="modal fade" id="modalCetakDivisi" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
@@ -410,15 +433,14 @@
                             <p><strong>Nomor Meja:</strong> <span id="rinci-meja">-</span></p>
                         </div>
                     </div>
+
                     <div class="form-group">
                         <label for="input-voucher">Masukkan Kode Voucher:</label>
                         <div class="input-group">
                             <input type="text" id="input-voucher" class="form-control" placeholder="Kode Voucher">
                             <div class="input-group-append">
                                 <button class="btn btn-primary" id="btn-check-voucher">Cek Voucher</button>
-                                <button class="btn btn-danger" id="reset-voucher">Reset
-                                    Voucher</button>
-
+                                <button class="btn btn-danger" id="reset-voucher">Reset Voucher</button>
                             </div>
                         </div>
                         <small id="voucher-message" class="text-success"></small>
@@ -436,12 +458,14 @@
                         <tbody id="rinci-item-list"></tbody>
                     </table>
 
-                    <div class="row">
+                    <div class="row mt-3">
                         <div class="col-md-6">
+                            <p><strong>Total Tagihan:</strong> <span id="rinci-tagihan">Rp 0</span></p>
+                            <!-- ⬅️ Tambah -->
                             <p><strong>Total Diskon:</strong> <span id="rinci-diskon">Rp 0</span></p>
                         </div>
                         <div class="col-md-6 text-right">
-                            <h4>Total Bayar: Rp <span id="rinci-total">0</span></h4>
+                            <h4><strong>Total Bayar:</strong> Rp <span id="rinci-total">0</span></h4>
                         </div>
                     </div>
                 </div>
@@ -492,13 +516,20 @@
                                 </table>
                                 <div class="row mb-2">
                                     <div class="col">
-                                        <p>Dapat Dibayar: <strong id="multi-tagihan">Rp 0</strong></p>
-                                        <p>Total Dibayar: <strong id="multi-total-dibayar">Rp 0</strong></p>
-                                        <p>Sisa Pembayaran: <strong id="multi-sisa">Rp 0</strong></p>
+                                        <div class="col-md-12">
+                                            <p><strong>Total Penjualan:</strong> <span id="multi-total-penjualan">Rp
+                                                    0</span></p>
+                                            <p><strong>Diskon:</strong> <span id="multi-diskon">Rp 0</span></p>
+                                            <p><strong>Total Tagihan:</strong> <span id="multi-tagihan">Rp 0</span></p>
+                                            <p> <strong>Total DP:</strong> <span id="multi-dp">Rp 0</span></p>
+                                            <p><strong>Total Dibayar:</strong> <span id="multi-total-dibayar">Rp
+                                                    0</span></p>
+                                            <p><strong>Sisa Pembayaran:</strong> <span id="multi-sisa">Rp 0</span></p>
+                                        </div>
                                     </div>
                                     <div class="col text-right">
                                         <label>Input Cepat:</label><br>
-                                        <div class="btn-group" role="group">
+                                        <div id="input-cepat-static" class="btn-group" role="group">
                                             <button type="button" class="btn btn-light btn-kalkulator"
                                                 data-nominal="10000">10K</button>
                                             <button type="button" class="btn btn-light btn-kalkulator"
@@ -508,6 +539,11 @@
                                             <button type="button" class="btn btn-light btn-kalkulator"
                                                 data-nominal="100000">100K</button>
                                         </div>
+
+                                        <div id="input-cepat-dinamis" class="mt-2">
+                                            <!-- Tombol Rp Sisa akan muncul otomatis di sini -->
+                                        </div>
+
                                     </div>
                                 </div>
                                 <input type="hidden" name="transaksi_id" id="bayar-transaksi-id">
@@ -528,6 +564,78 @@
                 </div>
                 <div class="modal-body" id="list-metode-pembayaran">
                     <!-- Diisi lewat JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal Void Pesanan -->
+    <div class="modal fade" id="modalVoidPesanan" tabindex="-1" role="dialog" aria-labelledby="modalVoidPesananLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content shadow">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="modalVoidPesananLabel">Batalkan Pesanan</h5>
+                    <button type="button" class="btn btn-light btn-sm ml-auto" id="btn-void-semua">
+                        <i class="fas fa-ban"></i> Batalkan Semua
+                    </button>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered table-sm">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Produk</th>
+                                <th class="text-center">Jumlah</th>
+                                <th class="text-center">Harga</th>
+                                <th class="text-center">Void</th>
+                            </tr>
+                        </thead>
+                        <tbody id="list-void-items"></tbody>
+                        <div class="row px-3 py-2">
+                            <div class="col">
+                                <strong>Total Aktif: <span id="total-void-aktif">Rp 0</span></strong>
+                            </div>
+                            <div class="col text-right">
+                                <strong>Total Batal: <span id="total-void-batal">Rp 0</span></strong>
+                            </div>
+                        </div>
+
+
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Void Pilihan -->
+    <div class="modal fade" id="modalVoidPilihan" tabindex="-1" aria-labelledby="modalVoidPilihanLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalVoidPilihanLabel">Pilih Produk/Extra yang Ingin Dibatalkan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <form id="formVoidPilihan">
+                        <div id="listProdukVoid" class="mb-3">
+                            <!-- List produk dan extra aktif, diisi via Ajax -->
+                        </div>
+                        <div class="mb-3">
+                            <label for="alasanVoid" class="form-label">Alasan Void (Wajib)</label>
+                            <input type="text" class="form-control" id="alasanVoid" name="alasan"
+                                placeholder="Masukkan alasan void..." required>
+                        </div>
+                        <input type="hidden" id="transaksi_id_void" name="transaksi_id">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="btnVoidPilihan" class="btn btn-danger">Void Pilihan</button>
                 </div>
             </div>
         </div>
@@ -560,6 +668,7 @@
     const base_url = "<?= base_url(); ?>";
 
     $(document).ready(function() {
+        $.fn.modal.Constructor.prototype._enforceFocus = function() {};
         let extraData = {};
         let currentProdukId = null;
         let currentUID = null;
@@ -568,6 +677,17 @@
         let rinciOrderItems = [];
         let pembayaranList = [];
         let tagihanTotal = 0;
+        let totalPenjualanAwal = 0; // ⬅️ simpan total penjualan awal
+
+        function resetVoucherForm() {
+            $("#input-voucher").val("").attr("readonly", false);
+            $("#btn-check-voucher").prop("disabled", false).text("Cek Voucher");
+            $("#voucher-message").text("").removeClass("text-success text-danger");
+            $("#rinci-voucher").text("-");
+            $("#rinci-diskon").text("Rp 0");
+            $("#rinci-total").text("Rp 0");
+            $("#row-total-penjualan").remove();
+        }
 
         function formatRupiah(angka) {
             return "Rp " + parseInt(angka).toLocaleString("id-ID");
@@ -590,9 +710,6 @@
                 $(this).find(".total").text(formatRupiah(subtotal));
                 total += subtotal;
             });
-
-            // const diskon = parseInt($("#nominal-diskon").text().replace("Rp ", "").replace(/\./g, "")) || 0;
-            // const totalBayar = total - diskon;
             const totalBayar = total;
 
             $("#total-harga").text(formatRupiah(total));
@@ -706,7 +823,8 @@
             </td>
         </tr>`;
 
-            $("#order-list").append(row);
+            // $("#order-list").append(row);
+            $(row).hide().prependTo("#order-list").fadeIn();
             updateTotal();
         });
         $(document).on("input", ".qty", function() {
@@ -782,7 +900,7 @@
                     satuan,
                     harga,
                     hpp,
-                    jumlah: jumlahProduk // ✅ sesuaikan dengan jumlah produk
+                    jumlah: 1 // ✅ Selalu 1 per produk
                 });
             });
 
@@ -973,9 +1091,14 @@
                     html = "<p class='text-muted text-center mt-2'>Tidak ada pesanan</p>";
                 } else {
                     orders.forEach(order => {
-                        html +=
-                            `<div class="pesanan-item" data-id="${order.id}"><div><strong>${order.no_transaksi}</strong></div><div>${order.customer}</div><div>Rp ${parseInt(order.total_pembayaran).toLocaleString("id-ID")}</div></div>`;
+                        html += `
+                        <div class="pesanan-item" data-id="${order.id}">
+                            <div><strong>${order.no_transaksi}</strong></div>
+                            <div>${order.customer}</div>
+                            <div>Rp ${parseInt(order.total_penjualan).toLocaleString("id-ID")}</div>
+                        </div>`;
                     });
+
                 }
                 $("#pending-orders").html(html);
             });
@@ -1094,6 +1217,7 @@
                             `;
 
                         $("#order-list").append(row);
+
                     });
 
 
@@ -1117,22 +1241,7 @@
             }
         });
 
-        $("#confirm-void-btn").on("click", function() {
-            if (voidTargetRow) {
-                // Simpan void ke pr_void (opsional via backend nanti)
-                const detailId = voidTargetRow.data("detail-id");
-                if (detailId) {
-                    // Kirim ke server jika perlu
-                    $.post(base_url + "kasir/void_item", {
-                        detail_id: detailId
-                    });
-                }
 
-                removeRow(voidTargetRow);
-                voidTargetRow = null;
-                $("#modalVoidConfirm").modal("hide");
-            }
-        });
 
         $(document).on("click", ".btn-kurangi-extra", function() {
             const uid = $(this).closest("ul").data("uid");
@@ -1186,14 +1295,6 @@
             }
         }
 
-        $("#confirm-void-btn").on("click", function() {
-            if (voidTargetRow && typeof voidTargetRow === 'object' && voidTargetRow.uid &&
-                voidTargetRow.extraId) {
-                removeExtra(voidTargetRow.uid, voidTargetRow.extraId);
-                voidTargetRow = null;
-                $("#modalVoidConfirm").modal("hide");
-            }
-        });
 
         function refreshExtraList(uid) {
             const list = extraData[uid].map(e =>
@@ -1228,7 +1329,7 @@
 
             const transaksi_id = selected.data("id");
 
-            $.post(base_url + "kasir/get_detail_transaksi", {
+            $.post(base_url + "kasir/get_detail_transaksi_aktif", {
                 transaksi_id
             }, function(res) {
                 console.log(res); // ⬅️ Tambahkan ini                
@@ -1239,40 +1340,78 @@
                 $("#rinci-meja").text(res.nomor_meja || "-");
                 $("#rinci-voucher").text(res.kode_voucher || "-");
                 $("#rinci-diskon").text("Rp " + (res.diskon || 0).toLocaleString("id-ID"));
-                $("#rinci-total").text((res.total_pembayaran || res.total_penjualan)
-                    .toLocaleString("id-ID"));
 
+                totalPenjualanAwal = parseInt(res.total_penjualan || res.total_pembayaran || 0);
+                $("#rinci-total").text(totalPenjualanAwal.toLocaleString("id-ID"));
+
+                // ⬇️ Tambahan ini:
+                $("#rinci-tagihan").text(totalPenjualanAwal.toLocaleString("id-ID"));
 
                 // ⬅️ Tambahkan ini di SINI
                 rinciOrderItems = res.items;
 
-                // Daftar item + ekstra
+                // Grouping berdasarkan detail_unit_id
+                const grouped = {};
 
-                const itemHtml = res.items.map(item => {
-                    let html = `
-                    <tr>
-                    <td>${item.nama_produk}</td>
-                    <td class="text-center">Rp ${item.harga.toLocaleString("id-ID")}</td>
-                    <td class="text-center">${item.jumlah}</td>
-                    <td class="text-right">Rp ${(item.harga * item.jumlah).toLocaleString("id-ID")}</td>
-                    </tr>`;
+                res.items.forEach(item => {
+                    if (!grouped[item.detail_unit_id]) {
+                        grouped[item.detail_unit_id] = {
+                            nama_produk: item.nama_produk,
+                            harga: parseInt(item.harga),
+                            jumlah: 0,
+                            extra: {},
+                        };
+                    }
+                    grouped[item.detail_unit_id].jumlah += parseInt(item.jumlah);
 
+                    // Gabungkan extra
                     if (item.extra?.length) {
                         item.extra.forEach(extra => {
-                            html += `
-                    <tr class="text-muted small">
-                        <td class="pl-4">➕ ${extra.nama}</td>
-                        <td class="text-center">Rp ${extra.harga.toLocaleString("id-ID")}</td>
-                        <td class="text-center">${extra.jumlah}</td>
-                        <td class="text-right">Rp ${(extra.harga * extra.jumlah).toLocaleString("id-ID")}</td>
-                    </tr>`;
+                            const key = extra.nama; // berdasarkan nama
+                            if (!grouped[item.detail_unit_id].extra[key]) {
+                                grouped[item.detail_unit_id].extra[key] = {
+                                    nama: extra.nama,
+                                    harga: parseInt(extra.harga),
+                                    jumlah: 0
+                                };
+                            }
+                            grouped[item.detail_unit_id].extra[key].jumlah +=
+                                parseInt(extra.jumlah);
                         });
                     }
+                });
 
-                    return html;
-                }).join("");
 
+                let itemHtml = '';
+                Object.values(grouped).forEach(item => {
+                    itemHtml += `
+        <tr>
+            <td>${item.nama_produk}</td>
+            <td class="text-center">Rp ${item.harga.toLocaleString('id-ID')}</td>
+            <td class="text-center">${item.jumlah}</td>
+            <td class="text-right">Rp ${(item.harga * item.jumlah).toLocaleString('id-ID')}</td>
+        </tr>`;
+
+                    // Loop extra
+                    if (item.extra) {
+                        Object.values(item.extra).forEach(extra => {
+                            itemHtml += `
+                <tr class="text-muted small">
+                    <td class="pl-4">➕ ${extra.nama}</td>
+                    <td class="text-center">Rp ${extra.harga.toLocaleString('id-ID')}</td>
+                    <td class="text-center">${extra.jumlah}</td>
+                    <td class="text-right">Rp ${(extra.harga * extra.jumlah).toLocaleString('id-ID')}</td>
+                </tr>`;
+                        });
+                    }
+                });
                 $("#rinci-item-list").html(itemHtml);
+
+
+                // pastikan total bayar tampil benar juga
+                $("#rinci-total").text(parseInt(res.total_pembayaran || res.total_penjualan ||
+                    0).toLocaleString("id-ID"));
+
                 $("#modalRincianPesanan").modal("show");
 
                 // simpan transaksi_id ke tombol Bayar
@@ -1280,32 +1419,20 @@
             }, "json");
         });
 
-        // Tambah ke dalam fungsi sukses get_detail_transaksi
-        //        rinciOrderItems = res.items;
 
         // Fungsi cek voucher
         $("#btn-check-voucher").click(function() {
             const kode = $("#input-voucher").val().trim();
-            const total = parseInt($("#rinci-total").text().replace(/\D/g, "")) || 0;
-
+            const total = totalPenjualanAwal; // ✅ GANTI, ambil dari total awal
             if (!kode || rinciOrderItems.length === 0) {
                 alert("Mohon lengkapi data transaksi.");
                 return;
             }
 
-            // Hitung subtotal jika belum ada
-            // rinciOrderItems.forEach(item => {
-            //     item.subtotal = (item.harga * item.jumlah) +
-            //         (item.extra?.reduce((t, e) => t + (e.harga * e.jumlah), 0) || 0);
-            // });
             const itemsForVoucher = rinciOrderItems.map(item => {
-                const subtotal = (item.harga * item.jumlah) +
-                    (item.extra?.reduce((t, e) => t + (e.harga * e.jumlah), 0) || 0);
-
                 return {
-                    pr_produk_id: item
-                        .pr_produk_id, // pastikan field ini sesuai controller cek_voucher
-                    subtotal: subtotal
+                    pr_produk_id: item.pr_produk_id,
+                    subtotal: item.harga * item.jumlah
                 };
             });
 
@@ -1314,7 +1441,6 @@
 
             $.post(base_url + "kasir/cek_voucher", {
                 kode_voucher: kode,
-                // items: JSON.stringify(rinciOrderItems),
                 items: JSON.stringify(itemsForVoucher),
                 total: total
             }, function(res) {
@@ -1326,27 +1452,16 @@
                         .addClass("text-success")
                         .text(res.message);
 
-                    $("#rinci-voucher").text(kode); // tampilkan kode voucher
+                    $("#rinci-voucher").text(kode);
                     $("#rinci-diskon").text("Rp " + res.diskon.toLocaleString("id-ID"));
+                    $("#rinci-tagihan").text(res.total_penjualan.toLocaleString(
+                        "id-ID")); // ✅ total sebelum diskon
                     $("#rinci-total").text(res.total_bayar.toLocaleString("id-ID"));
 
-                    if (!$("#row-total-penjualan").length) {
-                        $(".modal-body .row").append(`
-                        <div class="col-md-12 text-right mt-2" id="row-total-penjualan">
-                            <small class="text-muted">Total Penjualan: Rp ${res.total_penjualan.toLocaleString("id-ID")}</small>
-                        </div>`);
-                    } else {
-                        $("#row-total-penjualan").html(
-                            `<small class="text-muted">Total Penjualan: Rp ${res.total_penjualan.toLocaleString("id-ID")}</small>`
-                        );
-                    }
-
-                    // ✅ Kunci input dan tombol
                     $("#input-voucher").attr("readonly", true);
                     $("#btn-check-voucher").prop("disabled", true).text("✔ Digunakan");
 
                 } else {
-                    // Jika error
                     $("#voucher-message")
                         .removeClass("text-success")
                         .addClass("text-danger")
@@ -1354,21 +1469,25 @@
 
                     $("#rinci-voucher").text("-");
                     $("#rinci-diskon").text("Rp 0");
-                    $("#rinci-total").text(total.toLocaleString("id-ID"));
+                    $("#rinci-tagihan").text(totalPenjualanAwal.toLocaleString(
+                        "id-ID")); // ⬅️ kembalikan tagihan asli
+                    $("#rinci-total").text(totalPenjualanAwal.toLocaleString("id-ID"));
+
                     $("#row-total-penjualan").remove();
-
-
                 }
             }, "json");
         });
+
         $("#reset-voucher").click(function() {
+            $("#row-total-penjualan").remove();
             $("#input-voucher").val("").attr("readonly", false);
             $("#btn-check-voucher").prop("disabled", false).text("Cek Voucher");
             $("#voucher-message").text("").removeClass("text-success text-danger");
             $("#rinci-voucher").text("-");
             $("#rinci-diskon").text("Rp 0");
             $("#row-total-penjualan").remove();
-            // kamu bisa hitung ulang total jika mau
+            $("#rinci-total").text(totalPenjualanAwal.toLocaleString(
+                "id-ID")); // ⬅️ KEMBALIKAN TOTAL BAYAR
         });
 
 
@@ -1376,66 +1495,118 @@
         $("#btn-buka-bayar").click(function() {
             const transaksi_id = $(this).data("id");
 
-            // Ambil data transaksi terbaru dulu
-            $.post(base_url + "kasir/get_detail_transaksi", {
+            $.post(base_url + "kasir/get_detail_transaksi_aktif", {
                 transaksi_id: transaksi_id
             }, function(res) {
-                const total_tagihan = res.total_pembayaran || res.total_penjualan || 0;
-                tampilkanModalPembayaran(transaksi_id, total_tagihan);
+                const total_penjualan = parseInt(res.total_penjualan) || 0;
+
+                // Ambil diskon dari halaman rincian pesanan
+                const diskonText = $("#rinci-diskon").text();
+                const diskon = parseInt(diskonText.replace(/\D/g, "")) || 0;
+
+                const total_tagihan = total_penjualan - diskon;
+                const total_dp = parseInt(res.total_pembayaran) || 0;
+
+                tampilkanModalPembayaran(transaksi_id, total_tagihan, total_penjualan, diskon,
+                    total_dp, res.pembayaran);
             }, "json");
         });
 
 
+
+
         // PEMBAYARAN
-        function tampilkanModalPembayaran(transaksi_id, total_tagihan) {
+        function tampilkanModalPembayaran(transaksi_id, total_tagihan, total_penjualan, diskon, total_dp = 0,
+            pembayaranSebelumnya = []) {
+            $("#row-total-penjualan").remove();
+
             tagihanTotal = total_tagihan;
-
-            // Ambil nilai diskon dari field (jika ada)
-            const diskon = parseInt($("#rinci-diskon").text().replace(/\D/g, "")) || 0;
-            const totalBayar = total_tagihan - diskon;
-
             pembayaranList = [];
 
             $("#bayar-transaksi-id").val(transaksi_id);
-            $("#multi-tagihan").text("Rp " + totalBayar.toLocaleString("id-ID"));
+
+            $("#multi-total-penjualan").text("Rp " + total_penjualan.toLocaleString("id-ID"));
+            $("#multi-diskon").text("Rp " + diskon.toLocaleString("id-ID"));
+            $("#multi-tagihan").text("Rp " + total_tagihan.toLocaleString("id-ID"));
+            $("#multi-dp").text("Rp " + total_dp.toLocaleString("id-ID"));
             $("#multi-total-dibayar").text("Rp 0");
-            $("#multi-sisa").text("Rp " + totalBayar.toLocaleString("id-ID"));
+            $("#multi-sisa").text("Rp " + (total_tagihan - total_dp).toLocaleString("id-ID"));
             $("#tabel-pembayaran-multi").html("");
 
-            tagihanTotal = totalBayar;
+            // 🔥 Tambahkan semua pembayaran sebelumnya
+            if (pembayaranSebelumnya.length > 0) {
+                pembayaranSebelumnya.forEach(p => {
+                    tambahPembayaran(p.metode_id, p.metode_nama || "Metode " + p.metode_id, p.jumlah);
+                });
+            } else {
+                tambahPembayaran("1", "Cash", 0); // kalau tidak ada pembayaran sebelumnya, default cash
+            }
 
-            tambahPembayaran("1", "Cash", 0);
             $("#modalPembayaran").modal("show");
         }
 
 
         function tambahPembayaran(id, nama, jumlah = 0) {
-            const index = pembayaranList.length;
-            pembayaranList.push({
-                metode_id: id,
-                nama: nama,
-                jumlah: jumlah,
-                keterangan: ""
-            });
+            // Cek apakah sudah ada metode pembayaran ini
+            const existingIndex = pembayaranList.findIndex(p => p.metode_id == id);
 
-            const row = `
-                <tr>
-                <td>${nama}</td>
-                <td><input type="number" class="form-control input-jumlah" data-index="${index}" value="${jumlah}"></td>
-                <td><input type="text" class="form-control input-ket" data-index="${index}"></td>
-                <td><button class="btn btn-danger btn-sm btn-hapus-pembayaran" data-index="${index}">&times;</button></td>
-                </tr>
-            `;
-            $("#tabel-pembayaran-multi").append(row);
-            updateTotalMulti();
+            if (existingIndex !== -1) {
+                // Jika sudah ada, tambahkan jumlahnya
+                pembayaranList[existingIndex].jumlah += jumlah;
+
+                // Update input jumlah yang sudah ada di tabel
+                const inputJumlah = $(`.input-jumlah[data-index="${existingIndex}"]`);
+                let currentVal = parseInt(inputJumlah.val()) || 0;
+                inputJumlah.val(currentVal + jumlah);
+
+                updateTotalMulti();
+            } else {
+                // Jika belum ada, tambahkan baris baru
+                const index = pembayaranList.length;
+                pembayaranList.push({
+                    metode_id: id,
+                    nama: nama,
+                    jumlah: jumlah,
+                    keterangan: ""
+                });
+
+                const row = `
+            <tr>
+            <td>${nama}</td>
+            <td><input type="number" class="form-control input-jumlah" data-index="${index}" value="${jumlah}"></td>
+            <td><input type="text" class="form-control input-ket" data-index="${index}"></td>
+            <td><button class="btn btn-danger btn-sm btn-hapus-pembayaran" data-index="${index}">&times;</button></td>
+            </tr>
+        `;
+                $("#tabel-pembayaran-multi").append(row);
+                updateTotalMulti();
+            }
         }
+
 
         function updateTotalMulti() {
             let total = pembayaranList.reduce((sum, p) => sum + (parseInt(p.jumlah) || 0), 0);
             $("#multi-total-dibayar").text("Rp " + total.toLocaleString("id-ID"));
+
+            let dp = parseInt($("#multi-dp").text().replace(/\D/g, "")) || 0;
             let sisa = tagihanTotal - total;
+
             $("#multi-sisa").text("Rp " + sisa.toLocaleString("id-ID"));
+
+            if (sisa > 0) {
+                let html = `
+            <button type="button" class="btn btn-info btn-kalkulator" data-nominal="${sisa}">
+                Rp ${sisa.toLocaleString('id-ID')}
+            </button>
+        `;
+                $("#input-cepat-dinamis").html(html);
+            } else {
+                $("#input-cepat-dinamis").empty();
+            }
         }
+
+
+
 
         $(document).on("input", ".input-jumlah", function() {
             const i = $(this).data("index");
@@ -1454,6 +1625,7 @@
             $(this).closest("tr").remove();
             updateTotalMulti();
         });
+
 
         $("#btn-tambah-metode").click(function() {
             $.get(base_url + "kasir/get_metode_pembayaran", function(data) {
@@ -1474,7 +1646,7 @@
             $("#modalPilihMetode").modal("hide");
         });
 
-        $(".btn-kalkulator").click(function() {
+        $(document).on("click", ".btn-kalkulator", function() {
             const nominal = parseInt($(this).data("nominal"));
             let terakhir = pembayaranList.length - 1;
             pembayaranList[terakhir].jumlah += nominal;
@@ -1482,16 +1654,13 @@
             updateTotalMulti();
         });
 
+
         $("#formPembayaranMulti").submit(function(e) {
             e.preventDefault();
 
             const totalBayar = pembayaranList.reduce((sum, p) => sum + (parseInt(p.jumlah) || 0), 0);
-            if (totalBayar < tagihanTotal) {
-                alert("Total pembayaran masih kurang!");
-                return;
-            }
 
-            const diskon = parseInt($("#rinci-diskon").text().replace(/\D/g, "")) || 0;
+            const diskon = parseInt($("#multi-diskon").text().replace(/\D/g, "")) || 0;
             const kode_voucher = $("#input-voucher").val().trim() || "";
 
             $.post(base_url + "kasir/simpan_pembayaran", {
@@ -1503,86 +1672,508 @@
                 alert(res.message);
                 if (res.status === "success") {
                     $("#modalPembayaran").modal("hide");
-                    $("#modalRincianPesanan").modal("hide"); // opsional
+                    $("#modalRincianPesanan").modal("hide");
                     loadPendingOrders();
+                    resetVoucherForm();
                 }
             }, "json");
         });
 
 
 
-        // function bukaPopupPembayaran(transaksi_id) {
-        //     $.post(base_url + "kasir/get_detail_transaksi", {
-        //         transaksi_id
+
+        /////////////////
+        ///// VOID //////
+        /////////////////
+        // Klik Batalkan Pesanan
+        $("#batalkan-pesanan").click(function() {
+            if (!selectedOrderId) {
+                Swal.fire("Pilih pesanan dahulu!", "", "warning");
+                return;
+            }
+
+            $.post(base_url + "kasir/get_detail_transaksi", {
+                transaksi_id: selectedOrderId
+            }, function(res) {
+                tampilkanModalVoid(res);
+            }, "json");
+        });
+
+        // Tampilkan Modal Void
+        function tampilkanModalVoid(data) {
+            let html = '';
+            let totalAktif = 0;
+            let totalBatal = 0;
+
+            const grouped = {};
+
+            // Grouping berdasarkan detail_unit_id
+            data.items.forEach(item => {
+                if (!grouped[item.detail_unit_id]) {
+                    grouped[item.detail_unit_id] = {
+                        produk: item,
+                        extras: []
+                    };
+                }
+                if (item.extra && item.extra.length > 0) {
+                    grouped[item.detail_unit_id].extras.push(...item.extra);
+                }
+            });
+
+            // Looping semua produk
+            Object.values(grouped).forEach(group => {
+                const produk = group.produk;
+                const isProdukBatal = produk.status === 'BATAL';
+                const hargaTotal = produk.harga * produk.jumlah;
+
+                if (isProdukBatal) {
+                    totalBatal += hargaTotal;
+                } else {
+                    totalAktif += hargaTotal;
+                }
+
+                html += `
+            <tr id="row-void-${produk.id}" class="${isProdukBatal ? 'bg-light text-muted' : ''}" data-id="${produk.id}">
+                <td>${produk.nama_produk}</td>
+                <td class="text-center">${produk.jumlah}</td>
+                <td class="text-center">Rp ${parseInt(produk.harga).toLocaleString('id-ID')}</td>
+                <td class="text-center">
+                    ${isProdukBatal 
+                        ? `<button class="btn btn-secondary btn-sm" disabled><i class="fas fa-ban"></i></button>`
+                        : `<button class="btn btn-danger btn-sm btn-void-item" data-id="${produk.id}" data-nama="${produk.nama_produk}"><i class="fas fa-trash"></i></button>`
+                    }
+                </td>
+            </tr>`;
+
+                // Lalu tampilkan semua extra milik produk ini
+                if (group.extras && group.extras.length > 0) {
+                    group.extras.forEach(extra => {
+                        const isExtraBatal = extra.status === 'BATAL';
+                        const hargaExtraTotal = extra.harga * extra.jumlah;
+
+                        if (isExtraBatal) {
+                            totalBatal += hargaExtraTotal;
+                        } else {
+                            totalAktif += hargaExtraTotal;
+                        }
+
+                        html += `
+                    <tr class="text-muted small ${isExtraBatal ? 'bg-light' : ''}" id="row-void-extra-${extra.id}">
+                        <td class="pl-4">➕ ${extra.nama}</td>
+                        <td class="text-center">${extra.jumlah}</td>
+                        <td class="text-center">Rp ${parseInt(extra.harga).toLocaleString('id-ID')}</td>
+                        <td class="text-center">
+                            ${isExtraBatal
+                                ? `<button class="btn btn-secondary btn-sm" disabled><i class="fas fa-ban"></i></button>`
+                                : `<button class="btn btn-warning btn-sm btn-void-extra" data-id="${extra.id}" data-nama="${extra.nama}">
+                                    <i class="fas fa-trash"></i></button>`
+                            }
+                        </td>
+                    </tr>`;
+                    });
+                }
+            });
+
+            $("#list-void-items").html(html);
+
+            // Update total
+            $("#total-void-aktif").text("Rp " + totalAktif.toLocaleString('id-ID'));
+            $("#total-void-batal").text("Rp " + totalBatal.toLocaleString('id-ID'));
+
+            $("#modalVoidPesanan").modal("show");
+        }
+
+
+
+        // Klik Void per Produk
+        $(document).on("click", ".btn-void-item", function() {
+            const detail_id = $(this).data("id");
+            const nama = $(this).data("nama");
+
+            Swal.fire({
+                title: `Void Produk`,
+                html: `Masukkan alasan void untuk <b>"${nama}"</b>`,
+                input: 'text',
+                inputPlaceholder: 'Alasan void...',
+                showCancelButton: true,
+                confirmButtonText: 'Void Produk',
+                cancelButtonText: 'Batal',
+                backdrop: true,
+                allowOutsideClick: true,
+                allowEscapeKey: true,
+                focusConfirm: false,
+                willOpen: () => {
+                    document.activeElement.blur();
+                },
+                preConfirm: (alasan) => {
+                    if (!alasan) {
+                        Swal.showValidationMessage('Alasan wajib diisi');
+                    }
+                    return alasan;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const alasan = result.value;
+                    $.post(base_url + "kasir/void_item", {
+                        detail_id: detail_id,
+                        alasan: alasan
+                    }, function(res) {
+                        if (res.status === 'success') {
+                            Swal.fire({
+                                title: "Sukses!",
+                                text: "Produk berhasil di-void. Cetak struk void?",
+                                icon: "success",
+                                showCancelButton: true,
+                                confirmButtonText: "Cetak",
+                                cancelButtonText: "Tidak"
+                            }).then((choice) => {
+                                if (choice.isConfirmed) {
+                                    $.post(base_url +
+                                        "kasir/cetak_void_internal", {
+                                            void_ids: [res.void_id]
+                                        },
+                                        function(cetakres) {
+                                            console.log(cetakres.message);
+                                        }, "json");
+                                }
+                                loadPendingOrders(); // Tetap refresh pesanan
+                            });
+
+                            // Disable tombol void produk
+                            const $row = $(`#row-void-${detail_id}`);
+                            $row.find('button').removeClass('btn-danger').addClass(
+                                'btn-secondary').attr('disabled', true).html(
+                                '<i class="fas fa-ban"></i>');
+                            $row.addClass('bg-light text-muted');
+
+                            // Disable semua extra di bawahnya
+                            $row.nextUntil("tr:not(.text-muted)").find('button')
+                                .removeClass('btn-warning')
+                                .addClass('btn-secondary')
+                                .attr('disabled', true)
+                                .html('<i class="fas fa-ban"></i>');
+                            $row.nextUntil("tr:not(.text-muted)").addClass(
+                                'bg-light text-muted');
+                        } else {
+                            Swal.fire("Gagal", res.message, "error");
+                        }
+                    }, "json");
+                }
+            });
+        });
+
+
+        $(document).on("click", ".btn-void-extra", function() {
+            const extra_id = $(this).data("id");
+            const nama = $(this).data("nama");
+
+            Swal.fire({
+                title: `Void Extra`,
+                html: `Masukkan alasan void untuk <b>"${nama}"</b>`,
+                input: 'text',
+                inputPlaceholder: 'Alasan void...',
+                showCancelButton: true,
+                confirmButtonText: 'Void Extra',
+                cancelButtonText: 'Batal',
+                backdrop: true,
+                allowOutsideClick: true,
+                allowEscapeKey: true,
+                focusConfirm: false,
+                willOpen: () => {
+                    document.activeElement.blur();
+                },
+                preConfirm: (alasan) => {
+                    if (!alasan) {
+                        Swal.showValidationMessage('Alasan wajib diisi');
+                    }
+                    return alasan;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const alasan = result.value;
+                    $.post(base_url + "kasir/void_extra_item", {
+                        extra_id: extra_id,
+                        alasan: alasan
+                    }, function(res) {
+                        if (res.status === 'success') {
+                            Swal.fire({
+                                title: "Sukses!",
+                                text: "Extra berhasil di-void. Cetak struk void?",
+                                icon: "success",
+                                showCancelButton: true,
+                                confirmButtonText: "Cetak",
+                                cancelButtonText: "Tidak"
+                            }).then((choice) => {
+                                if (choice.isConfirmed) {
+                                    $.post(base_url +
+                                        "kasir/cetak_void_internal", {
+                                            void_ids: [res.void_id]
+                                        },
+                                        function(cetakres) {
+                                            console.log(cetakres.message);
+                                        }, "json");
+                                }
+                                loadPendingOrders();
+                            });
+
+                            // Disable tombol void extra
+                            const $row = $(`#row-void-extra-${extra_id}`);
+                            $row.find('button').removeClass('btn-warning').addClass(
+                                'btn-secondary').attr('disabled', true).html(
+                                '<i class="fas fa-ban"></i>');
+                            $row.addClass('bg-light text-muted');
+                        } else {
+                            Swal.fire("Gagal", res.message, "error");
+                        }
+                    }, "json");
+                }
+            });
+        });
+
+
+
+
+
+
+        // Klik Batalkan Semua
+        $("#btn-void-semua").click(function() {
+            Swal.fire({
+                title: 'Batalkan Semua Pesanan?',
+                text: "Semua produk akan dibatalkan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'Ya, Batalkan Semua!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.post(base_url + "kasir/void_semua", {
+                        transaksi_id: selectedOrderId
+                    }, function(res) {
+                        if (res.status === 'success') {
+                            Swal.fire({
+                                title: "Sukses!",
+                                text: "Semua produk berhasil di-void. Cetak struk void?",
+                                icon: "success",
+                                showCancelButton: true,
+                                confirmButtonText: "Cetak",
+                                cancelButtonText: "Tidak"
+                            }).then((choice) => {
+                                if (choice.isConfirmed) {
+                                    $.post(base_url +
+                                        "kasir/cetak_void_internal", {
+                                            void_ids: res.void_ids
+                                        },
+                                        function(cetakres) {
+                                            console.log(cetakres.message);
+                                        }, "json");
+                                }
+                                loadPendingOrders();
+                            });
+
+                            $("#modalVoidPesanan").modal("hide");
+                        } else {
+                            Swal.fire('Gagal!', res.message, 'error');
+                        }
+                    }, "json");
+                }
+            });
+        });
+
+        ///// VOID MODEL BARU //////
+
+        $("#btnVoidPilihanModal").click(function() {
+            if (!selectedOrderId) {
+                Swal.fire("Pilih pesanan dulu", "Silakan pilih pesanan yang ingin di-void", "info");
+                return;
+            }
+            openVoidPilihan(selectedOrderId);
+        });
+
+        // Buka modal Void Pilihan
+        function openVoidPilihan(transaksi_id) {
+            $("#transaksi_id_void").val(transaksi_id);
+            $("#listProdukVoid").html('<i>Loading...</i>');
+
+            $.post(base_url + "kasir/get_detail_transaksi_aktif", {
+                transaksi_id: transaksi_id
+            }, function(res) {
+                if (res.items && res.items.length > 0) {
+                    let html = `
+                <div class="d-flex justify-content-between mb-2">
+                    <button type="button" id="selectAllProduk" class="btn btn-outline-primary btn-sm">Pilih Semua Produk</button>
+                    <button type="button" id="selectAllExtra" class="btn btn-outline-secondary btn-sm">Pilih Semua Extra</button>
+                    <button type="button" id="uncheckAll" class="btn btn-outline-secondary btn-sm">Uncheck Semua</button>
+                </div>
+                <div class="list-group" id="list-group-void">
+            `;
+
+                    res.items.forEach(function(item) {
+                        const isBatal = item.status === 'batal';
+                        const disabled = isBatal ? 'disabled checked' : '';
+                        const classMuted = isBatal ? 'batal' : 'produk';
+
+                        html += `
+                    <label class="list-group-item d-flex justify-content-between align-items-center ${classMuted}">
+                        <div class="d-flex align-items-center">
+                            <input class="form-check-input me-2 checkbox-void" type="checkbox" ${disabled} value="${item.id}" data-type="produk" id="produk-${item.id}">
+                            <span>${item.jumlah}x ${item.nama_produk}</span>
+                        </div>
+                        <span class="badge badge-produk rounded-pill">${formatRupiah(item.harga * item.jumlah)}</span>
+                    </label>
+                `;
+
+                        if (item.extra && item.extra.length > 0) {
+                            item.extra.forEach(function(extra) {
+                                html += `
+                            <label class="list-group-item d-flex justify-content-between align-items-center extra">
+                                <div class="d-flex align-items-center">
+                                    <input class="form-check-input me-2 checkbox-void" type="checkbox" value="${extra.id}" data-type="extra" data-parent-id="${item.id}" id="extra-${extra.id}">
+                                    <small>➔ ${extra.nama}</small>
+                                </div>
+                                <span class="badge badge-extra rounded-pill">${formatRupiah(extra.harga * extra.jumlah)}</span>
+                            </label>
+                        `;
+                            });
+                        }
+                    });
+
+                    html += '</div>';
+                    $("#listProdukVoid").html(html);
+
+                    // Scroll otomatis ke bawah setelah render
+                    setTimeout(() => {
+                        const listGroup = document.getElementById('list-group-void');
+                        if (listGroup) {
+                            listGroup.scrollTop = listGroup.scrollHeight;
+                        }
+                    }, 200);
+                } else {
+                    $("#listProdukVoid").html('<i>Tidak ada produk yang aktif.</i>');
+                }
+            }, "json");
+
+            $("#modalVoidPilihan").modal("show");
+        }
+
+        // Tombol pilih semua produk
+        $(document).on('click', '#selectAllProduk', function() {
+            $(".checkbox-void").each(function() {
+                if ($(this).data('type') === 'produk' && !$(this).is(':disabled')) {
+                    $(this).prop('checked', true);
+                }
+            });
+        });
+
+        // Tombol pilih semua extra
+        $(document).on('click', '#selectAllExtra', function() {
+            $(".checkbox-void").each(function() {
+                if ($(this).data('type') === 'extra' && !$(this).is(':disabled')) {
+                    $(this).prop('checked', true);
+                }
+            });
+        });
+        // Tombol Uncheck Semua
+        $(document).on('click', '#uncheckAll', function() {
+            $(".checkbox-void").each(function() {
+                if (!$(this).is(':disabled')) {
+                    $(this).prop('checked', false);
+                }
+            });
+        });
+
+
+        // centang produk dan extra        
+        $(document).on('change', '.checkbox-void', function() {
+            const id = $(this).val();
+            const isChecked = $(this).is(':checked');
+            const type = $(this).data('type');
+
+            // Kalau produk utama dicentang, extra ikut
+            if (type === 'produk') {
+                $(`input[data-parent-id='${id}']`).prop('checked', isChecked);
+            }
+        });
+
+
+        // Submit Void Pilihan
+        $("#btnVoidPilihan").click(function() {
+            const selected = [];
+            $(".checkbox-void:checked").each(function() {
+                selected.push({
+                    id: $(this).val(),
+                    type: $(this).data("type")
+                });
+            });
+
+            const alasan = $("#alasanVoid").val();
+            const transaksi_id = $("#transaksi_id_void").val();
+
+            if (selected.length === 0) {
+                Swal.fire("Error", "Pilih minimal 1 produk atau extra untuk void.", "error");
+                return;
+            }
+
+            if (!alasan.trim()) {
+                Swal.fire("Error", "Alasan void wajib diisi.", "error");
+                return;
+            }
+
+            $.post(base_url + "kasir/void_pilihan", {
+                transaksi_id: transaksi_id,
+                items: JSON.stringify(selected),
+                alasan: alasan
+            }, function(res) {
+                if (res.status === 'success') {
+                    $("#modalVoidPilihan").modal("hide");
+
+                    Swal.fire({
+                        title: 'Cetak Struk Void?',
+                        text: 'Apakah ingin mencetak struk void untuk pesanan ini?',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Cetak Sekarang',
+                        cancelButtonText: 'Nanti'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            cetakVoidPilihan(res.void_ids); // void_ids baru
+                        }
+                    });
+
+                    loadPendingOrders();
+                } else {
+                    Swal.fire("Gagal", res.message, "error");
+                }
+            }, "json");
+        });
+
+        function cetakVoidPilihan(void_ids) {
+            $.post(base_url + "kasir/cetak_void_internal", {
+                void_ids: void_ids
+            }, function(res) {
+                if (res.status === 'success') {
+                    Swal.fire('Berhasil', res.message, 'success');
+                } else {
+                    Swal.fire('Gagal', res.message, 'error');
+                }
+            }, "json");
+        }
+
+
+        // // Kirim ke cetak_void_internal
+        // function cetakVoidPilihan(void_ids) {
+        //     $.post(base_url + "kasir/cetak_void_internal", {
+        //         void_ids: void_ids
         //     }, function(res) {
-        //         // tampilkan popup pembayaran seperti gambar: metode, total, diskon, dll
-        //         // isi field form hidden / visible untuk: transaksi_id, total, voucher, diskon
-
-        //         // kamu bisa munculkan modal baru misalnya: #modalPembayaran
-        //         // atau munculkan panel pembayaran di samping kanan halaman POS
-        //     }, "json");
-        // }
-
-
-        // $(document).on("click", ".metode-bayar", function() {
-        //     const metode_id = $(this).data("id");
-        //     const nama = $(this).data("nama");
-
-        //     const jumlah = prompt(`Masukkan jumlah untuk ${nama}:`);
-        //     const jml = parseInt(jumlah);
-        //     if (isNaN(jml) || jml <= 0) return;
-
-        //     pembayaranList.push({
-        //         metode_id,
-        //         nama,
-        //         jumlah: jml,
-        //         keterangan: ""
-        //     });
-        //     updateTabelPembayaran();
-        // });
-
-        // function updateTabelPembayaran() {
-        //     let html = "";
-        //     let total = 0;
-        //     pembayaranList.forEach((p, i) => {
-        //         total += p.jumlah;
-        //         html += `<tr>
-        //         <td>${p.nama}</td>
-        //         <td>Rp ${p.jumlah.toLocaleString()}</td>
-        //         <td><input class="form-control form-control-sm" onchange="pembayaranList[${i}].keterangan = this.value"></td>
-        //         <td><button class="btn btn-danger btn-sm" onclick="hapusPembayaran(${i})">×</button></td>
-        //         </tr>`;
-        //     });
-
-        //     $("#tabelPembayaran").html(html);
-        //     $("#totalPembayaran").text("Rp " + total.toLocaleString());
-        // }
-
-        // function hapusPembayaran(i) {
-        //     pembayaranList.splice(i, 1);
-        //     updateTabelPembayaran();
-        // }
-
-        // $("#formPembayaran").submit(function(e) {
-        //     e.preventDefault();
-        //     const total = pembayaranList.reduce((a, b) => a + b.jumlah, 0);
-        //     if (total < totalTagihan) {
-        //         alert("Total pembayaran kurang!");
-        //         return;
-        //     }
-
-        //     $.post(base_url + "kasir/simpan_pembayaran", {
-        //         transaksi_id: $("#bayar-transaksi-id").val(),
-        //         pembayaran: JSON.stringify(pembayaranList)
-        //     }, function(res) {
-        //         alert(res.message);
-        //         if (res.status === "success") {
-        //             $("#modalPembayaran").modal("hide");
-        //             $("#modalRincianPesanan").modal("hide");
-        //             loadPendingOrders(); // refresh list
+        //         if (res.status === 'success') {
+        //             Swal.fire('Berhasil', res.message, 'success');
+        //         } else {
+        //             Swal.fire('Gagal', res.message, 'error');
         //         }
         //     }, "json");
-        // });
+        // }
+
+
 
 
     });

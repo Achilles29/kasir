@@ -145,6 +145,35 @@ dari tabel database yang saya kirim dibawah, coba buatkan skemanya. mulai dari b
 kejutkan saya!
 
 
+sekarang buatkan fungsi void.
+alurnya:
+pilih pending order => klik batalkan pesanan => munculkan rincian pesanan tanpa grup detail unit.
+maka akan tampil rincian pesanan dan di sebelah kanan ada tombol tempat sampah. ketika dihapus=> masukkan alasan => di pr_detail_transaksi.status id yang dihapus tulis BATAL
+=> di pr_void masukkan data ( id, pr_transaksi_id, no_transaksi, detail_transaksi_id,pr_produk_id, nama_produk, jumlah, harga, subtotal, catatan, alasan, void_by, waktu, created_at, updated_at)
+di pr detail extra, tambahkan kolom status. ( BERHASIL, BATAL, REFUND (Default null)) => untuk extra yang produk nya di void maka pilih BATAL
+
+
+di bagian atas modal berikan button batalkan semua.
+ketika dibatalkan semua berarti di pr_transaksi.status_pembayaran pilih BATAL
+di detail dan extra pilih BATAL semua
+
+kejutkan saya!
+
+note tambahan modifikasi = berarti di simpan pembayara untuk extra ketika berhasil tulis BERHASIL
+
+pr_detail_extra:	id 	detail_transaksi_id 	pr_produk_extra_id 	jumlah 	harga 	subtotal 	sku 	satuan 	hpp 	created_at 	updated_at 	status 	
+
+pr_produk_extra :  id 	sku 	nama_extra 	satuan 	harga 	hpp 	status 	created_at 	updated_at 	
+
+pr_detail_transaksi : id 	pr_transaksi_id 	pr_produk_id 	detail_unit_id 	jumlah 	harga 	catatan 	is_printed 	status 	created_at 	updated_at 	
+
+pr_void : 	id 	pr_transaksi_id 	no_transaksi 	detail_transaksi_id 	pr_produk_id 	nama_produk 	detail_extra_id 	produk_extra_id 	nama_extra 	jumlah 	harga 	catatan 	alasan 	void_by 	waktu 	created_at 	updated_at 
+
+saya void pr_detail_extra id 4, detail_transaksi_id 5, pr_produk_extra_id 2
+
+yang terinput di pr_void : detail_transaksi_id 4 (seharusnya 5), pr_produk_id 50 (seharusnya 51 sesuai detail_transaksi_id), detail_extra_id 2 (seharusnya 4), produk_extra_id 1 (seharusnya 2)
+
+
 SET FOREIGN_KEY_CHECKS = 0;
 TRUNCATE TABLE pr_detail_extra;
 TRUNCATE TABLE pr_detail_transaksi;
@@ -159,18 +188,69 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 
 PERLU PERBAIKAN:
-FORM TOTAL PEMBAYARAN TIDAK FORMAT RUPIAH
-TAMBAHKAN TOMBOL SESUAI KEKURANGAN SAAT PEMBAYARAN SEHINGGA TIDAK PERLU KETIK ULANG
+
+v FORM TOTAL PEMBAYARAN TIDAK FORMAT RUPIAH
+v TAMPILAN RINCIAN PESANAN BUAT GRUP
+v saat buka transaksi baru voucher yang digunakan sebelumnya masih muncul
+v TAMBAHKAN TOMBOL SESUAI KEKURANGAN SAAT PEMBAYARAN SEHINGGA TIDAK PERLU KETIK ULANG
+v MODAL PEMBAYARAN PERBAIKI
+V pending order jangan tampilkan status batal dan refund
+v pembayaran 0 tetap tersimpan
+v simpan_pembayaran => produk yang BATAL (sudah di void) biarkan status nya tetap BATAL, jangan diganti BERHASIL !
+v tampilan cetak, produk dan extra yang sudah di void masih muncul. seharusnya yang void tidak dicetak
+v di bawah setelah rincian produk tambahkan:
+v simpan transaksi => BELUM_LUNAS
+v simpan pesananan => print 3 printer
+v CARA KASIH TAU KALAU VOID AGAR TIDAK DIPROSES
+v cek voucher min pembelian
+
+
+
 LOG PENGGUNAAN jumlah_poin
 
-TAMPILAN RINCIAN PESANAN BUAT GRUP
-MODAL PEMBAYARAN PERBAIKI
+OPSI print struk kasir CR CODE
 
 CLEAR PENCARIAN PRODUK SAAT SUDAH KLIK TOMBOL PRODUK
+
 NOTIF WARNING REFRESH / MENINGGALKAN HALAMAN KASIR SAAT KERANJANG ADA ISINYA
 
-saat buka transaksi baru voucher yang digunakan sebelumnya masih muncul
+simpan pembayaran => print kasir => buka laci
 
 perbaiki halaman voucher
 
+halaman antrian checker dan kitchen
 
+fungsi DP
+
+
+session login tetap aktif kecuali di logout
+
+v ubah pesanan, sisa_pembayaran tidak ikut ter update
+x ubah pesanan, total_penjualan menjumlah semua termasuk yang sudah tervoid
+v ubah pesanan, pesanan baru taruh atas
+
+cetak simpan transaksi, jika ada detail_unit_id dan atau extra nya yang sama maka gabungkan di cetaknya, jangan dipisahx`
+
+
+simpan menu Batalkan pesanan
+
+SETIAP SELESAI REFRESH, NAIK KE ATAS
+
+
+
+masih belum sesuai.
+logikanya seperi ini:
+ di pr_detail_transaksi berisi : 	id 	pr_transaksi_id 	pr_produk_id 	detail_unit_id 	jumlah 	harga 	catatan 	is_printed 	status 	created_at 	updated_at
+ ada kolom detail_unit_id yang dapat digunakan untuk mengelompokkan produk yang sama
+
+ di pr_detail_extra : id 	detail_transaksi_id 	pr_produk_extra_id 	jumlah 	harga 	subtotal 	sku 	satuan 	hpp 	created_at 	updated_at 	status
+ masalahanya tidak ada kolom seperti detail_unit_id yang dapat digunakan untuk mengidentifikasi kelompok yang sama. sehingga mungkin harus melakukan join pr_detail_transaksi.id = pr_detail_extra.detail_transaksi_id, dan kita ambil pr_detail_transaksi.detail_unit_id yang sama 
+
+
+
+ clos di kolom pencarian produk
+
+cetak per divisi belum grouped
+
+pilih voucher
+REVISI WALKIN Customer
