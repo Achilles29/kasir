@@ -247,6 +247,7 @@ favicon
 
 
 perbaiki fungsi scroll kanan
+perlebar sidebar kiri
 
 
 

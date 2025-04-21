@@ -44,7 +44,7 @@
                     <div class="sidebar-brand-icon rotate-n-15">
                         <i class="fas fa-laugh-wink"></i>
                     </div>
-                    <div class="sidebar-brand-text mx-3">NAMUA <br> Dashboard</div>
+                    <div class="sidebar-brand-text mx-3">NAMUA <br> POS</div>
                 </a>
 
                 <!-- Divider -->
@@ -67,173 +67,6 @@
                 </div>
 
                 <!-- Nav Item - Pages Collapse Menu -->
-                <li class="nav-item">
-
-                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseOne"
-                        aria-expanded="true" aria-controls="collapseOne">
-                        <i class="fas fa-fw fa-cog"></i>
-                        <span>Master</span>
-                    </a>
-                    <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordionSidebar">
-                        <div class="bg-white py-2 collapse-inner rounded">
-                            <a class="collapse-item" href="<?= site_url('/belanja') ?>"><i class="far fa-id-card"></i>
-                                Database Belanja</a>
-                            <a class="collapse-item" href="<?= site_url('/dbpurchase') ?>"><i
-                                    class="fas fa-user-cog"></i> Database Purchase</a>
-                        </div>
-                    </div>
-                </li>
-                <li class="nav-item">
-
-                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
-                        aria-expanded="true" aria-controls="collapseTwo">
-                        <i class="fas fa-fw fa-cog"></i>
-                        <span>Purchase</span>
-                    </a>
-                    <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-                        <div class="bg-white py-2 collapse-inner rounded">
-                            <a class="collapse-item" href="<?= site_url('/purchase') ?>"><i class="far fa-id-card"></i>
-                                Purchase</a>
-                            <a class="collapse-item" href="<?= site_url('/purchase_bar') ?>"><i
-                                    class="fas fa-user-cog"></i> PO Bar</a>
-                            <a class="collapse-item" href="<?= site_url('/purchase_kitchen') ?>"><i
-                                    class="fas fa-user-cog"></i> PO Kitchen</a>
-                            <a class="collapse-item" href="<?= site_url('/kas/rekapitulasi_metode_pembayaran') ?>"><i
-                                    class="fas fa-user-cog"></i> Rekap Pembayaran</a>
-                            <a class="collapse-item" href="<?= site_url('/kasbon') ?>"><i class="fas fa-user-cog"></i>
-                                Kasbon</a>
-                            <a class="collapse-item" href="<?= site_url('/purchase_bar/history') ?>"><i
-                                    class="fas fa-user-cog"></i> PO History</a>
-                            <a class="collapse-item" href="<?= site_url('/purchase_kitchen/history') ?>"><i
-                                    class="fas fa-user-cog"></i> PO History</a>
-                            <a class="collapse-item" href="<?= site_url('/purchase/laporan') ?>"><i
-                                    class="fas fa-user-cog"></i> Laporan Purchase</a>
-                            <a class="collapse-item" href="<?= site_url('/cost_production') ?>"><i
-                                    class="fas fa-user-cog"></i> Cost Production</a>
-                        </div>
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseThree"
-                        aria-expanded="true" aria-controls="collapseThree">
-                        <i class="fas fa-fw fa-cog"></i>
-                        <span>Store Request</span>
-                    </a>
-                    <div id="collapseThree" class="collapse" aria-labelledby="headingThree"
-                        data-parent="#accordionSidebar">
-                        <div class="bg-white py-2 collapse-inner rounded">
-                            <a class="collapse-item" href="<?= site_url('/storerequest') ?>"><i
-                                    class="far fa-id-card"></i> Store Request</a>
-                            <a class="collapse-item" href="<?= site_url('/storerequestbar') ?>"><i
-                                    class="fas fa-user-cog"></i> SR Bar</a>
-                            <a class="collapse-item" href="<?= site_url('/storerequestkitchen') ?>"><i
-                                    class="fas fa-user-cog"></i> SR Kitchen</a>
-                            <a class="collapse-item" href="<?= site_url('/storerequest/laporan') ?>"><i
-                                    class="far fa-id-card"></i> Laporan SR</a>
-                            <!-- <a class="collapse-item" <a href="<?= site_url('/purchase_kitchen') ?>"><i class="fas fa-user-cog"></i> Purchase Order Kitchen</a>
-                        <a class="collapse-item" <a href="<?= site_url('/purchase_kitchen/history') ?>"><i class="fas fa-user-cog"></i> Purchase Kitchen History</a> -->
-                        </div>
-                    </div>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseSix"
-                        aria-expanded="false" aria-controls="collapseSix">
-                        <i class="fas fa-fw fa-cog"></i>
-                        <span>Sales</span>
-                    </a>
-                    <div id="collapseSix" class="collapse" aria-labelledby="headingSix" data-parent="#accordionSidebar">
-                        <div class="bg-white py-2 collapse-inner rounded">
-                            <a class="collapse-item" href="<?= site_url('/penjualan_kasir') ?>"><i
-                                    class="fas fa-user-cog"></i> Rincian Sales</a>
-                            <a class="collapse-item" href="<?= site_url('/penjualan_produk') ?>"><i
-                                    class="fas fa-user-cog"></i> Rincian Sales Produk</a>
-                            <a class="collapse-item" href="<?= site_url('/kas/rekapitulasi_penjualan') ?>"><i
-                                    class="fas fa-user-cog"></i> Rekap Sales</a>
-                            <a class="collapse-item" href="<?= site_url('/refund') ?>"><i class="fas fa-user-cog"></i>
-                                Refund</a>
-                        </div>
-                    </div>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseFour"
-                        aria-expanded="false" aria-controls="collapseFour">
-                        <i class="fas fa-fw fa-cog"></i>
-                        <span>Storeroom</span>
-                    </a>
-                    <div id="collapseFour" class="collapse" aria-labelledby="headingFour"
-                        data-parent="#accordionSidebar">
-                        <div class="bg-white py-2 collapse-inner rounded">
-                            <a class="collapse-item" href="<?= site_url('/gudang') ?>"><i class="fas fa-user-cog"></i>
-                                Gudang Rinci</a>
-                            <a class="collapse-item" href="<?= site_url('/gudang/index_v2') ?>"><i
-                                    class="fas fa-user-cog"></i> Gudang</a>
-                            <!-- <a class="collapse-item" href="<?= site_url('/gudangawal') ?>"><i class="far fa-id-card"></i> Persediaan Awal</a> -->
-                            <a class="collapse-item" href="<?= site_url('/stokterbuang') ?>"><i
-                                    class="fas fa-user-cog"></i> Stok Terbuang</a>
-                            <a class="collapse-item" href="<?= site_url('/stokpenyesuaian') ?>"><i
-                                    class="fas fa-user-cog"></i> Penyesuaian Stok</a>
-                            <a class="collapse-item" href="<?= site_url('/stok_opname') ?>"><i
-                                    class="fas fa-user-cog"></i> Stok Opname</a>
-                        </div>
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseFive"
-                        aria-expanded="false" aria-controls="collapseFive">
-                        <i class="fas fa-fw fa-cog"></i>
-                        <span>Keuangan</span>
-                    </a>
-                    <div id="collapseFive" class="collapse" aria-labelledby="headingFive"
-                        data-parent="#accordionSidebar">
-                        <div class="bg-white py-2 collapse-inner rounded">
-                            <a class="collapse-item" href="<?= site_url('/kas') ?>"><i class="far fa-id-card"></i>
-                                Kas</a>
-                            <a class="collapse-item" href="<?= site_url('/mutasi_kas') ?>"><i
-                                    class="far fa-id-card"></i> Mutasi Kas</a>
-                            <a class="collapse-item" href="<?= site_url('/mutasi_rekening') ?>"><i
-                                    class="far fa-id-card"></i> Mutasi Rekening</a>
-                            <a class="collapse-item" href="<?= site_url('/laporan_keuangan') ?>"><i
-                                    class="fas fa-user-cog"></i> Laporan Keuangan</a>
-                            <a class="collapse-item" href="<?= site_url('/laporan_brankas') ?>"><i
-                                    class="fas fa-user-cog"></i> Laporan Brankas</a>
-                            <a class="collapse-item" href="<?= site_url('/rekap_rekening') ?>"><i
-                                    class="fas fa-user-cog"></i> Rekap Rekening</a>
-                        </div>
-                    </div>
-                </li>
-                <li class="nav-item">
-
-                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseSeven"
-                        aria-expanded="true" aria-controls="collapseSeven">
-                        <i class="fas fa-fw fa-cog"></i>
-                        <span>Produk</span>
-                    </a>
-                    <div id="collapseSeven" class="collapse" aria-labelledby="headingSeven"
-                        data-parent="#accordionSidebar">
-                        <div class="bg-white py-2 collapse-inner rounded">
-                            <a class="collapse-item" href="<?= site_url('/kasir') ?>"><i class="far fa-id-card"></i>
-                                POS</a>
-                            <a class="collapse-item" href="<?= site_url('/produk') ?>"><i class="far fa-id-card"></i>
-                                Daftar Produk</a>
-                            <a class="collapse-item" href="<?= site_url('/divisi') ?>"><i class="fas fa-user-cog"></i>
-                                Daftar Divisi</a>
-                            <a class="collapse-item" href="<?= site_url('/kategori') ?>"><i class="fas fa-user-cog"></i>
-                                Daftar Kategori</a>
-                            <a class="collapse-item" href="<?= site_url('/voucher') ?>"><i class="fas fa-user-cog"></i>
-                                Daftar Voucher</a>
-                            <a class="collapse-item" href="<?= site_url('/poin') ?>"><i class="fas fa-user-cog"></i>
-                                Daftar Poin</a>
-                            <a class="collapse-item" href="<?= site_url('/setting') ?>"><i class="fas fa-user-cog"></i>
-                                Pengaturan</a>
-                            <a class="collapse-item" href="<?= site_url('/printer') ?>"><i class="fas fa-user-cog"></i>
-                                Printer</a>
-                            <a class="collapse-item" href="<?= site_url('/setting/struk') ?>"><i
-                                    class="fas fa-user-cog"></i> Pengaturan Struk</a>
-                        </div>
-                    </div>
-                </li>
                 <li class="nav-item">
 
                     <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseLaporan"
@@ -274,17 +107,6 @@
                     </div>
                 </li>
 
-
-                <li class="nav-item">
-                    <a class="nav-link" href="/rekap_rekening/generate_rekap">
-                        <i class="fas fa-fw fa-chart-area"></i>
-                        <span>generate rekap</span></a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/rekap_rekening/generate_rekap_bulan_sebelumnya">
-                        <i class="fas fa-fw fa-chart-area"></i>
-                        <span>generate rekap M-1</span></a>
-                </li>
 
 
                 <!-- Nav Item -->

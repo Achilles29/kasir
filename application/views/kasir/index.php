@@ -250,6 +250,11 @@
     <!-- Top Tab Navigation -->
     <div class="top-menu bg-light d-flex align-items-center px-2" style="border-bottom: 1px solid #ddd;">
         <div class="nav-item">
+            <a href="<?= base_url('beranda') ?>" target="_blank" class="nav-link small font-weight-bold px-3 py-2">
+                <i class="fas fa-home"></i> Beranda
+            </a>
+        </div>
+        <div class="nav-item">
             <a href="<?= base_url('kasir') ?>" target="_blank" class="nav-link small font-weight-bold px-3 py-2">
                 <i class="fas fa-cash-register"></i> POS
             </a>

@@ -16,7 +16,7 @@ cd C:/xampp/htdocs/
 git clone https://github.com/Achilles29/kasir.git kasir
 
 TARIK KE VPS
-cd /www/wwwroot
+cd /www/wwwroot/kasir
 git clone https://github.com/Achilles29/kasir.git kasir
 
 UPDATE
