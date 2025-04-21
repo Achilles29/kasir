@@ -24,4 +24,7 @@ UPDATE
 git add .
 git commit -m "update fitur A"
 git push origin main
+
+
+
 git pull origin main

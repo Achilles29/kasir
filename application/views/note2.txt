@@ -203,6 +203,11 @@ v simpan transaksi => BELUM_LUNAS
 v simpan pesananan => print 3 printer
 v CARA KASIH TAU KALAU VOID AGAR TIDAK DIPROSES
 v cek voucher min pembelian
+v ubah pesanan, sisa_pembayaran tidak ikut ter update
+v ubah pesanan, total_penjualan menjumlah semua termasuk yang sudah tervoid
+v ubah pesanan, pesanan baru taruh atas
+v cetak simpan transaksi, jika ada detail_unit_id dan atau extra nya yang sama maka gabungkan di cetaknya, jangan dipisah
+v simpan menu Batalkan pesanan
 
 
 
@@ -225,32 +230,26 @@ fungsi DP
 
 session login tetap aktif kecuali di logout
 
-v ubah pesanan, sisa_pembayaran tidak ikut ter update
-x ubah pesanan, total_penjualan menjumlah semua termasuk yang sudah tervoid
-v ubah pesanan, pesanan baru taruh atas
-
-cetak simpan transaksi, jika ada detail_unit_id dan atau extra nya yang sama maka gabungkan di cetaknya, jangan dipisahx`
-
-
-simpan menu Batalkan pesanan
 
 SETIAP SELESAI REFRESH, NAIK KE ATAS
 
 
-
-masih belum sesuai.
-logikanya seperi ini:
- di pr_detail_transaksi berisi : 	id 	pr_transaksi_id 	pr_produk_id 	detail_unit_id 	jumlah 	harga 	catatan 	is_printed 	status 	created_at 	updated_at
- ada kolom detail_unit_id yang dapat digunakan untuk mengelompokkan produk yang sama
-
- di pr_detail_extra : id 	detail_transaksi_id 	pr_produk_extra_id 	jumlah 	harga 	subtotal 	sku 	satuan 	hpp 	created_at 	updated_at 	status
- masalahanya tidak ada kolom seperti detail_unit_id yang dapat digunakan untuk mengidentifikasi kelompok yang sama. sehingga mungkin harus melakukan join pr_detail_transaksi.id = pr_detail_extra.detail_transaksi_id, dan kita ambil pr_detail_transaksi.detail_unit_id yang sama 
-
-
-
- clos di kolom pencarian produk
+close di kolom pencarian produk
 
 cetak per divisi belum grouped
 
 pilih voucher
 REVISI WALKIN Customer
+
+login kasir, input modal kasir
+
+favicon
+
+
+perbaiki fungsi scroll kanan
+
+
+
+CLEAR
+pr_detail_transaksi berisi : 	id 	pr_transaksi_id 	pr_produk_id 	detail_unit_id 	jumlah 	harga 	catatan 	is_printed 	status 	created_at 	updated_at
+pr_detail_extra : id 	detail_transaksi_id 	pr_produk_extra_id 	jumlah 	harga 	subtotal 	sku 	satuan 	hpp 	created_at 	updated_at 	status

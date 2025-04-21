@@ -1501,4 +1501,41 @@ public function void_semua()
 }
 
 
+public function pesanan_terbayar()
+{
+
+    $data['title'] = "Pesanan Terbayar";
+    $this->load->view("templates/header", $data);
+    $this->load->view('kasir/pesanan_terbayar');
+    $this->load->view("templates/footer");
+
+}
+
+public function get_pesanan_terbayar()
+{
+    $tanggal_awal = $this->input->get('tanggal_awal');
+    $tanggal_akhir = $this->input->get('tanggal_akhir');
+    $search = $this->input->get('search');
+
+    $this->db->select('id, no_transaksi, customer, tanggal, total_pembayaran, status_pembayaran');
+    $this->db->from('pr_transaksi');
+    $this->db->where('status_pembayaran', 'LUNAS');
+
+    if ($tanggal_awal && $tanggal_akhir) {
+        $this->db->where('tanggal >=', $tanggal_awal);
+        $this->db->where('tanggal <=', $tanggal_akhir);
+    }
+
+    if ($search) {
+        $this->db->like('no_transaksi', $search);
+        $this->db->or_like('customer', $search);
+    }
+
+    $this->db->order_by('tanggal', 'DESC');
+
+    $query = $this->db->get();
+    echo json_encode($query->result());
+}
+
+
 }

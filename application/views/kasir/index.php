@@ -104,8 +104,9 @@
 
 
     /* Area kasir utama */
+
     .kasir-content {
-        width: 80%;
+        flex-grow: 1;
         padding: 10px;
         overflow-y: auto;
     }
@@ -218,11 +219,71 @@
         background-color: #dc3545;
         /* merah VOIDED */
     }
+
+    .top-menu {
+        height: 45px;
+        background-color: #f8f9fa;
+    }
+
+    .top-menu .nav-item {
+        display: inline-block;
+    }
+
+    .top-menu .nav-link {
+        color: #555;
+        font-size: 14px;
+        text-decoration: none;
+    }
+
+    .top-menu .nav-link:hover {
+        background-color: #e9ecef;
+        border-radius: 5px;
+    }
+
+    .top-menu .nav-link i {
+        margin-right: 5px;
+    }
     </style>
 </head>
 
 <body>
+    <!-- Top Tab Navigation -->
+    <div class="top-menu bg-light d-flex align-items-center px-2" style="border-bottom: 1px solid #ddd;">
+        <div class="nav-item">
+            <a href="<?= base_url('kasir') ?>" target="_blank" class="nav-link small font-weight-bold px-3 py-2">
+                <i class="fas fa-cash-register"></i> POS
+            </a>
+        </div>
+        <div class="nav-item">
+            <a href="<?= base_url('kasir/pesanan_terbayar') ?>" target="_blank"
+                class="nav-link small font-weight-bold px-3 py-2">
+                <i class="fas fa-chart-line"></i> Pesanan Terbayar
+            </a>
+        </div>
+        <div class="nav-item">
+            <a href="<?= base_url('laporan') ?>" target="_blank" class="nav-link small font-weight-bold px-3 py-2">
+                <i class="fas fa-chart-line"></i> Laporan
+            </a>
+        </div>
+        <div class="nav-item">
+            <a href="<?= base_url('stok') ?>" target="_blank" class="nav-link small font-weight-bold px-3 py-2">
+                <i class="fas fa-boxes"></i> Stok
+            </a>
+        </div>
+        <div class="nav-item">
+            <a href="<?= base_url('member') ?>" target="_blank" class="nav-link small font-weight-bold px-3 py-2">
+                <i class="fas fa-users"></i> Member
+            </a>
+        </div>
+        <div class="nav-item">
+            <a href="<?= base_url('setting') ?>" target="_blank" class="nav-link small font-weight-bold px-3 py-2">
+                <i class="fas fa-cogs"></i> Setting
+            </a>
+        </div>
+    </div>
+
     <div class="container-fluid">
+
         <!-- Sidebar Pesanan Belum Dibayar -->
         <div class="sidebar">
             <h4>Pesanan Belum Dibayar</h4>
@@ -248,7 +309,7 @@
                 <button id="cetak-kot" class="btn btn-warning">Cetak ulang KOT</button>
                 <button id="faktur" class="btn btn-info">Faktur</button>
                 <button id="tagihan" class="btn btn-success">Tagihan</button>
-                <button id="batalkan-pesanan" class="btn btn-danger">Batalkan Pesanan</button>
+                <!-- <button id="batalkan-pesanan" class="btn btn-danger">Batalkan Pesanan</button> -->
                 <button id="btnVoidPilihanModal" class="btn btn-danger">
                     <i class="fas fa-times-circle"></i> Void Pesanan
                 </button>
@@ -703,7 +764,7 @@
                 let subtotal = qty * harga;
                 if (extraData[uid]) {
                     extraData[uid].forEach(extra => {
-                        subtotal += extra.harga * extra.jumlah;
+                        subtotal += extra.harga * qty;
                     });
                 }
 
@@ -836,11 +897,12 @@
 
             if (extraData[uid]) {
                 extraData[uid].forEach(extra => {
-                    total += extra.harga * extra.jumlah;
+                    total += extra.harga * qty; // ✅ ini penting
                 });
             }
 
             $(this).closest("tr").find(".total").text(formatRupiah(total));
+            refreshExtraList(uid); // ✅ Tambahkan ini!
             updateTotal();
         });
 
@@ -900,7 +962,7 @@
                     satuan,
                     harga,
                     hpp,
-                    jumlah: 1 // ✅ Selalu 1 per produk
+                    jumlah: jumlahProduk // ✅ langsung ikut qty produk
                 });
             });
 
@@ -908,10 +970,10 @@
 
             const list = selected.map(e =>
                 `<li>
-                    ➕ ${e.jumlah}x ${e.nama} 
-                    <span class="float-right">Rp ${e.harga.toLocaleString('id-ID')}</span>
-                    <button class='btn btn-sm btn-outline-danger btn-hapus-extra ml-1'><i class='fas fa-times'></i></button>
-                </li>`
+            ➕ ${e.jumlah}x ${e.nama}
+            <span class="float-right">Rp ${(e.harga * e.jumlah).toLocaleString('id-ID')}</span>
+            <button class='btn btn-sm btn-outline-danger btn-hapus-extra ml-1'><i class='fas fa-times'></i></button>
+        </li>`
             ).join("");
 
             $(`.list-extra[data-uid="${currentUID}"]`).html(list);
@@ -1148,8 +1210,15 @@
                     $("#simpan-perubahan").show();
 
                     // 1. Group by detail_unit_id
+                    // 1. Group by detail_unit_id
                     const grouped = {};
-                    res.items.forEach((item) => {
+
+                    // 🔥 Tambahkan filter hanya item aktif (status null atau kosong)
+                    const activeItems = res.items.filter(item => !item.status || item
+                        .status === '');
+
+
+                    activeItems.forEach((item) => {
                         if (!grouped[item.detail_unit_id]) {
                             grouped[item.detail_unit_id] = {
                                 produk_id: item.pr_produk_id,
@@ -1295,15 +1364,16 @@
             }
         }
 
-
         function refreshExtraList(uid) {
+            const jumlahProduk = parseInt($(`[data-uid='${uid}']`).find(".qty").val()) || 1;
+
             const list = extraData[uid].map(e =>
                 `<li>
-            ➕ ${e.jumlah}x ${e.nama}
-            <span class="float-right">Rp ${(e.harga * e.jumlah).toLocaleString('id-ID')}</span>
-            <button class='btn btn-sm btn-outline-warning btn-kurangi-extra ml-2'>-</button>
-            <button class='btn btn-sm btn-outline-danger btn-hapus-extra ml-1'><i class='fas fa-times'></i></button>
-        </li>`
+    ➕ ${jumlahProduk}x ${e.nama}
+    <span class="float-right">Rp ${(e.harga * jumlahProduk).toLocaleString('id-ID')}</span>
+    <button class='btn btn-sm btn-outline-warning btn-kurangi-extra ml-2'>-</button>
+    <button class='btn btn-sm btn-outline-danger btn-hapus-extra ml-1'><i class='fas fa-times'></i></button>
+</li>`
             ).join("");
 
             $(`.list-extra[data-uid="${uid}"]`).html(list);
@@ -1683,7 +1753,7 @@
 
 
         /////////////////
-        ///// VOID //////
+        ///// VOID MODEL LAMA //////
         /////////////////
         // Klik Batalkan Pesanan
         $("#batalkan-pesanan").click(function() {
@@ -1979,6 +2049,9 @@
                 }
             });
         });
+
+
+
 
         ///// VOID MODEL BARU //////
 
