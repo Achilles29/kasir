@@ -58,7 +58,9 @@ tbody tr {
                                 <?php endif; ?>
                             </td>
                             <td class="text-center">
-                                <button class="btn btn-warning btn-sm refund-produk" data-id="<?= $item->id ?>">
+                                <button type="button" class="btn btn-warning btn-sm refund-produk"
+                                    data-id="<?= $item->id ?>">
+
                                     <i class="fas fa-undo"></i> Refund
                                 </button>
                             </td>
@@ -69,7 +71,7 @@ tbody tr {
             </div>
 
             <div class="text-center mt-4">
-                <button class="btn btn-danger btn-lg" id="refund-semua">
+                <button type="button" class="btn btn-danger btn-lg" id="refund-semua">
                     <i class="fas fa-undo"></i> Refund Semua Pesanan
                 </button>
             </div>
@@ -88,11 +90,12 @@ $(document).ready(function() {
 
         if (confirm("Apakah anda yakin ingin refund produk ini?")) {
             // Animasi fade-out baris
-            row.fadeOut(500, function() {
-                row.remove();
-                // Setelah animasi selesai, baru redirect
+            row.fadeOut(500);
+
+            // Tunggu 500ms baru redirect
+            setTimeout(function() {
                 window.location.href = base_url + "kasir/refund_produk/" + id;
-            });
+            }, 500);
         }
     });
 
@@ -100,10 +103,12 @@ $(document).ready(function() {
     $("#refund-semua").click(function() {
         if (confirm("Apakah anda yakin ingin refund semua pesanan ini?")) {
             // Animasi semua baris fade-out
-            $("tbody tr").fadeOut(500, function() {
-                // Setelah semua baris hilang, redirect
+            $("tbody tr").fadeOut(500);
+
+            // Tunggu 500ms baru redirect
+            setTimeout(function() {
                 window.location.href = base_url + "kasir/refund_semua/<?= $transaksi->id ?>";
-            });
+            }, 500);
         }
     });
 });

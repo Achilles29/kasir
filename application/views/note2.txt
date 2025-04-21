@@ -248,7 +248,8 @@ login kasir, input modal kasir
 perbaiki fungsi scroll kanan
 perlebar sidebar kiri
 loadpending order, data refund tampil
-
+LANJUTKAN BOOST REFUND EXTRA
+default filter bukan hari ini
 
 CLEAR
 pr_detail_transaksi berisi : 	id 	pr_transaksi_id 	pr_produk_id 	detail_unit_id 	jumlah 	harga 	catatan 	is_printed 	status 	created_at 	updated_at

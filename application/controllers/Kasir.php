@@ -750,7 +750,9 @@ public function simpan_transaksi()
 public function load_pending_orders() {
     $this->db->select('id, no_transaksi, customer, total_penjualan');
     $this->db->from('pr_transaksi');
-    $this->db->where('status_pembayaran !=', 'LUNAS'); // ✅ ganti jadi cek status_pembayaran
+    //$this->db->where('status_pembayaran !=', 'LUNAS'); // ✅ ganti jadi cek status_pembayaran
+    $this->db->where_not_in('status_pembayaran', ['LUNAS', 'REFUND']);
+
     $this->db->order_by('waktu_order', 'DESC');
     echo json_encode($this->db->get()->result_array());
 }
@@ -1576,40 +1578,107 @@ public function rincian_pesanan($id)
 }
 
 // --- API Refund
-public function refund_produk()
-{
-    $detail_id = $this->input->post('detail_id');
-    $alasan = $this->input->post('alasan');
 
-    // Update status jadi REFUND
+public function refund_produk($detail_id)
+{
+    $this->load->library('session');
+    $user_id = $this->session->userdata('id'); // ambil id kasir yg refund
+
+    // Ambil detail transaksi
+    $detail = $this->db->get_where('pr_detail_transaksi', ['id' => $detail_id])->row();
+    if (!$detail) {
+        show_404();
+    }
+
+    // Ambil data transaksi utama
+    $transaksi = $this->db->get_where('pr_transaksi', ['id' => $detail->pr_transaksi_id])->row();
+    if (!$transaksi) {
+        show_404();
+    }
+
+    // Insert ke pr_refund
+    $data = [
+        'pr_transaksi_id'         => $transaksi->id,
+        'pr_detail_transaksi_id'  => $detail->id,
+        'pr_produk_id'            => $detail->pr_produk_id,
+        'no_transaksi'            => $transaksi->no_transaksi,
+        'nama_produk'             => $detail->nama_produk,
+        'jumlah'                  => $detail->jumlah,
+        'harga'                   => $detail->harga,
+        'catatan'                 => $detail->catatan ?? '',
+        'alasan'                  => 'Refund produk', // Kalau mau kasih input alasan, bisa pakai form
+        'refund_by'               => $user_id,
+        'waktu_refund'            => date('Y-m-d H:i:s'),
+        'created_at'              => date('Y-m-d H:i:s'),
+        'updated_at'              => date('Y-m-d H:i:s'),
+        'detail_extra_id'         => null,
+        'produk_extra_id'         => null,
+        'nama_extra'              => null,
+    ];
+    $this->db->insert('pr_refund', $data);
+
+    // Update status produk menjadi BATAL di pr_detail_transaksi
+    $this->db->set('status', 'BATAL');
     $this->db->where('id', $detail_id);
-    $this->db->update('pr_detail_transaksi', [
-        'status' => 'REFUND',
-        'catatan' => $alasan
-    ]);
+    $this->db->update('pr_detail_transaksi');
 
-    echo json_encode(['status' => 'success', 'message' => 'Produk berhasil di-refund']);
+    // Update status transaksi menjadi REFUND kalau semua produk batal
+    $cek_aktif = $this->db->get_where('pr_detail_transaksi', [
+        'pr_transaksi_id' => $transaksi->id,
+        'status' => 'BERHASIL'
+    ])->num_rows();
+
+    if ($cek_aktif == 0) {
+        $this->db->set('status_pembayaran', 'REFUND');
+        $this->db->where('id', $transaksi->id);
+        $this->db->update('pr_transaksi');
+    }
+
+    redirect('kasir/pesanan_terbayar');
 }
-
-public function refund_transaksi()
+public function refund_semua($transaksi_id)
 {
-    $transaksi_id = $this->input->post('transaksi_id');
-    $alasan = $this->input->post('alasan');
+    $this->load->library('session');
+    $user_id = $this->session->userdata('id');
 
-    // Update semua detail jadi REFUND
+    // Ambil semua detail transaksi aktif (status BERHASIL)
     $this->db->where('pr_transaksi_id', $transaksi_id);
-    $this->db->update('pr_detail_transaksi', [
-        'status' => 'REFUND',
-        'catatan' => $alasan
-    ]);
+    $this->db->where('status', 'BERHASIL');
+    $details = $this->db->get('pr_detail_transaksi')->result();
 
-    // Update status transaksi
+    foreach ($details as $detail) {
+        $data = [
+            'pr_transaksi_id'         => $transaksi_id,
+            'pr_detail_transaksi_id'  => $detail->id,
+            'pr_produk_id'            => $detail->pr_produk_id,
+            'no_transaksi'            => $this->db->select('no_transaksi')->get_where('pr_transaksi', ['id' => $transaksi_id])->row('no_transaksi'),
+            'nama_produk'             => $detail->nama_produk,
+            'jumlah'                  => $detail->jumlah,
+            'harga'                   => $detail->harga,
+            'catatan'                 => $detail->catatan ?? '',
+            'alasan'                  => 'Refund semua produk',
+            'refund_by'               => $user_id,
+            'waktu_refund'            => date('Y-m-d H:i:s'),
+            'created_at'              => date('Y-m-d H:i:s'),
+            'updated_at'              => date('Y-m-d H:i:s'),
+            'detail_extra_id'         => null,
+            'produk_extra_id'         => null,
+            'nama_extra'              => null,
+        ];
+        $this->db->insert('pr_refund', $data);
+
+        // Update detail transaksi jadi BATAL
+        $this->db->set('status', 'BATAL');
+        $this->db->where('id', $detail->id);
+        $this->db->update('pr_detail_transaksi');
+    }
+
+    // Update status transaksi ke REFUND
+    $this->db->set('status_pembayaran', 'REFUND');
     $this->db->where('id', $transaksi_id);
-    $this->db->update('pr_transaksi', [
-        'status_pembayaran' => 'REFUND'
-    ]);
+    $this->db->update('pr_transaksi');
 
-    echo json_encode(['status' => 'success', 'message' => 'Semua produk di-refund']);
+    redirect('kasir/pesanan_terbayar');
 }
 
 }
