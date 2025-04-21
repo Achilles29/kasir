@@ -9,6 +9,8 @@
     <meta name="author" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>POS - Namua Coffee & Eatery</title>
+    <link rel="icon" type="image/x-icon" href="<?php echo base_url(); ?>assets/img/favicon.ico">
+
     <!-- Custom fonts for this template-->
     <link href="<?php echo base_url(); ?>assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet"
         type="text/css">

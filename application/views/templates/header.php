@@ -8,6 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
+    <link rel="icon" type="image/x-icon" href="<?php echo base_url(); ?>assets/img/favicon.ico">
+
 
     <title><?= isset($title) ? $title : 'Admin Panel' ?></title> <!-- Title dinamis -->
 
@@ -22,6 +24,7 @@
     <!-- Custom styles for this template-->
     <link href="<?php echo base_url(); ?>assets/css/sb-admin-2.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 
 </head>
 

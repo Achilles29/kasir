@@ -1503,11 +1503,11 @@ public function void_semua()
 
 public function pesanan_terbayar()
 {
+  $data['title'] = "Pesanan Terbayar";
+  $this->load->view('templates/header', $data);
+  $this->load->view('kasir/pesanan_terbayar');
+  $this->load->view('templates/footer');
 
-    $data['title'] = "Pesanan Terbayar";
-    $this->load->view("templates/header", $data);
-    $this->load->view('kasir/pesanan_terbayar');
-    $this->load->view("templates/footer");
 
 }
 
@@ -1519,7 +1519,7 @@ public function get_pesanan_terbayar()
 
     $this->db->select('id, no_transaksi, customer, tanggal, total_pembayaran, status_pembayaran');
     $this->db->from('pr_transaksi');
-    $this->db->where('status_pembayaran', 'LUNAS');
+    $this->db->where_in('status_pembayaran', ['LUNAS', 'REFUND']); // ✅ BISA LUNAS ATAU REFUND
 
     if ($tanggal_awal && $tanggal_akhir) {
         $this->db->where('tanggal >=', $tanggal_awal);
@@ -1527,8 +1527,10 @@ public function get_pesanan_terbayar()
     }
 
     if ($search) {
+        $this->db->group_start();
         $this->db->like('no_transaksi', $search);
         $this->db->or_like('customer', $search);
+        $this->db->group_end();
     }
 
     $this->db->order_by('tanggal', 'DESC');
@@ -1537,5 +1539,77 @@ public function get_pesanan_terbayar()
     echo json_encode($query->result());
 }
 
+
+// --- Halaman Rincian Pesanan
+public function rincian_pesanan($id)
+{
+    $this->db->select('no_transaksi, customer, tanggal, total_pembayaran');
+    $this->db->from('pr_transaksi');
+    $this->db->where('id', $id);
+    $transaksi = $this->db->get()->row();
+
+    if (!$transaksi) {
+        show_404();
+    }
+
+    $this->db->select('dt.*, p.nama_produk');
+    $this->db->from('pr_detail_transaksi dt');
+    $this->db->join('pr_produk p', 'dt.pr_produk_id = p.id', 'left');
+    $this->db->where('dt.pr_transaksi_id', $id);
+    $items = $this->db->get()->result();
+
+    foreach ($items as &$item) {
+        $this->db->select('e.nama_extra as nama, e.harga, de.jumlah');
+        $this->db->from('pr_detail_extra de');
+        $this->db->join('pr_produk_extra e', 'de.pr_produk_extra_id = e.id', 'left');
+        $this->db->where('de.detail_transaksi_id', $item->id);
+        $item->extra = $this->db->get()->result();
+    }
+
+    $data['transaksi'] = $transaksi;
+    $data['items'] = $items;
+
+  $data['title'] = "Rincian Pesanan";
+  $this->load->view('templates/header', $data);
+  $this->load->view('kasir/rincian_pesanan', $data);
+  $this->load->view('templates/footer');
+}
+
+// --- API Refund
+public function refund_produk()
+{
+    $detail_id = $this->input->post('detail_id');
+    $alasan = $this->input->post('alasan');
+
+    // Update status jadi REFUND
+    $this->db->where('id', $detail_id);
+    $this->db->update('pr_detail_transaksi', [
+        'status' => 'REFUND',
+        'catatan' => $alasan
+    ]);
+
+    echo json_encode(['status' => 'success', 'message' => 'Produk berhasil di-refund']);
+}
+
+public function refund_transaksi()
+{
+    $transaksi_id = $this->input->post('transaksi_id');
+    $alasan = $this->input->post('alasan');
+
+    // Update semua detail jadi REFUND
+    $this->db->where('pr_transaksi_id', $transaksi_id);
+    $this->db->update('pr_detail_transaksi', [
+        'status' => 'REFUND',
+        'catatan' => $alasan
+    ]);
+
+    // Update status transaksi
+    $this->db->where('id', $transaksi_id);
+    $this->db->update('pr_transaksi', [
+        'status_pembayaran' => 'REFUND'
+    ]);
+
+    echo json_encode(['status' => 'success', 'message' => 'Semua produk di-refund']);
+}
 
 }

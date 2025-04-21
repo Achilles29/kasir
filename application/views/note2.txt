@@ -243,12 +243,11 @@ REVISI WALKIN Customer
 
 login kasir, input modal kasir
 
-favicon
 
 
 perbaiki fungsi scroll kanan
 perlebar sidebar kiri
-
+loadpending order, data refund tampil
 
 
 CLEAR
