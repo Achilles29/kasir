@@ -51,7 +51,7 @@ class Auth extends CI_Controller {
             }
 
             // Redirect ke dashboard jika bukan request API
-            redirect('kasir');
+            redirect('beranda');
         } else {
             if ($this->input->is_ajax_request()) {
                 echo json_encode(['status' => 'error', 'message' => 'Username atau password salah']);
