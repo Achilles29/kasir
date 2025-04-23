@@ -300,7 +300,7 @@
                 <i class="fas fa-print"></i> Cetak
             </button> -->
             <button id="btn-cetak-divisi" class="btn btn-info mt-2">Cetak per Divisi</button>
-            <button id="btn-cetak-baru" class="btn btn-dark mt-2">Cetak Pesanan Baru</button>
+            <!-- <button id="btn-cetak-baru" class="btn btn-dark mt-2">Cetak Pesanan Baru</button> -->
 
 
             <!-- Pending Orders dengan scrolling -->
@@ -313,9 +313,9 @@
             <div id="menu-actions">
                 <button id="ubah-pesanan" class="btn btn-primary">Ubah Pesanan</button>
                 <button id="rincian-pesanan" class="btn btn-info">Lihat Rincian</button>
-                <button id="cetak-kot" class="btn btn-warning">Cetak ulang KOT</button>
+                <!-- <button id="cetak-kot" class="btn btn-warning">Cetak ulang KOT</button>
                 <button id="faktur" class="btn btn-info">Faktur</button>
-                <button id="tagihan" class="btn btn-success">Tagihan</button>
+                <button id="tagihan" class="btn btn-success">Tagihan</button> -->
                 <!-- <button id="batalkan-pesanan" class="btn btn-danger">Batalkan Pesanan</button> -->
                 <button id="btnVoidPilihanModal" class="btn btn-danger">
                     <i class="fas fa-times-circle"></i> Void Pesanan
@@ -402,7 +402,7 @@
                     <input type="hidden" id="transaksi-id" value="">
                     <button class="btn btn-warning" id="simpan-transaksi">Simpan Pesanan</button>
                     <button class="btn btn-info" id="simpan-perubahan" style="display:none;">Simpan Perubahan</button>
-                    <button id="btn-selesaikan-pembayaran" class="btn btn-success">Selesaikan Pembayaran</button>
+                    <!-- <button id="rincian-pesanan" class="btn btn-success">Selesaikan Pembayaran</button> -->
 
                 </div>
 
