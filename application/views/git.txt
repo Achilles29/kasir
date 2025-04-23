@@ -26,5 +26,7 @@ git commit -m "update fitur A"
 git push origin main
 
 
+Update VPS
+cd /www/wwwroot/kasir
 
 git pull origin main

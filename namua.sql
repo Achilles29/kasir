@@ -11,7 +11,7 @@
  Target Server Version : 100432
  File Encoding         : 65001
 
- Date: 20/04/2025 11:36:24
+ Date: 23/04/2025 20:54:53
 */
 
 SET NAMES utf8mb4;
@@ -2953,7 +2953,7 @@ CREATE TABLE `abs_absensi_pending`  (
   `created_at` timestamp(0) NULL DEFAULT current_timestamp(0),
   `updated_at` timestamp(0) NULL DEFAULT current_timestamp(0) ON UPDATE CURRENT_TIMESTAMP(0),
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1166 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1186 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of abs_absensi_pending
@@ -21096,7 +21096,7 @@ CREATE TABLE `pr_customer_poin`  (
   `created_at` datetime(0) NULL DEFAULT current_timestamp(0),
   `updated_at` datetime(0) NULL DEFAULT current_timestamp(0) ON UPDATE CURRENT_TIMESTAMP(0),
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 46 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 48 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of pr_customer_poin
@@ -21146,6 +21146,8 @@ INSERT INTO `pr_customer_poin` VALUES (42, 1, 12, 1, 'per_pembelian', NULL, '202
 INSERT INTO `pr_customer_poin` VALUES (43, 1, 1, 2, 'per_produk', '13', '2026-04-20', 'aktif', '2025-04-20 10:42:14', '2025-04-20 10:42:14');
 INSERT INTO `pr_customer_poin` VALUES (44, 1, 1, 2, 'per_produk', '13', '2026-04-20', 'aktif', '2025-04-20 10:42:14', '2025-04-20 10:42:14');
 INSERT INTO `pr_customer_poin` VALUES (45, 1, 1, 1, 'per_pembelian', NULL, '2026-04-20', 'aktif', '2025-04-20 10:42:14', '2025-04-20 10:42:14');
+INSERT INTO `pr_customer_poin` VALUES (46, 2, 7, 2, 'per_produk', '13', '2026-04-22', 'aktif', '2025-04-22 20:05:13', '2025-04-22 20:05:13');
+INSERT INTO `pr_customer_poin` VALUES (47, 2, 7, 1, 'per_pembelian', NULL, '2026-04-22', 'aktif', '2025-04-22 20:05:13', '2025-04-22 20:05:13');
 
 -- ----------------------------
 -- Table structure for pr_detail_extra
@@ -21169,14 +21171,28 @@ CREATE TABLE `pr_detail_extra`  (
   INDEX `pr_produk_extra_id`(`pr_produk_extra_id`) USING BTREE,
   CONSTRAINT `pr_detail_extra_ibfk_1` FOREIGN KEY (`detail_transaksi_id`) REFERENCES `pr_detail_transaksi` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `pr_detail_extra_ibfk_2` FOREIGN KEY (`pr_produk_extra_id`) REFERENCES `pr_produk_extra` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 18 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of pr_detail_extra
 -- ----------------------------
-INSERT INTO `pr_detail_extra` VALUES (1, 7, 1, 1, 1500, 1500, 'PPBWL', 'PCS', 800, '2025-04-20 10:59:34', '2025-04-20 10:59:34', NULL);
-INSERT INTO `pr_detail_extra` VALUES (6, 16, 2, 1, 1500, 1500, 'PPBX', 'PCS', 800, '2025-04-20 11:14:01', '2025-04-20 11:14:01', 'BATAL');
-INSERT INTO `pr_detail_extra` VALUES (7, 17, 2, 1, 1500, 1500, 'PPBX', 'PCS', 800, '2025-04-20 11:14:01', '2025-04-20 11:14:01', 'BATAL');
+INSERT INTO `pr_detail_extra` VALUES (1, 2, 1, 1, 1500, 1500, 'PPBWL', 'PCS', 800, '2025-04-21 21:37:31', '2025-04-21 21:37:31', 'BERHASIL');
+INSERT INTO `pr_detail_extra` VALUES (2, 2, 2, 1, 1500, 1500, 'PPBX', 'PCS', 800, '2025-04-21 21:37:31', '2025-04-21 21:37:31', 'BERHASIL');
+INSERT INTO `pr_detail_extra` VALUES (3, 3, 1, 1, 1500, 1500, 'PPBWL', 'PCS', 800, '2025-04-21 21:37:31', '2025-04-21 21:37:31', 'BERHASIL');
+INSERT INTO `pr_detail_extra` VALUES (4, 3, 2, 1, 1500, 1500, 'PPBX', 'PCS', 800, '2025-04-21 21:37:31', '2025-04-21 21:37:31', 'BERHASIL');
+INSERT INTO `pr_detail_extra` VALUES (5, 4, 2, 2, 1500, 3000, 'PPBX', 'PCS', 800, '2025-04-21 21:37:31', '2025-04-21 21:37:31', 'REFUND');
+INSERT INTO `pr_detail_extra` VALUES (6, 5, 2, 2, 1500, 3000, 'PPBX', 'PCS', 800, '2025-04-21 21:37:31', '2025-04-21 21:37:31', 'BERHASIL');
+INSERT INTO `pr_detail_extra` VALUES (7, 6, 2, 2, 1500, 3000, 'PPBX', 'PCS', 800, '2025-04-21 21:38:24', '2025-04-21 21:38:24', 'BERHASIL');
+INSERT INTO `pr_detail_extra` VALUES (8, 7, 2, 2, 1500, 3000, 'PPBX', 'PCS', 800, '2025-04-21 21:38:24', '2025-04-21 21:38:24', 'BERHASIL');
+INSERT INTO `pr_detail_extra` VALUES (9, 10, 1, 2, 1500, 3000, 'PPBWL', 'PCS', 800, '2025-04-21 21:43:52', '2025-04-21 21:43:52', 'BERHASIL');
+INSERT INTO `pr_detail_extra` VALUES (10, 10, 2, 2, 1500, 3000, 'PPBX', 'PCS', 800, '2025-04-21 21:43:52', '2025-04-21 21:43:52', 'BERHASIL');
+INSERT INTO `pr_detail_extra` VALUES (11, 11, 1, 2, 1500, 3000, 'PPBWL', 'PCS', 800, '2025-04-21 21:43:52', '2025-04-21 21:43:52', 'BERHASIL');
+INSERT INTO `pr_detail_extra` VALUES (12, 11, 2, 2, 1500, 3000, 'PPBX', 'PCS', 800, '2025-04-21 21:43:52', '2025-04-21 21:43:52', 'BERHASIL');
+INSERT INTO `pr_detail_extra` VALUES (13, 24, 2, 2, 1500, 3000, 'PPBX', 'PCS', 800, '2025-04-22 20:01:38', '2025-04-22 20:01:38', 'BATAL');
+INSERT INTO `pr_detail_extra` VALUES (14, 25, 2, 2, 1500, 3000, 'PPBX', 'PCS', 800, '2025-04-22 20:01:38', '2025-04-22 20:01:38', 'BATAL');
+INSERT INTO `pr_detail_extra` VALUES (15, 29, 2, 3, 1500, 4500, 'PPBX', 'PCS', 800, '2025-04-22 20:03:03', '2025-04-22 20:03:03', 'BERHASIL');
+INSERT INTO `pr_detail_extra` VALUES (16, 30, 2, 3, 1500, 4500, 'PPBX', 'PCS', 800, '2025-04-22 20:03:03', '2025-04-22 20:03:03', 'BERHASIL');
+INSERT INTO `pr_detail_extra` VALUES (17, 31, 2, 3, 1500, 4500, 'PPBX', 'PCS', 800, '2025-04-22 20:03:03', '2025-04-22 20:03:03', 'BERHASIL');
 
 -- ----------------------------
 -- Table structure for pr_detail_transaksi
@@ -21199,23 +21215,46 @@ CREATE TABLE `pr_detail_transaksi`  (
   INDEX `pr_produk_id`(`pr_produk_id`) USING BTREE,
   CONSTRAINT `pr_detail_transaksi_ibfk_1` FOREIGN KEY (`pr_transaksi_id`) REFERENCES `pr_transaksi` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `pr_detail_transaksi_ibfk_2` FOREIGN KEY (`pr_produk_id`) REFERENCES `pr_produk` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 20 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 36 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of pr_detail_transaksi
 -- ----------------------------
-INSERT INTO `pr_detail_transaksi` VALUES (1, 1, 6, '6804704f14bcc', 1, 16000.00, '', 1, NULL, '2025-04-20 10:55:59', '2025-04-20 10:56:02');
-INSERT INTO `pr_detail_transaksi` VALUES (2, 1, 7, '6804704f14e95', 1, 17000.00, '', 1, NULL, '2025-04-20 10:55:59', '2025-04-20 10:56:02');
-INSERT INTO `pr_detail_transaksi` VALUES (3, 1, 7, '6804704f14e95', 1, 17000.00, '', 1, NULL, '2025-04-20 10:55:59', '2025-04-20 10:56:02');
-INSERT INTO `pr_detail_transaksi` VALUES (4, 1, 52, '6804704f168ea', 1, 23000.00, '', 1, NULL, '2025-04-20 10:55:59', '2025-04-20 10:56:02');
-INSERT INTO `pr_detail_transaksi` VALUES (5, 1, 52, '6804704f168ea', 1, 23000.00, '', 1, NULL, '2025-04-20 10:55:59', '2025-04-20 10:56:02');
-INSERT INTO `pr_detail_transaksi` VALUES (6, 1, 77, '68047074b235f', 1, 28000.00, '', 1, NULL, '2025-04-20 10:56:36', '2025-04-20 10:56:37');
-INSERT INTO `pr_detail_transaksi` VALUES (7, 1, 76, '680471264c49a', 1, 22000.00, '', 1, NULL, '2025-04-20 10:59:34', '2025-04-20 10:59:35');
-INSERT INTO `pr_detail_transaksi` VALUES (8, 2, 21, '680471403beb4', 1, 18000.00, '', 1, NULL, '2025-04-20 11:00:00', '2025-04-20 11:00:01');
-INSERT INTO `pr_detail_transaksi` VALUES (9, 2, 76, '6804714915231', 1, 22000.00, '', 1, 'BATAL', '2025-04-20 11:00:09', '2025-04-20 11:17:24');
-INSERT INTO `pr_detail_transaksi` VALUES (16, 2, 7, '680474892e66d', 1, 17000.00, '', 1, 'BATAL', '2025-04-20 11:14:01', '2025-04-20 11:17:24');
-INSERT INTO `pr_detail_transaksi` VALUES (17, 2, 7, '680474892e66d', 1, 17000.00, '', 1, 'BATAL', '2025-04-20 11:14:01', '2025-04-20 11:17:24');
-INSERT INTO `pr_detail_transaksi` VALUES (19, 1, 95, '68047532da85d', 1, 21000.00, '', 1, NULL, '2025-04-20 11:16:50', '2025-04-20 11:16:53');
+INSERT INTO `pr_detail_transaksi` VALUES (1, 1, 21, '6806582b8c81b', 1, 18000.00, 'ass', 1, 'REFUND', '2025-04-21 21:37:31', '2025-04-21 22:28:45');
+INSERT INTO `pr_detail_transaksi` VALUES (2, 1, 6, '6806582b8ca0d', 1, 16000.00, '', 1, 'REFUND', '2025-04-21 21:37:31', '2025-04-23 06:54:41');
+INSERT INTO `pr_detail_transaksi` VALUES (3, 1, 6, '6806582b8ca0d', 1, 16000.00, '', 1, 'REFUND', '2025-04-21 21:37:31', '2025-04-23 07:04:17');
+INSERT INTO `pr_detail_transaksi` VALUES (4, 1, 6, '6806582b8ec9a', 1, 16000.00, '', 1, 'REFUND', '2025-04-21 21:37:31', '2025-04-23 07:17:41');
+INSERT INTO `pr_detail_transaksi` VALUES (5, 1, 6, '6806582b8ec9a', 1, 16000.00, '', 1, 'BERHASIL', '2025-04-21 21:37:31', '2025-04-21 22:00:33');
+INSERT INTO `pr_detail_transaksi` VALUES (6, 1, 21, '68065860dc7b9', 1, 18000.00, '', 1, 'BERHASIL', '2025-04-21 21:38:24', '2025-04-21 22:00:33');
+INSERT INTO `pr_detail_transaksi` VALUES (7, 1, 21, '68065860dc7b9', 1, 18000.00, '', 1, 'BERHASIL', '2025-04-21 21:38:24', '2025-04-21 22:00:33');
+INSERT INTO `pr_detail_transaksi` VALUES (8, 1, 6, '6806597db41b3', 1, 16000.00, '', 1, 'BERHASIL', '2025-04-21 21:43:09', '2025-04-21 22:00:33');
+INSERT INTO `pr_detail_transaksi` VALUES (9, 2, 51, '680659a85252c', 1, 20000.00, '', 1, 'BERHASIL', '2025-04-21 21:43:52', '2025-04-21 22:00:01');
+INSERT INTO `pr_detail_transaksi` VALUES (10, 2, 6, '680659a853686', 1, 16000.00, '', 1, 'BERHASIL', '2025-04-21 21:43:52', '2025-04-21 22:00:01');
+INSERT INTO `pr_detail_transaksi` VALUES (11, 2, 6, '680659a853686', 1, 16000.00, '', 1, 'BERHASIL', '2025-04-21 21:43:52', '2025-04-21 22:00:01');
+INSERT INTO `pr_detail_transaksi` VALUES (12, 2, 69, '680659f7c32c2', 1, 21000.00, '', 1, 'BERHASIL', '2025-04-21 21:45:11', '2025-04-21 22:00:01');
+INSERT INTO `pr_detail_transaksi` VALUES (13, 3, 50, '68065a0fcc47a', 1, 19000.00, '', 1, 'BATAL', '2025-04-21 21:45:35', '2025-04-22 20:32:41');
+INSERT INTO `pr_detail_transaksi` VALUES (14, 3, 7, '68065a0fcd208', 1, 17000.00, '', 1, 'BERHASIL', '2025-04-21 21:45:35', '2025-04-21 21:59:37');
+INSERT INTO `pr_detail_transaksi` VALUES (15, 3, 6, '68065a0fcd302', 1, 16000.00, '', 1, 'BERHASIL', '2025-04-21 21:45:35', '2025-04-21 21:59:37');
+INSERT INTO `pr_detail_transaksi` VALUES (16, 2, 6, '68065a8f4bb3d', 1, 16000.00, '', 1, 'BERHASIL', '2025-04-21 21:47:43', '2025-04-21 22:00:01');
+INSERT INTO `pr_detail_transaksi` VALUES (17, 2, 6, '68065a8f4bc54', 1, 16000.00, '', 1, 'BERHASIL', '2025-04-21 21:47:43', '2025-04-21 22:00:01');
+INSERT INTO `pr_detail_transaksi` VALUES (18, 4, 50, '68065acacb155', 1, 19000.00, '', 1, 'BERHASIL', '2025-04-21 21:48:42', '2025-04-21 21:59:50');
+INSERT INTO `pr_detail_transaksi` VALUES (19, 4, 7, '68065acacd224', 1, 17000.00, '', 1, 'BERHASIL', '2025-04-21 21:48:42', '2025-04-21 21:59:50');
+INSERT INTO `pr_detail_transaksi` VALUES (20, 4, 6, '68065acacdcc4', 1, 16000.00, '', 1, 'BERHASIL', '2025-04-21 21:48:42', '2025-04-21 21:59:50');
+INSERT INTO `pr_detail_transaksi` VALUES (21, 5, 6, '68065db207f33', 1, 16000.00, '', 1, 'BERHASIL', '2025-04-21 22:01:06', '2025-04-21 22:01:23');
+INSERT INTO `pr_detail_transaksi` VALUES (22, 6, 81, '6807933275dc9', 1, 25000.00, '', 1, NULL, '2025-04-22 20:01:38', '2025-04-22 20:01:47');
+INSERT INTO `pr_detail_transaksi` VALUES (23, 6, 9, '6807933276950', 1, 68000.00, '', 1, NULL, '2025-04-22 20:01:38', '2025-04-22 20:01:47');
+INSERT INTO `pr_detail_transaksi` VALUES (24, 6, 7, '6807933276a84', 1, 17000.00, '', 1, 'BATAL', '2025-04-22 20:01:38', '2025-04-23 06:57:51');
+INSERT INTO `pr_detail_transaksi` VALUES (25, 6, 7, '6807933276a84', 1, 17000.00, '', 1, 'BATAL', '2025-04-22 20:01:38', '2025-04-23 06:57:51');
+INSERT INTO `pr_detail_transaksi` VALUES (26, 6, 6, '68079332793fd', 1, 16000.00, '', 1, NULL, '2025-04-22 20:01:38', '2025-04-22 20:01:47');
+INSERT INTO `pr_detail_transaksi` VALUES (27, 7, 14, '680793870ace1', 1, 28000.00, '', 1, 'BERHASIL', '2025-04-22 20:03:03', '2025-04-22 20:05:13');
+INSERT INTO `pr_detail_transaksi` VALUES (28, 7, 13, '680793870c55a', 1, 25000.00, '', 1, 'BERHASIL', '2025-04-22 20:03:03', '2025-04-22 20:05:13');
+INSERT INTO `pr_detail_transaksi` VALUES (29, 7, 7, '680793870d947', 1, 17000.00, '', 1, 'REFUND', '2025-04-22 20:03:03', '2025-04-22 20:38:40');
+INSERT INTO `pr_detail_transaksi` VALUES (30, 7, 7, '680793870d947', 1, 17000.00, '', 1, 'BERHASIL', '2025-04-22 20:03:03', '2025-04-22 20:05:13');
+INSERT INTO `pr_detail_transaksi` VALUES (31, 7, 7, '680793870d947', 1, 17000.00, '', 1, 'BERHASIL', '2025-04-22 20:03:03', '2025-04-22 20:05:13');
+INSERT INTO `pr_detail_transaksi` VALUES (32, 7, 6, '680793870f938', 1, 16000.00, '', 1, 'BERHASIL', '2025-04-22 20:03:03', '2025-04-22 20:05:13');
+INSERT INTO `pr_detail_transaksi` VALUES (33, 8, 7, '68079421dfd3a', 1, 17000.00, '', 1, NULL, '2025-04-22 20:05:37', '2025-04-22 20:05:44');
+INSERT INTO `pr_detail_transaksi` VALUES (34, 8, 14, '68079421e288e', 1, 28000.00, '', 1, NULL, '2025-04-22 20:05:37', '2025-04-22 20:05:44');
+INSERT INTO `pr_detail_transaksi` VALUES (35, 8, 13, '68079421e39ba', 1, 25000.00, '', 1, NULL, '2025-04-22 20:05:37', '2025-04-22 20:05:44');
 
 -- ----------------------------
 -- Table structure for pr_divisi
@@ -21506,7 +21545,7 @@ CREATE TABLE `pr_log_voucher`  (
   CONSTRAINT `pr_log_voucher_ibfk_2` FOREIGN KEY (`transaksi_id`) REFERENCES `pr_transaksi` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `pr_log_voucher_ibfk_3` FOREIGN KEY (`detail_transaksi_id`) REFERENCES `pr_detail_transaksi` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `pr_log_voucher_ibfk_4` FOREIGN KEY (`customer_id`) REFERENCES `pr_customer` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 15 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 17 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of pr_log_voucher
@@ -21525,6 +21564,8 @@ INSERT INTO `pr_log_voucher` VALUES (11, 4, 5, NULL, 3, 'tes01', 27450, 98, '202
 INSERT INTO `pr_log_voucher` VALUES (12, 4, 6, NULL, 19, 'tes01', 8550, 97, '2025-04-20 09:38:56');
 INSERT INTO `pr_log_voucher` VALUES (13, 6, 2, NULL, 1, 'TES 20', 10000, 99, '2025-04-20 09:50:58');
 INSERT INTO `pr_log_voucher` VALUES (14, 6, 12, NULL, 1, 'Tes 20', 10000, 98, '2025-04-20 10:38:01');
+INSERT INTO `pr_log_voucher` VALUES (15, 6, 1, NULL, NULL, 'tes 20', 10000, 97, '2025-04-21 22:00:33');
+INSERT INTO `pr_log_voucher` VALUES (16, 6, 7, NULL, 2, 'TES 20', 10000, 96, '2025-04-22 20:05:13');
 
 -- ----------------------------
 -- Table structure for pr_lokasi_printer
@@ -21662,7 +21703,19 @@ CREATE TABLE `pr_pembayaran`  (
   INDEX `metode_id`(`metode_id`) USING BTREE,
   CONSTRAINT `pr_pembayaran_ibfk_1` FOREIGN KEY (`transaksi_id`) REFERENCES `pr_transaksi` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `pr_pembayaran_ibfk_2` FOREIGN KEY (`metode_id`) REFERENCES `pr_metode_pembayaran` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 9 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of pr_pembayaran
+-- ----------------------------
+INSERT INTO `pr_pembayaran` VALUES (1, 3, 1, 52000, '2025-04-21 23:52:22', '', 98, '2025-04-21 21:59:37', '2025-04-21 21:59:37');
+INSERT INTO `pr_pembayaran` VALUES (2, 4, 1, 52000, '2025-04-21 21:59:50', '', 98, '2025-04-21 21:59:50', '2025-04-21 21:59:50');
+INSERT INTO `pr_pembayaran` VALUES (3, 2, 1, 117000, '2025-04-21 22:00:01', '', 98, '2025-04-21 22:00:01', '2025-04-21 22:00:01');
+INSERT INTO `pr_pembayaran` VALUES (4, 1, 1, 50000, '2025-04-21 22:00:33', '', 98, '2025-04-21 22:00:33', '2025-04-21 22:00:33');
+INSERT INTO `pr_pembayaran` VALUES (5, 1, 2, 50000, '2025-04-21 22:00:33', '', 98, '2025-04-21 22:00:33', '2025-04-21 22:00:33');
+INSERT INTO `pr_pembayaran` VALUES (6, 1, 3, 42000, '2025-04-21 22:00:33', '', 98, '2025-04-21 22:00:33', '2025-04-21 22:00:33');
+INSERT INTO `pr_pembayaran` VALUES (7, 5, 1, 16000, '2025-04-21 22:01:23', '', 98, '2025-04-21 22:01:23', '2025-04-21 22:01:23');
+INSERT INTO `pr_pembayaran` VALUES (8, 7, 1, 114500, '2025-04-22 20:05:13', '', 98, '2025-04-22 20:05:13', '2025-04-22 20:05:13');
 
 -- ----------------------------
 -- Table structure for pr_pengaturan
@@ -21749,10 +21802,10 @@ CREATE TABLE `pr_printer`  (
 -- ----------------------------
 -- Records of pr_printer
 -- ----------------------------
-INSERT INTO `pr_printer` VALUES (1, 'KASIR', 0, 'EP5802AI', 'COM6', '2025-04-12 12:28:12', '2025-04-19 19:27:43', 3000);
-INSERT INTO `pr_printer` VALUES (2, 'BAR', 1, 'EP5802AI', 'COM6', '2025-04-12 12:30:30', '2025-04-13 13:46:33', 3001);
-INSERT INTO `pr_printer` VALUES (3, 'KITCHEN', 2, 'RPP210A', 'COM8', '2025-04-12 12:30:48', '2025-04-19 20:44:50', 3002);
-INSERT INTO `pr_printer` VALUES (4, 'CHECKER', 0, 'RPP210A', 'COM8', '2025-04-12 13:56:43', '2025-04-19 20:45:04', 3003);
+INSERT INTO `pr_printer` VALUES (1, 'KASIR', 0, 'RPP210A', 'COM7', '2025-04-12 12:28:12', '2025-04-22 19:51:35', 3000);
+INSERT INTO `pr_printer` VALUES (2, 'BAR', 1, 'RPP02', 'COM3', '2025-04-12 12:30:30', '2025-04-22 20:04:23', 3001);
+INSERT INTO `pr_printer` VALUES (3, 'KITCHEN', 2, 'RPP02N', 'COM10', '2025-04-12 12:30:48', '2025-04-22 20:00:41', 3002);
+INSERT INTO `pr_printer` VALUES (4, 'CHECKER', 0, 'RPP210A', 'COM7', '2025-04-12 13:56:43', '2025-04-22 19:51:41', 3003);
 
 -- ----------------------------
 -- Table structure for pr_printer_setting
@@ -22154,24 +22207,37 @@ DROP TABLE IF EXISTS `pr_refund`;
 CREATE TABLE `pr_refund`  (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `pr_transaksi_id` int(11) NOT NULL,
-  `pr_detail_transaksi_id` int(11) NOT NULL,
-  `no_transaksi` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
-  `nama_produk` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
-  `jumlah` int(11) NOT NULL,
-  `harga` int(11) NOT NULL,
-  `subtotal` int(11) NOT NULL,
-  `catatan` text CHARACTER SET utf8 COLLATE utf8_general_ci NULL,
-  `alasan` text CHARACTER SET utf8 COLLATE utf8_general_ci NULL,
-  `refund_by` int(11) NULL DEFAULT NULL,
-  `waktu_refund` datetime(0) NULL DEFAULT current_timestamp(0),
+  `no_transaksi` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `pr_detail_transaksi_id` int(11) NULL DEFAULT NULL,
+  `pr_produk_id` int(11) NULL DEFAULT NULL,
+  `nama_produk` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `detail_extra_id` int(11) NULL DEFAULT NULL,
+  `produk_extra_id` int(11) NULL DEFAULT NULL,
+  `nama_extra` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `jumlah` int(11) NOT NULL DEFAULT 1,
+  `harga` int(11) NOT NULL DEFAULT 0,
+  `catatan` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL,
+  `alasan` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `refund_by` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `waktu_refund` datetime(0) NOT NULL,
   `created_at` datetime(0) NULL DEFAULT current_timestamp(0),
   `updated_at` datetime(0) NULL DEFAULT current_timestamp(0) ON UPDATE CURRENT_TIMESTAMP(0),
-  PRIMARY KEY (`id`) USING BTREE,
-  INDEX `pr_transaksi_id`(`pr_transaksi_id`) USING BTREE,
-  INDEX `pr_detail_transaksi_id`(`pr_detail_transaksi_id`) USING BTREE,
-  CONSTRAINT `pr_refund_ibfk_1` FOREIGN KEY (`pr_transaksi_id`) REFERENCES `pr_transaksi` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
-  CONSTRAINT `pr_refund_ibfk_2` FOREIGN KEY (`pr_detail_transaksi_id`) REFERENCES `pr_detail_transaksi` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 18 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 11 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of pr_refund
+-- ----------------------------
+INSERT INTO `pr_refund` VALUES (1, 3, 'CS/63/250421/0003', 13, 50, 'CAFE LATTE HOT', NULL, NULL, NULL, 1, 19000, '', 'Refund produk', '98', '2025-04-22 20:32:41', '2025-04-22 20:32:41', '2025-04-22 20:32:41');
+INSERT INTO `pr_refund` VALUES (2, 7, 'CS/63/250422/0002', 29, 7, 'AMERICANO ICE', NULL, NULL, NULL, 1, 17000, '', 'Refund produk', '98', '2025-04-22 20:36:27', '2025-04-22 20:36:27', '2025-04-22 20:36:27');
+INSERT INTO `pr_refund` VALUES (3, 1, 'CS/63/250421/0001', 2, 6, 'AMERICANO HOT', NULL, NULL, NULL, 1, 16000, '', 'Refund produk', '98', '2025-04-23 06:54:41', '2025-04-23 06:54:41', '2025-04-23 06:54:41');
+INSERT INTO `pr_refund` VALUES (4, 1, 'CS/63/250421/0001', 2, 6, 'AMERICANO HOT', 1, 1, 'PAPER BOWL', 1, 1500, '', 'Refund extra', '98', '2025-04-23 06:54:41', '2025-04-23 06:54:41', '2025-04-23 06:54:41');
+INSERT INTO `pr_refund` VALUES (5, 1, 'CS/63/250421/0001', 2, 6, 'AMERICANO HOT', 2, 2, 'PAPPER BOX', 1, 1500, '', 'Refund extra', '98', '2025-04-23 06:54:41', '2025-04-23 06:54:41', '2025-04-23 06:54:41');
+INSERT INTO `pr_refund` VALUES (6, 1, 'CS/63/250421/0001', 3, 6, 'AMERICANO HOT', NULL, NULL, NULL, 1, 16000, '', 'Refund produk', '98', '2025-04-23 07:04:17', '2025-04-23 07:04:17', '2025-04-23 07:04:17');
+INSERT INTO `pr_refund` VALUES (7, 1, 'CS/63/250421/0001', 3, 6, 'AMERICANO HOT', 3, 1, 'PAPER BOWL', 1, 1500, '', 'Refund extra', '98', '2025-04-23 07:04:17', '2025-04-23 07:04:17', '2025-04-23 07:04:17');
+INSERT INTO `pr_refund` VALUES (8, 1, 'CS/63/250421/0001', 3, 6, 'AMERICANO HOT', 4, 2, 'PAPPER BOX', 1, 1500, '', 'Refund extra', '98', '2025-04-23 07:04:17', '2025-04-23 07:04:17', '2025-04-23 07:04:17');
+INSERT INTO `pr_refund` VALUES (9, 1, 'CS/63/250421/0001', 4, 6, 'AMERICANO HOT', NULL, NULL, NULL, 1, 16000, '', 'Refund produk', '98', '2025-04-23 07:17:41', '2025-04-23 07:17:41', '2025-04-23 07:17:41');
+INSERT INTO `pr_refund` VALUES (10, 1, 'CS/63/250421/0001', 4, 6, 'AMERICANO HOT', 5, 2, 'PAPPER BOX', 2, 1500, '', 'Refund extra', '98', '2025-04-23 07:17:41', '2025-04-23 07:17:41', '2025-04-23 07:17:41');
 
 -- ----------------------------
 -- Table structure for pr_resep_base
@@ -22531,13 +22597,19 @@ CREATE TABLE `pr_transaksi`  (
   CONSTRAINT `pr_transaksi_ibfk_1` FOREIGN KEY (`jenis_order_id`) REFERENCES `pr_jenis_order` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `pr_transaksi_ibfk_3` FOREIGN KEY (`kasir_order`) REFERENCES `abs_pegawai` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `pr_transaksi_ibfk_4` FOREIGN KEY (`kasir_bayar`) REFERENCES `abs_pegawai` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 9 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of pr_transaksi
 -- ----------------------------
-INSERT INTO `pr_transaksi` VALUES (1, 2, '2025-04-20', 'CS/63/250420/0001', '2025-04-20 10:55:59', NULL, 1, 'ANIS FITRIYA', '1', 168500.00, 98, NULL, NULL, NULL, 0, 168500, 'BELUM_LUNAS', '2025-04-20 10:55:59', '2025-04-20 11:16:50');
-INSERT INTO `pr_transaksi` VALUES (2, 1, '2025-04-20', 'CS/63/250420/0002', '2025-04-20 11:00:00', NULL, 1, 'ANDI', '3', 18000.00, 98, NULL, NULL, NULL, 0, 18000, 'BELUM_LUNAS', '2025-04-20 11:00:00', '2025-04-20 11:17:24');
+INSERT INTO `pr_transaksi` VALUES (1, NULL, '2025-04-21', 'CS/63/250421/0001', '2025-04-21 21:37:31', '2025-04-21 22:00:33', 1, 'Bagos Banget', '2', 152000.00, 98, 98, 'tes 20', 10000, 142000, 0, 'LUNAS', '2025-04-21 21:37:31', '2025-04-21 23:11:30');
+INSERT INTO `pr_transaksi` VALUES (2, NULL, '2025-04-21', 'CS/63/250421/0002', '2025-04-21 21:43:52', '2025-04-21 22:00:01', 1, 'ANDI', '4', 117000.00, 98, 98, '', 0, 117000, 0, 'LUNAS', '2025-04-21 21:43:52', '2025-04-22 20:34:38');
+INSERT INTO `pr_transaksi` VALUES (3, NULL, '2025-04-21', 'CS/63/250421/0003', '2025-04-21 21:45:35', '2025-04-21 23:52:22', 1, 'Devi Tri Silviana', '4', 52000.00, 98, 98, '', 0, 52000, 0, 'LUNAS', '2025-04-21 21:45:35', '2025-04-21 23:59:11');
+INSERT INTO `pr_transaksi` VALUES (4, NULL, '2025-04-21', 'CS/63/250421/0004', '2025-04-21 21:48:42', '2025-04-21 21:59:50', 1, 'Nanda', '', 52000.00, 98, 98, '', 0, 52000, 0, 'LUNAS', '2025-04-21 21:48:42', '2025-04-21 21:59:50');
+INSERT INTO `pr_transaksi` VALUES (5, 1, '2025-04-21', 'CS/63/250421/0005', '2025-04-21 22:01:06', '2025-04-21 22:01:23', 1, 'ANDI', '2', 16000.00, 98, 98, '', 0, 16000, 0, 'LUNAS', '2025-04-21 22:01:06', '2025-04-21 22:01:23');
+INSERT INTO `pr_transaksi` VALUES (6, 1, '2025-04-22', 'CS/63/250422/0001', '2025-04-22 20:01:38', NULL, 1, 'ANDI', '3', 106000.00, 98, NULL, NULL, NULL, 0, 106000, 'BELUM_LUNAS', '2025-04-22 20:01:38', '2025-04-23 06:57:51');
+INSERT INTO `pr_transaksi` VALUES (7, 2, '2025-04-22', 'CS/63/250422/0002', '2025-04-22 20:03:03', '2025-04-22 20:05:13', 1, 'ANIS FITRIYA', '4', 124500.00, 98, 98, 'TES 20', 10000, 114500, 0, 'LUNAS', '2025-04-22 20:03:03', '2025-04-22 20:05:13');
+INSERT INTO `pr_transaksi` VALUES (8, 2, '2025-04-22', 'CS/63/250422/0003', '2025-04-22 20:05:37', NULL, 1, 'ANIS FITRIYA', '2', 70000.00, 98, NULL, NULL, NULL, 0, 70000, 'BELUM_LUNAS', '2025-04-22 20:05:37', '2025-04-22 20:05:37');
 
 -- ----------------------------
 -- Table structure for pr_void
@@ -22563,7 +22635,7 @@ CREATE TABLE `pr_void`  (
   `updated_at` datetime(0) NULL DEFAULT current_timestamp(0) ON UPDATE CURRENT_TIMESTAMP(0),
   `is_printed` tinyint(1) NULL DEFAULT 0,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of pr_void
@@ -22573,6 +22645,10 @@ INSERT INTO `pr_void` VALUES (2, 2, 'CS/63/250420/0002', 16, 7, 'AMERICANO ICE',
 INSERT INTO `pr_void` VALUES (3, 2, 'CS/63/250420/0002', 16, 7, 'AMERICANO ICE', 6, 2, 'PAPPER BOX', 1, 1500, 'Extra', 'batal', 98, '2025-04-20 11:17:24', '2025-04-20 11:17:24', '2025-04-20 11:17:27', 1);
 INSERT INTO `pr_void` VALUES (4, 2, 'CS/63/250420/0002', 17, 7, 'AMERICANO ICE', NULL, NULL, NULL, 1, 17000, '', 'batal', 98, '2025-04-20 11:17:24', '2025-04-20 11:17:24', '2025-04-20 11:17:27', 1);
 INSERT INTO `pr_void` VALUES (5, 2, 'CS/63/250420/0002', 17, 7, 'AMERICANO ICE', 7, 2, 'PAPPER BOX', 1, 1500, 'Extra', 'batal', 98, '2025-04-20 11:17:24', '2025-04-20 11:17:24', '2025-04-20 11:17:27', 1);
+INSERT INTO `pr_void` VALUES (6, 6, 'CS/63/250422/0001', 24, 7, 'AMERICANO ICE', NULL, NULL, NULL, 1, 17000, '', 'salah pesan', 98, '2025-04-23 06:57:51', '2025-04-23 06:57:51', '2025-04-23 06:57:56', 1);
+INSERT INTO `pr_void` VALUES (7, 6, 'CS/63/250422/0001', 24, 7, 'AMERICANO ICE', 13, 2, 'PAPPER BOX', 2, 1500, 'Extra', 'salah pesan', 98, '2025-04-23 06:57:51', '2025-04-23 06:57:51', '2025-04-23 06:57:56', 1);
+INSERT INTO `pr_void` VALUES (8, 6, 'CS/63/250422/0001', 25, 7, 'AMERICANO ICE', NULL, NULL, NULL, 1, 17000, '', 'salah pesan', 98, '2025-04-23 06:57:51', '2025-04-23 06:57:51', '2025-04-23 06:57:56', 1);
+INSERT INTO `pr_void` VALUES (9, 6, 'CS/63/250422/0001', 25, 7, 'AMERICANO ICE', 14, 2, 'PAPPER BOX', 2, 1500, 'Extra', 'salah pesan', 98, '2025-04-23 06:57:51', '2025-04-23 06:57:51', '2025-04-23 06:57:56', 1);
 
 -- ----------------------------
 -- Table structure for pr_voucher
@@ -22603,7 +22679,7 @@ CREATE TABLE `pr_voucher`  (
 -- ----------------------------
 INSERT INTO `pr_voucher` VALUES (4, 'TES01', 'persentase', 15, 10000, 0, 0, 0, 100, 97, 'aktif', '2025-01-01', '2025-05-08', '2025-03-24 06:18:07', '2025-04-20 09:38:56');
 INSERT INTO `pr_voucher` VALUES (5, 'BEBEK10', 'persentase', 10, 0, 25, 100, 20000, 100, 93, 'aktif', '2025-01-01', '2025-05-08', '2025-03-24 06:18:07', '2025-04-20 07:24:44');
-INSERT INTO `pr_voucher` VALUES (6, 'TES 20', 'persentase', 20, 100000, 0, 0, 10000, 100, 98, 'aktif', '2025-01-01', '2025-05-08', '2025-03-24 06:18:07', '2025-04-20 10:38:01');
+INSERT INTO `pr_voucher` VALUES (6, 'TES 20', 'persentase', 20, 100000, 0, 0, 10000, 100, 96, 'aktif', '2025-01-01', '2025-05-08', '2025-03-24 06:18:07', '2025-04-22 20:05:13');
 INSERT INTO `pr_voucher` VALUES (7, 'TES03', 'nominal', 10000, 0, 0, 0, 0, 100, 100, 'aktif', '2025-01-01', '2025-05-08', '2025-03-24 06:18:07', '2025-04-16 21:32:11');
 INSERT INTO `pr_voucher` VALUES (8, 'TES02', 'persentase', 10, 1000000, 0, 0, 0, 100, 100, 'aktif', '2025-03-15', '2026-05-17', '2025-04-16 19:33:11', '2025-04-16 21:32:08');
 
