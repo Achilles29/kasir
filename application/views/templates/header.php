@@ -68,6 +68,12 @@
                 <div class="sidebar-heading">
                     Interface
                 </div>
+                <!-- Nav Item -->
+                <li class="nav-item">
+                    <a class="nav-link" href="<?= site_url('/kasir') ?>">
+                        <i class="fas fa-fw fa-chart-area"></i>
+                        <span>POS</span></a>
+                </li>
 
                 <!-- Nav Item - Pages Collapse Menu -->
                 <li class="nav-item">
