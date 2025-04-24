@@ -320,6 +320,7 @@
                 <button id="btnVoidPilihanModal" class="btn btn-danger">
                     <i class="fas fa-times-circle"></i> Void Pesanan
                 </button>
+                <button id="batalkan-pesanan" class="btn btn-danger"></button>
             </div>
         </div>
 

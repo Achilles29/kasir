@@ -73,15 +73,54 @@ tbody tr {
                 </table>
             </div>
 
+            <!-- Tombol Refund Semua -->
             <div class="text-center mt-4">
-                <button type="button" class="btn btn-danger btn-lg" id="refund-semua">
+                <button type="button" class="btn btn-danger btn-lg" data-toggle="modal"
+                    data-target="#modalAlasanRefundSemua">
                     <i class="fas fa-undo"></i> Refund Semua Pesanan
+                </button>
+            </div>
+            <!-- Tombol Refund Pilihan -->
+            <div class="text-center mt-2">
+                <button type="button" class="btn btn-secondary btn-lg" data-toggle="modal"
+                    data-target="#modalRefundPilihan">
+                    <i class="fas fa-check-square"></i> Refund Pilihan
                 </button>
             </div>
         </div>
     </div>
 </div>
+<!-- Modal Refund Pilihan -->
+<div class="modal fade" id="modalRefundPilihan" tabindex="-1" role="dialog" aria-labelledby="modalRefundPilihanLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <form id="formRefundPilihan" class="modal-content">
+            <div class="modal-header bg-secondary text-white">
+                <h5 class="modal-title" id="modalRefundPilihanLabel"><i class="fas fa-undo"></i> Refund
+                    Pilihan</h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="transaksi-id" value="<?= $transaksi->id ?>">
+                <div id="listProdukVoid">
+                    <!-- Checklist produk yang aktif akan ditampilkan lewat JS -->
+                </div>
+                <div class="form-group mt-2">
+                    <label for="alasanRefundPilihan">Alasan Refund:</label>
+                    <input type="text" class="form-control" name="alasan" id="alasanRefundPilihan" required
+                        placeholder="Contoh: Refund beberapa item karena komplain">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-danger">Proses Refund</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Modal Alasan Refund -->
+
 <div class="modal fade" id="modalAlasanRefund" tabindex="-1" role="dialog" aria-labelledby="modalAlasanRefundLabel"
     aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -105,12 +144,51 @@ tbody tr {
         </form>
     </div>
 </div>
+<!-- Modal Refund Semua -->
+<div class="modal fade" id="modalAlasanRefundSemua" tabindex="-1" role="dialog"
+    aria-labelledby="modalAlasanRefundSemuaLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <form id="formRefundSemua" class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="modalAlasanRefundSemuaLabel"><i class="fas fa-undo"></i> Alasan Refund Semua
+                </h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="alasanSemua">Tuliskan alasan refund semua produk:</label>
+                    <input type="text" class="form-control" name="alasanSemua" id="alasanSemua" required
+                        placeholder="Contoh: Customer batalkan semua pesanan">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-danger">Kirim Refund</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+            </div>
+        </form>
+    </div>
+</div>
+<?php if (!empty($kode_refund)): ?>
+<div class="alert alert-warning text-center">
+    <strong>REFUND berhasil!</strong>
+    <a href="<?= base_url('kasir/cetak_refund/' . $kode_refund) ?>" class="btn btn-danger btn-sm ml-2" target="_blank">
+        <i class="fas fa-print"></i> Cetak Notifikasi Refund
+    </a>
+</div>
+<?php endif; ?>
 
 <div id="loadingRefund"
     style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:#ffffffcc; z-index:9999; text-align:center; padding-top:20%;">
     <div class="spinner-border text-danger" style="width: 3rem; height: 3rem;"></div>
     <p class="mt-3 text-danger">Memproses refund...</p>
 </div>
+
+<?php if ($this->session->flashdata('kode_refund')): ?>
+<a href="<?= base_url('kasir/cetak_refund/' . $this->session->flashdata('kode_refund')) ?>"
+    class="btn btn-outline-danger mt-3" target="_blank">
+    <i class="fas fa-print"></i> Cetak Notifikasi Refund
+</a>
+<?php endif; ?>
 
 
 <script>
@@ -150,5 +228,69 @@ $(document).ready(function() {
             }, 300);
         }
     });
+    // Refund semua produk
+    $("#formRefundSemua").submit(function(e) {
+        e.preventDefault();
+        const alasan = $("#alasanSemua").val();
+
+        $("#modalAlasanRefundSemua").modal("hide");
+        $("body").append('<div class="modal-backdrop fade show"></div>');
+        $("#loadingRefund").show();
+
+        setTimeout(function() {
+            window.location.href = base_url +
+                "kasir/refund_semua/<?= $transaksi->id ?>?alasan=" + encodeURIComponent(alasan);
+        }, 300);
+    });
+
+    // Refund Pilihan
+    $("#modalRefundPilihan").on("show.bs.modal", function() {
+        const html = [];
+        <?php foreach ($items as $item): ?>
+        <?php if ($item->status != 'REFUND'): ?>
+        html.push(`
+        <div class="form-check mb-2">
+            <input class="form-check-input refund-check" type="checkbox" name="produk_id[]" value="<?= $item->id ?>"
+                id="produk-<?= $item->id ?>">
+            <label class="form-check-label" for="produk-<?= $item->id ?>">
+                <strong><?= $item->nama_produk ?></strong> (Rp <?= number_format($item->harga, 0, ',', '.') ?>)
+            </label>
+        </div>
+    `);
+        <?php endif; ?>
+        <?php endforeach; ?>
+
+        $("#listProdukVoid").html(html.join(""));
+    });
+
+    $("#formRefundPilihan").submit(function(e) {
+        e.preventDefault();
+        const selected = $(".refund-check:checked").map(function() {
+            return $(this).val();
+        }).get();
+
+        const alasan = $("#alasanRefundPilihan").val();
+        const transaksiId = $("#transaksi-id").val();
+
+        if (selected.length === 0) {
+            alert("Pilih produk terlebih dahulu.");
+            return;
+        }
+
+        $("#modalRefundPilihan").modal("hide");
+        $("#loadingRefund").show();
+
+        // Kirim ke backend
+        $.post(base_url + "kasir/refund_pilihan", {
+            produk_ids: selected,
+            alasan: alasan,
+            transaksi_id: transaksiId
+        }, function(kode_refund) {
+            window.location.href = base_url + "kasir/rincian_pesanan/" + transaksiId +
+                "?kode_refund=" + kode_refund;
+        });
+    });
+
+
 });
 </script>
