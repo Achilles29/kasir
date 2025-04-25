@@ -110,6 +110,16 @@ tbody tr {
                     <input type="text" class="form-control" name="alasan" id="alasanRefundPilihan" required
                         placeholder="Contoh: Refund beberapa item karena komplain">
                 </div>
+                <div class="form-group">
+                    <label for="metode_refund">Pilih Metode Pengembalian:</label>
+                    <select class="form-control" id="metode_refund_pilihan" name="metode_pembayaran_id" required>
+                        <option value="">-- Pilih Metode --</option>
+                        <?php foreach ($metode_pembayaran as $mp): ?>
+                        <option value="<?= $mp->id ?>"><?= $mp->metode_pembayaran ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
             </div>
             <div class="modal-footer">
                 <button type="submit" class="btn btn-danger">Proses Refund</button>
@@ -119,7 +129,7 @@ tbody tr {
     </div>
 </div>
 
-<!-- Modal Alasan Refund -->
+<!-- Modal Alasan Refund Satuan -->
 
 <div class="modal fade" id="modalAlasanRefund" tabindex="-1" role="dialog" aria-labelledby="modalAlasanRefundLabel"
     aria-hidden="true">
@@ -136,7 +146,18 @@ tbody tr {
                     <input type="text" class="form-control" name="alasan" required
                         placeholder="Contoh: Salah input / Komplain customer">
                 </div>
+                <div class="form-group">
+                    <label for="metode_refund">Pilih Metode Pengembalian:</label>
+                    <select class="form-control" id="metode_refund_satuan" name="metode_pembayaran_id" required>
+                        <option value="">-- Pilih Metode --</option>
+                        <?php foreach ($metode_pembayaran as $mp): ?>
+                        <option value="<?= $mp->id ?>"><?= $mp->metode_pembayaran ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
             </div>
+
             <div class="modal-footer">
                 <button type="submit" class="btn btn-danger">Kirim Refund</button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
@@ -160,7 +181,18 @@ tbody tr {
                     <input type="text" class="form-control" name="alasanSemua" id="alasanSemua" required
                         placeholder="Contoh: Customer batalkan semua pesanan">
                 </div>
+                <div class="form-group">
+                    <label for="metode_refund">Pilih Metode Pengembalian:</label>
+                    <select class="form-control" id="metode_refund_semua" name="metode_pembayaran_id" required>
+                        <option value="">-- Pilih Metode --</option>
+                        <?php foreach ($metode_pembayaran as $mp): ?>
+                        <option value="<?= $mp->id ?>"><?= $mp->metode_pembayaran ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
             </div>
+
             <div class="modal-footer">
                 <button type="submit" class="btn btn-danger">Kirim Refund</button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
@@ -168,14 +200,6 @@ tbody tr {
         </form>
     </div>
 </div>
-<?php if (!empty($kode_refund)): ?>
-<div class="alert alert-warning text-center">
-    <strong>REFUND berhasil!</strong>
-    <a href="<?= base_url('kasir/cetak_refund/' . $kode_refund) ?>" class="btn btn-danger btn-sm ml-2" target="_blank">
-        <i class="fas fa-print"></i> Cetak Notifikasi Refund
-    </a>
-</div>
-<?php endif; ?>
 
 <div id="loadingRefund"
     style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:#ffffffcc; z-index:9999; text-align:center; padding-top:20%;">
@@ -183,11 +207,14 @@ tbody tr {
     <p class="mt-3 text-danger">Memproses refund...</p>
 </div>
 
-<?php if ($this->session->flashdata('kode_refund')): ?>
-<a href="<?= base_url('kasir/cetak_refund/' . $this->session->flashdata('kode_refund')) ?>"
-    class="btn btn-outline-danger mt-3" target="_blank">
-    <i class="fas fa-print"></i> Cetak Notifikasi Refund
-</a>
+
+<?php if (!empty($kode_refund)): ?>
+<div class="alert alert-warning text-center">
+    <strong>REFUND berhasil!</strong>
+    <button class="btn btn-danger btn-sm ml-2" onclick="cetakRefundInternal('<?= $kode_refund ?>')">
+        <i class="fas fa-print"></i> Cetak Refund (Internal)
+    </button>
+</div>
 <?php endif; ?>
 
 
@@ -202,20 +229,26 @@ $(document).ready(function() {
         $("#modalAlasanRefund").modal("show");
     });
 
-    // Kirim alasan refund
+
+    //refund satuan
     $("#formRefundAlasan").submit(function(e) {
         e.preventDefault();
         const id = $("#refund-id").val();
         const alasan = $(this).find("input[name='alasan']").val();
+        const metode = $("#metode_refund_satuan").val();
 
-        // Loading smooth
+
+        if (!metode) {
+            Swal.fire("Metode kosong", "Silakan pilih metode pengembalian.", "warning");
+            return;
+        }
+
         $("#modalAlasanRefund").modal("hide");
         $("body").append('<div class="modal-backdrop fade show"></div>');
 
-        // Delay 300ms baru redirect
         setTimeout(function() {
             window.location.href =
-                `${base_url}kasir/refund_produk/${id}?alasan=${encodeURIComponent(alasan)}`;
+                `${base_url}kasir/refund_produk/${id}?alasan=${encodeURIComponent(alasan)}&metode=${metode}`;
         }, 300);
     });
 
@@ -231,7 +264,9 @@ $(document).ready(function() {
     // Refund semua produk
     $("#formRefundSemua").submit(function(e) {
         e.preventDefault();
+        const metode = $("#metode_refund_semua").val();
         const alasan = $("#alasanSemua").val();
+
 
         $("#modalAlasanRefundSemua").modal("hide");
         $("body").append('<div class="modal-backdrop fade show"></div>');
@@ -239,7 +274,9 @@ $(document).ready(function() {
 
         setTimeout(function() {
             window.location.href = base_url +
-                "kasir/refund_semua/<?= $transaksi->id ?>?alasan=" + encodeURIComponent(alasan);
+                "kasir/refund_semua/<?= $transaksi->id ?>?alasan=" + encodeURIComponent(
+                    alasan) +
+                "&metode=" + metode;
         }, 300);
     });
 
@@ -284,12 +321,25 @@ $(document).ready(function() {
         $.post(base_url + "kasir/refund_pilihan", {
             produk_ids: selected,
             alasan: alasan,
-            transaksi_id: transaksiId
+            transaksi_id: transaksiId,
+            metode_pembayaran_id: $("#metode_refund_pilihan").val()
         }, function(kode_refund) {
             window.location.href = base_url + "kasir/rincian_pesanan/" + transaksiId +
                 "?kode_refund=" + kode_refund;
         });
     });
+
+    function cetakRefundInternal(kode_refund) {
+        $.post(base_url + "kasir/cetak_refund_internal", {
+            kode_refund: kode_refund
+        }, function(res) {
+            if (res.status === 'success') {
+                Swal.fire('Berhasil', res.message, 'success');
+            } else {
+                Swal.fire('Gagal', res.message, 'error');
+            }
+        }, "json");
+    }
 
 
 });

@@ -25,6 +25,20 @@
     <link href="<?php echo base_url(); ?>assets/css/sb-admin-2.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+    <!-- Moment.js -->
+    <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+
+    <!-- Date Range Picker -->
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+    <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
 </head>
 
@@ -88,6 +102,9 @@
                         <div class="bg-white py-2 collapse-inner rounded">
                             <a class="collapse-item" href="<?= site_url('/laporan') ?>"><i class="far fa-id-card"></i>
                                 Detail Penjualan</a>
+                            <a class="collapse-item" href="<?= site_url('/kasir/daftar_refund') ?>"><i
+                                    class="far fa-id-card"></i>
+                                Laporan Refund</a>
                             <a class="collapse-item" href="<?= site_url('/stok') ?>"><i class="far fa-id-card"></i> Stok
                                 Bahan Baku</a>
                             <a class="collapse-item" href="<?= site_url('/stok/log') ?>"><i class="far fa-id-card"></i>

@@ -123,6 +123,8 @@ public function search_customer() {
         return "CS/63/" . $date . "/" . $new_id;
     }
 
+
+    
 private function send_to_python_service($lokasi_printer, $text) {
     $printer = $this->Printer_model->get_by_lokasi($lokasi_printer);
 
@@ -463,6 +465,7 @@ public function cetak_void_internal()
 
     echo json_encode(['status' => 'success', 'message' => 'Void berhasil dicetak']);
 }
+
 
 
 public function cetak_pesanan_dibayar()
@@ -1231,161 +1234,161 @@ if (!empty($detail_ids)) {
 }
 
 
-public function void_item()
-{
-    $detail_id = $this->input->post('detail_id');
-    $alasan = trim($this->input->post('alasan'));
-    $user_id = $this->session->userdata('pegawai_id');
+// public function void_item()
+// {
+//     $detail_id = $this->input->post('detail_id');
+//     $alasan = trim($this->input->post('alasan'));
+//     $user_id = $this->session->userdata('pegawai_id');
 
-    if (empty($alasan)) {
-        echo json_encode(['status' => 'error', 'message' => 'Alasan tidak boleh kosong!']);
-        return;
-    }
+//     if (empty($alasan)) {
+//         echo json_encode(['status' => 'error', 'message' => 'Alasan tidak boleh kosong!']);
+//         return;
+//     }
 
-    $produk = $this->db->get_where('pr_detail_transaksi', ['id' => $detail_id])->row();
-    if (!$produk) {
-        echo json_encode(['status' => 'error', 'message' => 'Produk tidak ditemukan']);
-        return;
-    }
+//     $produk = $this->db->get_where('pr_detail_transaksi', ['id' => $detail_id])->row();
+//     if (!$produk) {
+//         echo json_encode(['status' => 'error', 'message' => 'Produk tidak ditemukan']);
+//         return;
+//     }
 
-    $transaksi = $this->db->get_where('pr_transaksi', ['id' => $produk->pr_transaksi_id])->row();
-    $master_produk = $this->db->get_where('pr_produk', ['id' => $produk->pr_produk_id])->row();
+//     $transaksi = $this->db->get_where('pr_transaksi', ['id' => $produk->pr_transaksi_id])->row();
+//     $master_produk = $this->db->get_where('pr_produk', ['id' => $produk->pr_produk_id])->row();
 
-    // 1. Ambil semua extra yang status NULL (belum batal)
-    $this->db->select('ex.id, ex.pr_produk_extra_id, ex.jumlah, ex.harga, pe.nama_extra');
-    $this->db->from('pr_detail_extra ex');
-    $this->db->join('pr_produk_extra pe', 'ex.pr_produk_extra_id = pe.id', 'left');
-    $this->db->where('ex.detail_transaksi_id', $detail_id);
-    $this->db->where('ex.status IS NULL', null, false); // 👉 ambil yang status NULL saja
-    $extra_items = $this->db->get()->result();
+//     // 1. Ambil semua extra yang status NULL (belum batal)
+//     $this->db->select('ex.id, ex.pr_produk_extra_id, ex.jumlah, ex.harga, pe.nama_extra');
+//     $this->db->from('pr_detail_extra ex');
+//     $this->db->join('pr_produk_extra pe', 'ex.pr_produk_extra_id = pe.id', 'left');
+//     $this->db->where('ex.detail_transaksi_id', $detail_id);
+//     $this->db->where('ex.status IS NULL', null, false); // 👉 ambil yang status NULL saja
+//     $extra_items = $this->db->get()->result();
 
-    // 2. Update status produk utama dan semua extra menjadi BATAL
-    $this->db->where('id', $detail_id)->update('pr_detail_transaksi', ['status' => 'BATAL']);
-    $this->db->where('detail_transaksi_id', $detail_id)->where('status IS NULL', null, false)->update('pr_detail_extra', ['status' => 'BATAL']);
+//     // 2. Update status produk utama dan semua extra menjadi BATAL
+//     $this->db->where('id', $detail_id)->update('pr_detail_transaksi', ['status' => 'BATAL']);
+//     $this->db->where('detail_transaksi_id', $detail_id)->where('status IS NULL', null, false)->update('pr_detail_extra', ['status' => 'BATAL']);
 
-    // 3. Hitung pengurang total_penjualan
-    $pengurang = (int)$produk->harga * (int)$produk->jumlah;
-    foreach ($extra_items as $ex) {
-        $pengurang += ((int)$ex->harga * (int)$ex->jumlah);
-    }
+//     // 3. Hitung pengurang total_penjualan
+//     $pengurang = (int)$produk->harga * (int)$produk->jumlah;
+//     foreach ($extra_items as $ex) {
+//         $pengurang += ((int)$ex->harga * (int)$ex->jumlah);
+//     }
 
-    $this->db->where('id', $produk->pr_transaksi_id);
-    $this->db->set('total_penjualan', 'total_penjualan - ' . $pengurang, false);
-    $this->db->set('sisa_pembayaran', 'GREATEST(0, sisa_pembayaran - ' . $pengurang . ')', false); // 🔥 Tambahkan ini
-    $this->db->update('pr_transaksi');
+//     $this->db->where('id', $produk->pr_transaksi_id);
+//     $this->db->set('total_penjualan', 'total_penjualan - ' . $pengurang, false);
+//     $this->db->set('sisa_pembayaran', 'GREATEST(0, sisa_pembayaran - ' . $pengurang . ')', false); // 🔥 Tambahkan ini
+//     $this->db->update('pr_transaksi');
     
-    // 4. Insert void untuk produk utama
-    $this->db->insert('pr_void', [
-        'pr_transaksi_id' => $produk->pr_transaksi_id,
-        'no_transaksi' => $transaksi->no_transaksi,
-        'detail_transaksi_id' => $produk->id,
-        'nama_produk' => $master_produk ? $master_produk->nama_produk : $produk->nama_produk,
-        'detail_extra_id' => NULL,
-        'pr_produk_id' => $produk->pr_produk_id,
-        'produk_extra_id' => NULL,
-        'nama_extra' => NULL,
-        'jumlah' => $produk->jumlah,
-        'harga' => $produk->harga,
-        'catatan' => $produk->catatan,
-        'alasan' => $alasan,
-        'void_by' => $user_id,
-        'waktu' => date('Y-m-d H:i:s'),
-        'created_at' => date('Y-m-d H:i:s'),
-        'updated_at' => date('Y-m-d H:i:s'),
-    ]);
+//     // 4. Insert void untuk produk utama
+//     $this->db->insert('pr_void', [
+//         'pr_transaksi_id' => $produk->pr_transaksi_id,
+//         'no_transaksi' => $transaksi->no_transaksi,
+//         'detail_transaksi_id' => $produk->id,
+//         'nama_produk' => $master_produk ? $master_produk->nama_produk : $produk->nama_produk,
+//         'detail_extra_id' => NULL,
+//         'pr_produk_id' => $produk->pr_produk_id,
+//         'produk_extra_id' => NULL,
+//         'nama_extra' => NULL,
+//         'jumlah' => $produk->jumlah,
+//         'harga' => $produk->harga,
+//         'catatan' => $produk->catatan,
+//         'alasan' => $alasan,
+//         'void_by' => $user_id,
+//         'waktu' => date('Y-m-d H:i:s'),
+//         'created_at' => date('Y-m-d H:i:s'),
+//         'updated_at' => date('Y-m-d H:i:s'),
+//     ]);
 
-    // 5. Insert void untuk semua extra aktif (yang awalnya status NULL)
-    foreach ($extra_items as $ex) {
-        $this->db->insert('pr_void', [
-            'pr_transaksi_id' => $produk->pr_transaksi_id,
-            'no_transaksi' => $transaksi->no_transaksi,
-            'detail_transaksi_id' => $produk->id,
-            'nama_produk' => $master_produk ? $master_produk->nama_produk : $produk->nama_produk,
-            'detail_extra_id' => $ex->id,
-            'pr_produk_id' => $produk->pr_produk_id,
-            'produk_extra_id' => $ex->pr_produk_extra_id,
-            'nama_extra' => $ex->nama_extra,
-            'jumlah' => $ex->jumlah,
-            'harga' => $ex->harga,
-            'catatan' => 'Extra dari ' . ($master_produk ? $master_produk->nama_produk : $produk->nama_produk),
-            'alasan' => $alasan,
-            'void_by' => $user_id,
-            'waktu' => date('Y-m-d H:i:s'),
-            'created_at' => date('Y-m-d H:i:s'),
-            'updated_at' => date('Y-m-d H:i:s'),
-        ]);
-    }
+//     // 5. Insert void untuk semua extra aktif (yang awalnya status NULL)
+//     foreach ($extra_items as $ex) {
+//         $this->db->insert('pr_void', [
+//             'pr_transaksi_id' => $produk->pr_transaksi_id,
+//             'no_transaksi' => $transaksi->no_transaksi,
+//             'detail_transaksi_id' => $produk->id,
+//             'nama_produk' => $master_produk ? $master_produk->nama_produk : $produk->nama_produk,
+//             'detail_extra_id' => $ex->id,
+//             'pr_produk_id' => $produk->pr_produk_id,
+//             'produk_extra_id' => $ex->pr_produk_extra_id,
+//             'nama_extra' => $ex->nama_extra,
+//             'jumlah' => $ex->jumlah,
+//             'harga' => $ex->harga,
+//             'catatan' => 'Extra dari ' . ($master_produk ? $master_produk->nama_produk : $produk->nama_produk),
+//             'alasan' => $alasan,
+//             'void_by' => $user_id,
+//             'waktu' => date('Y-m-d H:i:s'),
+//             'created_at' => date('Y-m-d H:i:s'),
+//             'updated_at' => date('Y-m-d H:i:s'),
+//         ]);
+//     }
 
-    echo json_encode(['status' => 'success', 'message' => 'Produk berhasil di-void!']);
-}
+//     echo json_encode(['status' => 'success', 'message' => 'Produk berhasil di-void!']);
+// }
 
 
-public function void_extra_item()
-{
-    $extra_id = $this->input->post('extra_id'); // ID dari pr_detail_extra.id
-    $alasan = trim($this->input->post('alasan'));
-    $user_id = $this->session->userdata('pegawai_id');
+// public function void_extra_item()
+// {
+//     $extra_id = $this->input->post('extra_id'); // ID dari pr_detail_extra.id
+//     $alasan = trim($this->input->post('alasan'));
+//     $user_id = $this->session->userdata('pegawai_id');
 
-    // 1. Ambil data extra + produk utama
-    $this->db->select('
-        ex.id AS detail_extra_id, 
-        ex.pr_produk_extra_id, 
-        ex.detail_transaksi_id, 
-        ex.jumlah, 
-        ex.harga,
-        d.pr_transaksi_id, 
-        d.pr_produk_id, 
-        prod.nama_produk AS nama_produk,
-        pextra.nama_extra AS nama_extra
-    ');
-    $this->db->from('pr_detail_extra ex');
-    $this->db->join('pr_detail_transaksi d', 'ex.detail_transaksi_id = d.id', 'left'); // join ke transaksi
-    $this->db->join('pr_produk prod', 'd.pr_produk_id = prod.id', 'left'); // join ke produk utama
-    $this->db->join('pr_produk_extra pextra', 'ex.pr_produk_extra_id = pextra.id', 'left'); // join ke produk extra
-    $this->db->where('ex.id', $extra_id);
-    $extra = $this->db->get()->row();
+//     // 1. Ambil data extra + produk utama
+//     $this->db->select('
+//         ex.id AS detail_extra_id, 
+//         ex.pr_produk_extra_id, 
+//         ex.detail_transaksi_id, 
+//         ex.jumlah, 
+//         ex.harga,
+//         d.pr_transaksi_id, 
+//         d.pr_produk_id, 
+//         prod.nama_produk AS nama_produk,
+//         pextra.nama_extra AS nama_extra
+//     ');
+//     $this->db->from('pr_detail_extra ex');
+//     $this->db->join('pr_detail_transaksi d', 'ex.detail_transaksi_id = d.id', 'left'); // join ke transaksi
+//     $this->db->join('pr_produk prod', 'd.pr_produk_id = prod.id', 'left'); // join ke produk utama
+//     $this->db->join('pr_produk_extra pextra', 'ex.pr_produk_extra_id = pextra.id', 'left'); // join ke produk extra
+//     $this->db->where('ex.id', $extra_id);
+//     $extra = $this->db->get()->row();
 
-    if (!$extra) {
-        echo json_encode(['status' => 'error', 'message' => 'Extra tidak ditemukan']);
-        return;
-    }
+//     if (!$extra) {
+//         echo json_encode(['status' => 'error', 'message' => 'Extra tidak ditemukan']);
+//         return;
+//     }
 
-    // 2. Ambil data transaksi
-    $transaksi = $this->db->get_where('pr_transaksi', ['id' => $extra->pr_transaksi_id])->row();
+//     // 2. Ambil data transaksi
+//     $transaksi = $this->db->get_where('pr_transaksi', ['id' => $extra->pr_transaksi_id])->row();
 
-    // 3. Update status pr_detail_extra menjadi BATAL
-    $this->db->where('id', $extra->detail_extra_id);
-    $this->db->update('pr_detail_extra', ['status' => 'BATAL']);
+//     // 3. Update status pr_detail_extra menjadi BATAL
+//     $this->db->where('id', $extra->detail_extra_id);
+//     $this->db->update('pr_detail_extra', ['status' => 'BATAL']);
 
-    // 4. Update pengurangan total_penjualan
-    $pengurang = (int)$extra->harga * (int)$extra->jumlah;
-    $this->db->where('id', $extra->pr_transaksi_id);
-    $this->db->set('total_penjualan', 'total_penjualan - ' . $pengurang, false);
-    $this->db->set('sisa_pembayaran', 'GREATEST(0, sisa_pembayaran - ' . $pengurang . ')', false); // 🔥 Tambahkan ini
-    $this->db->update('pr_transaksi');
+//     // 4. Update pengurangan total_penjualan
+//     $pengurang = (int)$extra->harga * (int)$extra->jumlah;
+//     $this->db->where('id', $extra->pr_transaksi_id);
+//     $this->db->set('total_penjualan', 'total_penjualan - ' . $pengurang, false);
+//     $this->db->set('sisa_pembayaran', 'GREATEST(0, sisa_pembayaran - ' . $pengurang . ')', false); // 🔥 Tambahkan ini
+//     $this->db->update('pr_transaksi');
 
-    // 5. Insert ke pr_void
-    $this->db->insert('pr_void', [
-        'pr_transaksi_id'     => $extra->pr_transaksi_id,
-        'no_transaksi'        => $transaksi->no_transaksi,
-        'detail_transaksi_id' => $extra->detail_transaksi_id, // ID Produk Utama
-        'pr_produk_id'        => $extra->pr_produk_id,        // ID Produk Utama
-        'nama_produk'         => $extra->nama_produk,         // Nama Produk Utama
-        'detail_extra_id'     => $extra->detail_extra_id,     // ID detail_extra (ID Extra)
-        'produk_extra_id'     => $extra->pr_produk_extra_id,  // ID Produk Extra
-        'nama_extra'          => $extra->nama_extra,          // Nama Produk Extra
-        'jumlah'              => $extra->jumlah,
-        'harga'               => $extra->harga,
-        'catatan'             => 'Extra',
-        'alasan'              => $alasan,
-        'void_by'             => $user_id,
-        'waktu'               => date('Y-m-d H:i:s'),
-        'created_at'          => date('Y-m-d H:i:s'),
-        'updated_at'          => date('Y-m-d H:i:s'),
-    ]);
+//     // 5. Insert ke pr_void
+//     $this->db->insert('pr_void', [
+//         'pr_transaksi_id'     => $extra->pr_transaksi_id,
+//         'no_transaksi'        => $transaksi->no_transaksi,
+//         'detail_transaksi_id' => $extra->detail_transaksi_id, // ID Produk Utama
+//         'pr_produk_id'        => $extra->pr_produk_id,        // ID Produk Utama
+//         'nama_produk'         => $extra->nama_produk,         // Nama Produk Utama
+//         'detail_extra_id'     => $extra->detail_extra_id,     // ID detail_extra (ID Extra)
+//         'produk_extra_id'     => $extra->pr_produk_extra_id,  // ID Produk Extra
+//         'nama_extra'          => $extra->nama_extra,          // Nama Produk Extra
+//         'jumlah'              => $extra->jumlah,
+//         'harga'               => $extra->harga,
+//         'catatan'             => 'Extra',
+//         'alasan'              => $alasan,
+//         'void_by'             => $user_id,
+//         'waktu'               => date('Y-m-d H:i:s'),
+//         'created_at'          => date('Y-m-d H:i:s'),
+//         'updated_at'          => date('Y-m-d H:i:s'),
+//     ]);
 
-    echo json_encode(['status' => 'success', 'message' => 'Extra berhasil di-void!']);
-}
+//     echo json_encode(['status' => 'success', 'message' => 'Extra berhasil di-void!']);
+// }
 
 // VOID BARU ///
 
@@ -1543,10 +1546,9 @@ public function get_pesanan_terbayar()
 }
 
 
-// --- Halaman Rincian Pesanan
 public function rincian_pesanan($id)
 {
-    $kode_refund = $this->input->get('kode_refund'); // ✅ ini ditambahkan
+    $kode_refund = $this->input->get('kode_refund');
 
     $this->db->select('id, no_transaksi, customer, tanggal, total_pembayaran');
     $this->db->from('pr_transaksi');
@@ -1574,7 +1576,15 @@ public function rincian_pesanan($id)
 
     $data['transaksi'] = $transaksi;
     $data['items'] = $items;
-    $data['kode_refund'] = $kode_refund; // ✅ dikirim ke view
+    $data['kode_refund'] = $kode_refund;
+
+    // ✅ Tambahan ini
+    $data['metode_pembayaran'] = $this->db
+        ->select('id, metode_pembayaran')
+        ->order_by('id', 'ASC')
+        ->get('pr_metode_pembayaran')
+        ->result();
+
 
     $data['title'] = "Rincian Pesanan";
     $this->load->view('templates/header', $data);
@@ -1582,20 +1592,66 @@ public function rincian_pesanan($id)
     $this->load->view('templates/footer');
 }
 
-public function cetak_refund($kode_refund)
-{
-    $this->load->model('Refund_model');
-    $data['refund'] = $this->Refund_model->get_refund_by_kode($kode_refund);
-
-    if (!$data['refund']) {
-        show_404();
-    }
-
-    $this->load->view('kasir/print_refund_per_divisi', $data);
-}
-
 
 // --- API Refund
+
+public function cetak_refund_internal()
+{
+    $kode_refund = $this->input->post('kode_refund');
+    if (!$kode_refund) {
+        echo json_encode(['status' => 'error', 'message' => 'Kode refund tidak ditemukan.']);
+        return;
+    }
+
+    $this->load->model('Setting_model');
+    $this->load->model('Printer_model');
+    $this->load->model('Refund_model');
+    $this->load->model('Kasir_model');
+
+    $refunds = $this->Refund_model->get_refund_by_kode($kode_refund);
+    if (!$refunds) {
+        echo json_encode(['status' => 'error', 'message' => 'Data refund tidak ditemukan.']);
+        return;
+    }
+
+    // Ambil data transaksi untuk header struk
+    $transaksi = $this->db
+        ->select('t.no_transaksi, t.customer, t.nomor_meja, p.nama as kasir_order')
+        ->from('pr_transaksi t')
+        ->join('abs_pegawai p', 'p.id = t.kasir_order', 'left')
+        ->where('t.no_transaksi', $refunds[0]->no_transaksi)
+        ->get()->row_array();
+
+    $struk_data = $this->Setting_model->get_data_struk();
+
+    // Group data refund berdasarkan divisi
+    $refund_per_divisi = [];
+    foreach ($refunds as $r) {
+        $divisi = $r->nama_divisi ?: 'OTHER';
+        $refund_per_divisi[$divisi][] = (array) $r;
+    }
+
+    foreach ($refund_per_divisi as $divisi => $list) {
+        $printer = $this->Printer_model->get_by_lokasi($divisi);
+        if (!$printer) continue;
+
+        $lokasi = strtoupper($printer['lokasi_printer']);
+        if (!in_array($lokasi, ['BAR', 'KITCHEN'])) continue;
+
+        $struk_text = $this->Kasir_model->generate_refund_struk($transaksi, $list, $printer, $struk_data, $lokasi);
+        $this->send_to_python_service($lokasi, $struk_text);
+    }
+
+    // Cetak ke CHECKER
+    $printer_checker = $this->Printer_model->get_by_lokasi('CHECKER');
+    if ($printer_checker) {
+        $struk_checker = $this->Kasir_model->generate_refund_struk($transaksi, (array) $refunds, $printer_checker, $struk_data, 'CHECKER');
+        $this->send_to_python_service('CHECKER', $struk_checker);
+    }
+
+    echo json_encode(['status' => 'success', 'message' => 'Refund berhasil dicetak']);
+}
+
 
 public function refund_produk($detail_id)
 {
@@ -1603,6 +1659,10 @@ public function refund_produk($detail_id)
     $kasir_id = $this->session->userdata('pegawai_id') ?? 0;
     $alasan = $this->input->get('alasan') ?? 'Refund produk';
     $kode_refund = $this->Refund_model->generate_kode_refund();
+//    $metode_pembayaran_id = $this->input->get('metode') ?? null;
+    $metode_pembayaran_id = $this->input->get('metode');
+
+
     // Ambil detail transaksi
     $this->db->select('dt.*, p.nama_produk');
     $this->db->from('pr_detail_transaksi dt');
@@ -1628,6 +1688,7 @@ public function refund_produk($detail_id)
         'catatan' => 'Refund produk',
         'alasan' => $alasan,
         'refund_by' => $kasir_id,
+        'metode_pembayaran_id' => $metode_pembayaran_id,
         'waktu_refund' => date('Y-m-d H:i:s'),
         'created_at' => date('Y-m-d H:i:s'),
         'updated_at' => date('Y-m-d H:i:s'),
@@ -1656,6 +1717,7 @@ public function refund_produk($detail_id)
             'catatan' => 'Refund extra',
             'alasan' => $alasan,
             'refund_by' => $kasir_id,
+            'metode_pembayaran_id' => $metode_pembayaran_id,
             'waktu_refund' => date('Y-m-d H:i:s'),
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s'),
@@ -1681,16 +1743,18 @@ public function refund_produk($detail_id)
     }
 
     $this->session->set_flashdata('kode_refund', $kode_refund);
-    redirect('kasir/rincian_pesanan/' . $transaksi_id . '?kode_refund=' . $kode_refund);
+    redirect('kasir/rincian_pesanan/' . $transaksi->id . '?kode_refund=' . $kode_refund);
 
 }
+
 
 public function refund_pilihan()
 {
     $this->load->library('session');
     $kasir_id = $this->session->userdata('pegawai_id') ?? 0;
     $kode_refund = $this->Refund_model->generate_kode_refund();
-    
+    $metode_pembayaran_id = $this->input->post('metode_pembayaran_id');
+
     $produk_ids = $this->input->post('produk_ids');
     $alasan = $this->input->post('alasan');
     $transaksi_id = $this->input->post('transaksi_id');
@@ -1720,6 +1784,7 @@ public function refund_pilihan()
             'catatan' => 'Refund pilihan',
             'alasan' => $alasan,
             'refund_by' => $kasir_id,
+            'metode_pembayaran_id' => $metode_pembayaran_id,
             'waktu_refund' => date('Y-m-d H:i:s'),
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s'),
@@ -1738,6 +1803,7 @@ public function refund_pilihan()
 
         foreach ($extras as $ex) {
             $this->db->insert('pr_refund', [
+                'kode_refund' => $kode_refund,
                 'pr_transaksi_id' => $transaksi_id,
                 'pr_detail_transaksi_id' => $detail->id,
                 'pr_produk_id' => $detail->pr_produk_id,
@@ -1748,6 +1814,7 @@ public function refund_pilihan()
                 'catatan' => 'Refund pilihan - extra',
                 'alasan' => $alasan,
                 'refund_by' => $kasir_id,
+                'metode_pembayaran_id' => $metode_pembayaran_id,
                 'waktu_refund' => date('Y-m-d H:i:s'),
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s'),
@@ -1784,6 +1851,7 @@ public function refund_semua($transaksi_id)
     $kasir_id = $this->session->userdata('pegawai_id') ?? 0;
     $alasan = $this->input->get('alasan') ?? 'Refund semua produk';
     $kode_refund = $this->Refund_model->generate_kode_refund();
+    $metode_pembayaran_id = $this->input->get('metode');
     
     $this->db->select('dt.*, p.nama_produk');
     $this->db->from('pr_detail_transaksi dt');
@@ -1807,6 +1875,7 @@ public function refund_semua($transaksi_id)
             'catatan' => 'Refund produk',
             'alasan' => $alasan,
             'refund_by' => $kasir_id,
+            'metode_pembayaran_id' => $metode_pembayaran_id,
             'waktu_refund' => date('Y-m-d H:i:s'),
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s'),
@@ -1835,6 +1904,7 @@ public function refund_semua($transaksi_id)
                 'catatan' => 'Refund extra',
                 'alasan' => $alasan,
                 'refund_by' => $kasir_id,
+                'metode_pembayaran_id' => $metode_pembayaran_id,
                 'waktu_refund' => date('Y-m-d H:i:s'),
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s'),
@@ -1855,6 +1925,87 @@ public function refund_semua($transaksi_id)
     redirect('kasir/rincian_pesanan/' . $transaksi_id . '?kode_refund=' . $kode_refund);
 
 }
+
+// public function daftar_refund()
+// {
+//     $data['title'] = "Daftar Refund";
+
+//     $tanggal_awal = $this->input->get('tanggal_awal') ?: date('Y-m-d');
+//     $tanggal_akhir = $this->input->get('tanggal_akhir') ?: date('Y-m-d');
+
+//     $data['tanggal_awal'] = $tanggal_awal;
+//     $data['tanggal_akhir'] = $tanggal_akhir;
+
+//     $data['refunds'] = $this->Kasir_model->get_daftar_refund($tanggal_awal, $tanggal_akhir);
+
+//     $this->load->view('templates/header', $data);
+//     $this->load->view('kasir/daftar_refund', $data);
+//     $this->load->view('templates/footer');
+// }
+
+public function daftar_refund()
+{
+    $data['title'] = "Laporan Refund";
+    $this->load->view('templates/header', $data);
+    $this->load->view('kasir/daftar_refund', $data);
+    $this->load->view('templates/footer');
+}
+
+public function get_refund_data_ajax()
+{
+    $tanggal_awal = $this->input->get('tanggal_awal');
+    $tanggal_akhir = $this->input->get('tanggal_akhir');
+    $keyword = $this->input->get('keyword');
+
+    if (!$tanggal_awal || !$tanggal_akhir) {
+        $tanggal_awal = date('Y-m-d');
+        $tanggal_akhir = date('Y-m-d');
+    }
+
+    if ($keyword) {
+        $this->db->group_start();
+        $this->db->like('r.kode_refund', $keyword);
+        $this->db->or_like('r.no_transaksi', $keyword);
+        $this->db->or_like('t.customer', $keyword);
+        $this->db->group_end();
+    }
+
+    $this->db->select('r.pr_transaksi_id, r.kode_refund, r.no_transaksi, t.customer, t.nomor_meja, 
+                    MAX(r.waktu_refund) as waktu, 
+                    SUM(r.harga * r.jumlah) as total_refund, 
+                    mp.metode_pembayaran');
+
+    $this->db->from('pr_refund r');
+    $this->db->join('pr_transaksi t', 't.id = r.pr_transaksi_id', 'left');
+    $this->db->join('pr_metode_pembayaran mp', 'mp.id = r.metode_pembayaran_id', 'left');
+    $this->db->where('r.waktu_refund >=', $tanggal_awal . ' 00:00:00');
+    $this->db->where('r.waktu_refund <=', $tanggal_akhir . ' 23:59:59');
+    $this->db->group_by('r.kode_refund');
+    $this->db->order_by('waktu', 'DESC');
+
+    $result = $this->db->get()->result();
+    echo json_encode($result);
+}
+
+public function detail_refund_kode($kode)
+{
+    $this->load->model('Refund_model');
+
+    $kode_refund = str_replace('-', '/', $kode);
+    $refund = $this->Refund_model->get_by_kode($kode_refund);
+
+    if (!$refund) {
+        show_error("Data refund tidak ditemukan.");
+    }
+
+    $data['refund'] = $refund;
+    $data['title'] = "Detail Refund";
+
+    $this->load->view('templates/header', $data);
+    $this->load->view('kasir/detail_refund', $data);
+    $this->load->view('templates/footer');
+}
+
 
 
 }

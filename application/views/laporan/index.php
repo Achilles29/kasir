@@ -1,6 +1,6 @@
 <!-- Di header (CSS) -->
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" /> -->
 
 <div class="container-fluid">
 
