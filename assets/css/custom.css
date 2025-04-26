@@ -1,0 +1,37 @@
+:root {
+  --primary: #800000; /* Merah maroon */
+  --primary-hover: #660000;
+  --primary-light: #a52a2a;
+  --text-light: #fff;
+}
+
+/* Override Bootstrap warna */
+.btn-primary {
+  background-color: var(--primary);
+  border-color: var(--primary);
+  color: var(--text-light);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: var(--primary-hover);
+  border-color: var(--primary-hover);
+  color: var(--text-light);
+}
+
+.navbar,
+.sidebar,
+.bg-primary {
+  background-color: var(--primary) !important;
+  color: var(--text-light);
+}
+
+.text-primary {
+  color: var(--primary) !important;
+}
+
+.card-header,
+.table thead th {
+  background-color: var(--primary);
+  color: var(--text-light);
+}

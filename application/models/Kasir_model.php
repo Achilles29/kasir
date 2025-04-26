@@ -861,24 +861,31 @@ public function generate_refund_struk($transaksi, $produk_refund, $printer, $str
 
     return $out;
 }
-
 public function get_daftar_refund($tanggal_awal, $tanggal_akhir)
 {
     return $this->db
-        ->select('
-            r.kode_refund, 
-            r.no_transaksi, 
-            t.customer, 
-            t.nomor_meja, 
-            MAX(r.waktu_refund) as waktu, 
-            COUNT(*) as jumlah_item
-        ')
+        ->select('r.kode_refund, r.no_transaksi, t.customer, t.nomor_meja, MAX(r.waktu_refund) as waktu, COUNT(*) as jumlah_item')
         ->from('pr_refund r')
         ->join('pr_transaksi t', 't.id = r.pr_transaksi_id', 'left')
-        ->where('r.waktu_refund >=', $tanggal_awal . ' 00:00:00')
-        ->where('r.waktu_refund <=', $tanggal_akhir . ' 23:59:59')
+        ->where('DATE(r.created_at) >=', $tanggal_awal)
+        ->where('DATE(r.created_at) <=', $tanggal_akhir)
         ->group_by('r.kode_refund')
-        ->order_by('waktu', 'DESC')
+        ->order_by('r.created_at', 'DESC')
+        ->get()
+        ->result();
+}
+
+public function get_by_kode($kode_refund)
+{
+    return $this->db
+        ->select('r.*, p.nama_produk, e.nama_extra, t.customer, t.nomor_meja, m.metode_pembayaran')
+        ->from('pr_refund r')
+        ->join('pr_detail_transaksi d', 'r.detail_transaksi_id = d.id', 'left')
+        ->join('pr_produk p', 'd.pr_produk_id = p.id', 'left')
+        ->join('pr_detail_extra e', 'r.detail_extra_id = e.id', 'left')
+        ->join('pr_transaksi t', 'r.pr_transaksi_id = t.id', 'left')
+        ->join('pr_metode_pembayaran m', 'r.metode_pembayaran_id = m.id', 'left')
+        ->where('r.kode_refund', $kode_refund)
         ->get()
         ->result();
 }

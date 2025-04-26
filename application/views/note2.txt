@@ -257,6 +257,10 @@ print cetak refund manual
 
 hapus pesanan
 
+rincian_pesanan => refund error
+
+
+
 CLEAR
 pr_detail_transaksi berisi : 	id 	pr_transaksi_id 	pr_produk_id 	detail_unit_id 	jumlah 	harga 	catatan 	is_printed 	status 	created_at 	updated_at
 pr_detail_extra : id 	detail_transaksi_id 	pr_produk_extra_id 	jumlah 	harga 	subtotal 	sku 	satuan 	hpp 	created_at 	updated_at 	status

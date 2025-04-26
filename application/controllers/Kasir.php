@@ -1864,7 +1864,7 @@ public function refund_semua($transaksi_id)
     foreach ($details as $detail) {
         // Produk utama
         $this->db->insert('pr_refund', [
-            'kode_refund' => $kode_refund,
+            'kode_refund' => $kode_refund,  
             'pr_transaksi_id' => $transaksi_id,
             'pr_detail_transaksi_id' => $detail->id,
             'pr_produk_id' => $detail->pr_produk_id,
@@ -1962,6 +1962,19 @@ public function get_refund_data_ajax()
         $tanggal_akhir = date('Y-m-d');
     }
 
+    $this->db->select('
+        r.kode_refund, 
+        r.no_transaksi, 
+        t.customer, 
+        t.nomor_meja, 
+        MAX(r.waktu_refund) as waktu, 
+        SUM(r.harga * r.jumlah) as total_refund, 
+        mp.metode_pembayaran
+    ');
+    $this->db->from('pr_refund r');
+    $this->db->join('pr_transaksi t', 't.id = r.pr_transaksi_id', 'left');
+    $this->db->join('pr_metode_pembayaran mp', 'mp.id = r.metode_pembayaran_id', 'left');
+
     if ($keyword) {
         $this->db->group_start();
         $this->db->like('r.kode_refund', $keyword);
@@ -1970,30 +1983,37 @@ public function get_refund_data_ajax()
         $this->db->group_end();
     }
 
-    $this->db->select('r.pr_transaksi_id, r.kode_refund, r.no_transaksi, t.customer, t.nomor_meja, 
-                    MAX(r.waktu_refund) as waktu, 
-                    SUM(r.harga * r.jumlah) as total_refund, 
-                    mp.metode_pembayaran');
-
-    $this->db->from('pr_refund r');
-    $this->db->join('pr_transaksi t', 't.id = r.pr_transaksi_id', 'left');
-    $this->db->join('pr_metode_pembayaran mp', 'mp.id = r.metode_pembayaran_id', 'left');
     $this->db->where('r.waktu_refund >=', $tanggal_awal . ' 00:00:00');
     $this->db->where('r.waktu_refund <=', $tanggal_akhir . ' 23:59:59');
-    $this->db->group_by('r.kode_refund');
+    $this->db->group_by('r.kode_refund, r.no_transaksi, t.customer, t.nomor_meja, mp.metode_pembayaran');
     $this->db->order_by('waktu', 'DESC');
 
     $result = $this->db->get()->result();
     echo json_encode($result);
 }
 
-public function detail_refund_kode($kode)
+public function get_detail_refund()
 {
+    $kode = $this->input->get('kode_refund');
+    $this->load->model('Refund_model');
+    $data['refund'] = $this->Refund_model->get_by_kode($kode);
+
+    if (!$data['refund']) {
+        echo '<div class="text-danger">Data refund tidak ditemukan.</div>';
+        return;
+    }
+
+    $this->load->view('kasir/modal_detail_refund', $data);
+}
+
+
+
+public function detail_refund_kode($kode_refund_encoded)
+{
+    $kode_refund = urldecode($kode_refund_encoded); // decode dulu
     $this->load->model('Refund_model');
 
-    $kode_refund = str_replace('-', '/', $kode);
     $refund = $this->Refund_model->get_by_kode($kode_refund);
-
     if (!$refund) {
         show_error("Data refund tidak ditemukan.");
     }
@@ -2005,7 +2025,6 @@ public function detail_refund_kode($kode)
     $this->load->view('kasir/detail_refund', $data);
     $this->load->view('templates/footer');
 }
-
 
 
 }

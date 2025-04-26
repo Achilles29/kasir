@@ -82,8 +82,8 @@ tbody tr {
             </div>
             <!-- Tombol Refund Pilihan -->
             <div class="text-center mt-2">
-                <button type="button" class="btn btn-secondary btn-lg" data-toggle="modal"
-                    data-target="#modalRefundPilihan">
+                <button type="button" class="btn btn-secondary btn-lg" data-bs-toggle="modal"
+                    data-bs-target="#modalRefundPilihan">
                     <i class="fas fa-check-square"></i> Refund Pilihan
                 </button>
             </div>
@@ -283,22 +283,27 @@ $(document).ready(function() {
     // Refund Pilihan
     $("#modalRefundPilihan").on("show.bs.modal", function() {
         const html = [];
-        <?php foreach ($items as $item): ?>
-        <?php if ($item->status != 'REFUND'): ?>
-        html.push(`
-        <div class="form-check mb-2">
-            <input class="form-check-input refund-check" type="checkbox" name="produk_id[]" value="<?= $item->id ?>"
-                id="produk-<?= $item->id ?>">
-            <label class="form-check-label" for="produk-<?= $item->id ?>">
-                <strong><?= $item->nama_produk ?></strong> (Rp <?= number_format($item->harga, 0, ',', '.') ?>)
-            </label>
-        </div>
-    `);
-        <?php endif; ?>
-        <?php endforeach; ?>
+
+        $("table tbody tr").each(function() {
+            const produkId = $(this).find(".refund-produk").data("id");
+            const produkNama = $(this).find("td").eq(0).text();
+            const harga = $(this).find("td").eq(2).text();
+
+            if (produkId !== undefined) { // Kalau belum refund
+                html.push(`
+                <div class="form-check mb-2">
+                    <input class="form-check-input refund-check" type="checkbox" name="produk_id[]" value="${produkId}" id="produk-${produkId}">
+                    <label class="form-check-label" for="produk-${produkId}">
+                        <strong>${produkNama}</strong> (${harga})
+                    </label>
+                </div>
+            `);
+            }
+        });
 
         $("#listProdukVoid").html(html.join(""));
     });
+
 
     $("#formRefundPilihan").submit(function(e) {
         e.preventDefault();

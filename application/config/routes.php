@@ -145,6 +145,9 @@ $route['kasir/cetak_struk/(:num)/(:any)'] = 'kasir/cetak_struk/$1/$2';
 $route['api/get_extra'] = 'extra/getExtra';
 $route['api/divisi'] = 'divisi/index';
 
+$route['kasir/detail_refund_kode/(:any)'] = 'kasir/detail_refund_kode/$1';
+
+
 $route['member'] = 'member';
 $route['data_awal'] = 'data_awal';
 
