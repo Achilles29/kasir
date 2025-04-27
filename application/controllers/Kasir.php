@@ -19,25 +19,212 @@ class Kasir extends CI_Controller {
         }
     }
 
-    public function index() {
+    // public function index() {
 
-        $data['title'] = 'POS Namua Coffee & Eatery';
-        $data['jenis_order'] = $this->db->get('pr_jenis_order')->result_array();
-        $data['metode_pembayaran'] = $this->db->get('pr_metode_pembayaran')->result_array();
-        $data['kategori'] = $this->Produk_model->get_kategori_pos(); // Kategori untuk tab
-        $data['produk'] = $this->Produk_model->search_produk_pos('', ''); // Semua produk saat awal load
-//        $this->load->view('templates/header', $data);
-        $data['printer'] = $this->Printer_model->get_all_with_divisi();
-        $data['divisi'] = $this->db->get('pr_divisi')->result_array();
+    //     $data['title'] = 'POS Namua Coffee & Eatery';
+    //     $data['jenis_order'] = $this->db->get('pr_jenis_order')->result_array();
+    //     $data['metode_pembayaran'] = $this->db->get('pr_metode_pembayaran')->result_array();
+    //     $data['kategori'] = $this->Produk_model->get_kategori_pos(); // Kategori untuk tab
+    //     $data['produk'] = $this->Produk_model->search_produk_pos('', ''); // Semua produk saat awal load
+    //     $data['printer'] = $this->Printer_model->get_all_with_divisi();
+    //     $data['divisi'] = $this->db->get('pr_divisi')->result_array();
 
 
-$this->load->view('kasir/index', $data);
-//        $this->load->view('templates/footer');
+    //     $this->load->view('kasir/index', $data);
+    //         }
+    
+public function index() {
+    // Ambil ID kasir dari session
+    $kasir_id = $this->session->userdata('pegawai_id');
+
+    // Load model shift
+    $this->load->model('KasirShift_model');
+
+    // Cek apakah ada shift yang masih open
+    $shift = $this->KasirShift_model->get_open_shift($kasir_id);
+
+    // Data untuk dikirim ke view
+    $data = [
+        'title' => 'POS Namua Coffee & Eatery',
+        'jenis_order' => $this->db->get('pr_jenis_order')->result_array(),
+        'metode_pembayaran' => $this->db->get('pr_metode_pembayaran')->result_array(),
+        'kategori' => $this->Produk_model->get_kategori_pos(),
+        'produk' => $this->Produk_model->search_produk_pos('', ''),
+        'printer' => $this->Printer_model->get_all_with_divisi(),
+        'divisi' => $this->db->get('pr_divisi')->result_array(),
+        'show_modal_awal' => ($shift === null) ? true : false, // << modal ditentukan disini
+    ];
+
+    $this->load->view('kasir/index', $data);
+}
+
+public function start_shift()
+{
+    $kasir_id = $this->session->userdata('pegawai_id'); // << ganti disini juga
+    $modal_awal = $this->input->post('modal_awal');
+
+    $this->load->model('KasirShift_model');
+    $shift_id = $this->KasirShift_model->start_shift($kasir_id, $modal_awal);
+
+    if ($shift_id) {
+        echo json_encode(['status' => 'success']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal mulai shift']);
     }
+}
+public function get_shift_aktif($kasir_id) {
+    $this->db->where('kasir_id', $kasir_id);
+    $this->db->where('status', 'OPEN');
+    return $this->db->get('pr_kasir_shift')->row_array();
+}
+
+public function cek_shift()
+{
+    $kasir_id = $this->session->userdata('pegawai_id');
+    $this->load->model('KasirShift_model');
+
+    $shift = $this->KasirShift_model->get_open_shift($kasir_id);
+
+    if (!$shift) {
+        echo json_encode(['status' => 'error', 'message' => 'Tidak ada shift yang aktif.']);
+        return;
+    }
+
+    // Hitung total penjualan selesai (status LUNAS)
+    $this->db->select_sum('total_penjualan');
+    $this->db->where('kasir_order', $kasir_id);
+    $this->db->where('DATE(waktu_order)', date('Y-m-d'));
+    $this->db->where('status_pembayaran', 'LUNAS');
+    $total_penjualan = $this->db->get('pr_transaksi')->row()->total_penjualan ?? 0;
+
+    // Hitung total pending (sisa pembayaran)
+    $this->db->select_sum('sisa_pembayaran');
+    $this->db->where('kasir_order', $kasir_id);
+    $this->db->where('DATE(waktu_order)', date('Y-m-d'));
+    $this->db->where('status_pembayaran !=', 'LUNAS');
+    $total_pending = $this->db->get('pr_transaksi')->row()->sisa_pembayaran ?? 0;
+
+    // Hitung transaksi selesai
+    $this->db->where('kasir_order', $kasir_id);
+    $this->db->where('DATE(waktu_order)', date('Y-m-d'));
+    $this->db->where('status_pembayaran', 'LUNAS');
+    $transaksi_selesai = $this->db->count_all_results('pr_transaksi');
+
+    // Hitung transaksi belum terbayar
+    $this->db->where('kasir_order', $kasir_id);
+    $this->db->where('DATE(waktu_order)', date('Y-m-d'));
+    $this->db->where('status_pembayaran !=', 'LUNAS');
+    $transaksi_pending = $this->db->count_all_results('pr_transaksi');
+
+    // Detail per metode pembayaran
+    $this->db->select('pr_metode_pembayaran.metode_pembayaran, SUM(pr_pembayaran.jumlah) as total')
+        ->from('pr_pembayaran')
+        ->join('pr_metode_pembayaran', 'pr_metode_pembayaran.id = pr_pembayaran.metode_id', 'left')
+        ->where('pr_pembayaran.kasir_id', $kasir_id)
+        ->where('DATE(pr_pembayaran.waktu_bayar)', date('Y-m-d'))
+        ->group_by('pr_pembayaran.metode_id');
+
+    $metode_pembayaran = $this->db->get()->result_array();
+
+    // Hitung total pembayaran masuk
+    $total_bayar_masuk = array_sum(array_column($metode_pembayaran, 'total'));
+
+    // Modal akhir dihitung otomatis
+    $modal_akhir = $shift->modal_awal + $total_bayar_masuk;
+
+    echo json_encode([
+        'status' => 'success',
+        'modal_awal' => (float) $shift->modal_awal,
+        'total_penjualan' => (float) $total_penjualan,
+        'total_pending' => (float) $total_pending,
+        'modal_akhir' => (float) $modal_akhir,
+        'transaksi_selesai' => (int) $transaksi_selesai,
+        'transaksi_pending' => (int) $transaksi_pending,
+        'metode_pembayaran' => $metode_pembayaran
+    ]);
+}
+
+public function tutup_shift()
+{
+    $kasir_id = $this->session->userdata('pegawai_id');
+    $this->load->model('KasirShift_model');
+
+    $shift = $this->KasirShift_model->get_open_shift($kasir_id);
+
+    if (!$shift) {
+        echo json_encode(['status' => 'error', 'message' => 'Tidak ada shift yang aktif.']);
+        return;
+    }
+
+    // Hitung Total Penjualan LUNAS
+    $this->db->select_sum('total_penjualan');
+    $this->db->where('kasir_order', $kasir_id);
+    $this->db->where('DATE(waktu_order)', date('Y-m-d'));
+    $this->db->where('status_pembayaran', 'LUNAS');
+    $total_penjualan = $this->db->get('pr_transaksi')->row()->total_penjualan ?? 0;
+
+    // Hitung Total Pending (dari sisa_pembayaran)
+    $this->db->select_sum('sisa_pembayaran');
+    $this->db->where('kasir_order', $kasir_id);
+    $this->db->where('DATE(waktu_order)', date('Y-m-d'));
+    $this->db->where('status_pembayaran !=', 'LUNAS');
+    $total_pending = $this->db->get('pr_transaksi')->row()->sisa_pembayaran ?? 0;
+
+    // Hitung Total Pembayaran Masuk
+    $this->db->select_sum('jumlah');
+    $this->db->where('kasir_id', $kasir_id);
+    $this->db->where('DATE(waktu_bayar)', date('Y-m-d'));
+    $total_bayar_masuk = $this->db->get('pr_pembayaran')->row()->jumlah ?? 0;
+
+    // Hitung transaksi selesai
+    $this->db->where('kasir_order', $kasir_id);
+    $this->db->where('DATE(waktu_order)', date('Y-m-d'));
+    $this->db->where('status_pembayaran', 'LUNAS');
+    $transaksi_selesai = $this->db->count_all_results('pr_transaksi');
+
+    // Hitung transaksi pending
+    $this->db->where('kasir_order', $kasir_id);
+    $this->db->where('DATE(waktu_order)', date('Y-m-d'));
+    $this->db->where('status_pembayaran !=', 'LUNAS');
+    $transaksi_pending = $this->db->count_all_results('pr_transaksi');
+
+    // Hitung Modal Akhir
+    $modal_akhir = $shift->modal_awal + $total_bayar_masuk;
+
+    // Update ke tabel pr_kasir_shift
+    $this->db->where('id', $shift->id);
+    $this->db->update('pr_kasir_shift', [
+        'total_penjualan' => $total_penjualan,
+        'total_pending' => $total_pending,
+        'modal_akhir' => $modal_akhir,
+        'selisih' => 0,
+        'waktu_tutup' => date('Y-m-d H:i:s'),
+        'status' => 'CLOSE',
+        'transaksi_selesai' => $transaksi_selesai,   // ✅ ini dia
+        'transaksi_pending' => $transaksi_pending    // ✅ ini dia
+    ]);
+
+    echo json_encode([
+        'status' => 'success',
+        'message' => 'Shift berhasil ditutup.',
+        'modal_awal' => $shift->modal_awal,
+        'total_penjualan' => $total_penjualan,
+        'total_pending' => $total_pending,
+        'total_bayar_masuk' => $total_bayar_masuk,
+        'modal_akhir' => $modal_akhir,
+        'transaksi_selesai' => $transaksi_selesai,
+        'transaksi_pending' => $transaksi_pending
+    ]);
+}
+
+
+
 public function get_printer_list() {
     $data = $this->Printer_model->get_all_printers();
     echo json_encode($data);
 }
+
+
 
     // Load Produk AJAX untuk pencarian & kategori
 public function load_produk() {

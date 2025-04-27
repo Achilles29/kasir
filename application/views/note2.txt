@@ -209,6 +209,14 @@ v ubah pesanan, pesanan baru taruh atas
 v cetak simpan transaksi, jika ada detail_unit_id dan atau extra nya yang sama maka gabungkan di cetaknya, jangan dipisah
 v simpan menu Batalkan pesanan
 V rincian_pesanan => refund error
+v close di kolom pencarian produk
+v NOTIF WARNING REFRESH / MENINGGALKAN HALAMAN KASIR SAAT KERANJANG ADA ISINYA
+v perbaiki fungsi scroll kanan
+v perlebar sidebar kiri
+v animasi saat simpan pesanan
+v REVISI WALKIN Customer
+
+login kasir, input modal kasir
 
 
 
@@ -216,9 +224,7 @@ LOG PENGGUNAAN jumlah_poin
 
 OPSI print struk kasir CR CODE
 
-CLEAR PENCARIAN PRODUK SAAT SUDAH KLIK TOMBOL PRODUK
 
-NOTIF WARNING REFRESH / MENINGGALKAN HALAMAN KASIR SAAT KERANJANG ADA ISINYA
 
 simpan pembayaran => print kasir => buka laci
 
@@ -232,22 +238,17 @@ fungsi DP
 session login tetap aktif kecuali di logout
 
 
-SETIAP SELESAI REFRESH, NAIK KE ATAS
 
 
-close di kolom pencarian produk
 
 cetak per divisi belum grouped
 
-pilih voucher
-REVISI WALKIN Customer
-
-login kasir, input modal kasir
+pilih voucher > munculkan cari voucher
 
 
+halaman pending order
 
-perbaiki fungsi scroll kanan
-perlebar sidebar kiri
+
 loadpending order, data refund tampil
 LANJUTKAN BOOST REFUND EXTRA
 default filter bukan hari ini
@@ -257,6 +258,8 @@ print cetak refund manual
 
 
 hapus pesanan kosong ( pesanan yang void semua isinya jangan ditampikan)
+
+cetak divisi => pesanan baru (date create terbaru ) dan semua pesanan
 
 
 

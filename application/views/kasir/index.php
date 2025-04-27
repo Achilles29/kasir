@@ -51,55 +51,50 @@
     }
 
     .sidebar {
-        width: 270px;
-        background: #6b0f1a;
-        color: white;
         display: flex;
         flex-direction: column;
+        height: calc(100vh - 45px);
+        /* 100% tinggi minus top bar */
+        width: 270px;
+        background: #6b0f1a;
         padding: 10px;
+        color: white;
         border-right: 2px solid #f5f0eb;
-        overflow: hidden;
-        /* Fix utama: overflow hidden */
-        position: relative;
-        /* Tambah position relative */
     }
 
-    .sidebar {
-        width: 270px;
-        background: #6b0f1a;
-        color: white;
-        display: flex;
-        flex-direction: column;
-        padding: 10px;
-        border-right: 2px solid #f5f0eb;
-        overflow: hidden;
-        /* Fix utama: overflow hidden */
-        position: relative;
-        /* Tambah position relative */
+
+    #pending-orders-container {
+        flex: 1;
+        overflow-y: auto;
+        padding-bottom: 120px;
+        /* Tambahkan padding agar space aman! */
     }
+
+    #btn-cetak-divisi {
+        display: block;
+        margin: 10px auto;
+        /* tengah otomatis */
+        width: 80%;
+        /* atau 100% kalau mau full */
+        text-align: center;
+    }
+
+    #menu-actions {
+        margin-top: auto;
+        padding-top: 10px;
+        padding-bottom: 50px;
+
+    }
+
+    /* #menu-actions {
+        bottom: 10px;
+    } */
 
     .sidebar h4 {
         color: #ffe7d6;
         font-weight: bold;
     }
 
-    #pending-orders-container {
-        flex-grow: 1;
-        overflow-y: auto;
-        margin-bottom: 100px;
-        /* Beri ruang untuk tombol di bawah */
-    }
-
-    #menu-actions {
-        position: absolute;
-        /* Fix: absolute di dalam relative sidebar */
-        bottom: 10px;
-        /* Jarak dari bawah */
-        width: calc(100% - 20px);
-        /* Sesuai padding sidebar */
-        background: #6b0f1a;
-        /* Warna latar sama sidebar */
-    }
 
     .main-content {
         display: flex;
@@ -110,7 +105,8 @@
         flex: 0 0 45%;
         padding: 10px;
         overflow-y: auto;
-        background: #ffffff;
+        background: #f5f0eb;
+        /* ← GANTI jadi krem */
         border-right: 2px solid #f5f0eb;
     }
 
@@ -118,7 +114,8 @@
         flex: 0 0 55%;
         padding: 10px;
         overflow-y: auto;
-        background: #ffffff;
+        background: #f5f0eb;
+        /* ← GANTI jadi krem */
     }
 
     .kasir-content h4 {
@@ -213,81 +210,13 @@
         text-decoration: underline;
     }
 
-    /* Fullscreen Mode */
-    /* body,
-    html {
-        margin: 0;
-        padding: 0;
-        height: 100%;
-        overflow: hidden;
-    } */
-
-    /* .container-fluid {
-        display: flex;
-        height: 100vh;
-    } */
-
-    /* Sidebar pesanan belum dibayar */
-    /* .sidebar {
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-        background: #f8f9fa;
-        padding: 10px;
-        border-right: 1px solid #ddd;
-    } */
-
-    /* Container untuk pending orders dengan scrolling */
-    /* #pending-orders-container {
-        flex-grow: 1;
-        overflow-y: auto;
-        padding-bottom: 10px;
-    } */
 
     /* Pending Orders */
     #pending-orders {
         max-height: 70vh;
-        /* Batasi tinggi agar tidak menutupi tombol */
     }
 
-    /* Menu tindakan tetap di bawah */
-    /* #menu-actions {
-        position: relative;
-        bottom: 0;
-        width: 100%;
-        background: #ffffff;
-        padding: 10px;
-        border-top: 1px solid #ddd;
-    }
 
-    .pesanan-item {
-        background: #fff;
-        padding: 10px;
-        margin-bottom: 5px;
-        border-radius: 5px;
-        border: 1px solid #ddd;
-        cursor: pointer;
-        transition: background 0.3s ease;
-    }
-
-    .pesanan-item:hover {
-        background: #e9ecef;
-    }
-
-    .pesanan-item.selected {
-        background: #343a40 !important;
-        color: #fff !important;
-        font-weight: bold;
-    } */
-
-
-    /* Area kasir utama */
-    /* 
-    .kasir-content {
-        flex-grow: 1;
-        padding: 10px;
-        overflow-y: auto;
-    } */
 
     /* Kategori Produk */
     #kategori-tab button {
@@ -421,6 +350,36 @@
     .top-menu .nav-link i {
         margin-right: 5px;
     }
+
+    #search {
+        position: relative;
+        padding-right: 30px;
+        /* Biar ada ruang untuk tombol X */
+    }
+
+    /* Tombol clear */
+    #clear-search {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #999;
+        display: none;
+        /* Default sembunyikan */
+    }
+
+    #modalTutupShift .modal-content {
+        border-radius: 10px;
+    }
+
+    #modalTutupShift .modal-header {
+        border-bottom: 0;
+    }
+
+    #modalTutupShift .modal-footer {
+        border-top: 0;
+    }
     </style>
 </head>
 
@@ -469,20 +428,23 @@
 
         <!-- Sidebar Pesanan Belum Dibayar -->
         <div class="sidebar">
-            <h4>Pesanan Belum Dibayar</h4>
-
-            <button id="btn-cetak-divisi" class="btn btn-info mt-2">Cetak per Divisi</button>
-
             <div id="pending-orders-container">
+                <h4>Pesanan Belum Dibayar</h4>
+                <button id="btn-cetak-divisi" class="btn btn-info mt-2">Cetak per Divisi</button>
+
                 <div id="pending-orders" class="mt-2"></div>
             </div>
 
             <div id="menu-actions">
-                <button id="ubah-pesanan" class="btn btn-warning">Ubah Pesanan</button>
-                <button id="rincian-pesanan" class="btn btn-info">Lihat Rincian</button>
-                <button id="btnVoidPilihanModal" class="btn btn-danger">
+                <button id="ubah-pesanan" class="btn btn-secondary btn-block">Ubah Pesanan</button>
+                <button id="rincian-pesanan" class="btn btn-success btn-block">Lihat Rincian/Bayar</button>
+                <button id="btnVoidPilihanModal" class="btn btn-danger btn-block">
                     <i class="fas fa-times-circle"></i> Void Pesanan
                 </button>
+                <button class="btn btn-danger btn-block" id="btnTutupShift">
+                    <i class="fas fa-door-closed"></i> Tutup Shift
+                </button>
+
             </div>
         </div>
 
@@ -552,13 +514,21 @@
 
                 <button id="btn-batal" class="btn btn-danger">Batal</button>
                 <input type="hidden" id="transaksi-id" value="">
-                <button class="btn btn-warning" id="simpan-transaksi">Simpan Pesanan</button>
+                <!-- <button class="btn btn-warning" id="simpan-transaksi">Simpan Pesanan</button> -->
+                <button class="btn btn-warning" id="simpan-transaksi">
+                    <span id="spinner-simpan" class="spinner-border spinner-border-sm d-none" role="status"
+                        aria-hidden="true"></span>
+                    <span id="text-simpan">Simpan Pesanan</span>
+                </button>
                 <button class="btn btn-info" id="simpan-perubahan" style="display:none;">Simpan Perubahan</button>
             </div>
 
             <div class="produk-pilihan">
                 <h4>Cari Produk</h4>
-                <input type="text" id="search" class="form-control" placeholder="Cari produk...">
+                <div style="position: relative;">
+                    <input type="text" id="search" class="form-control" placeholder="Cari produk...">
+                    <span id="clear-search"><i class="fas fa-times"></i></span>
+                </div>
 
                 <h4 class="mt-3">Kategori</h4>
                 <div id="kategori-tab">
@@ -576,7 +546,28 @@
         </div>
 
     </div>
-
+    <!-- Modal Input Modal Awal -->
+    <div class="modal fade" id="modalAwalKasir" tabindex="-1" aria-labelledby="modalAwalKasirLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form id="formModalAwal">
+                <div class="modal-content">
+                    <div class="modal-header bg-maroon text-white">
+                        <h5 class="modal-title" id="modalAwalKasirLabel">Input Modal Awal Kasir</h5>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Modal Awal (Rp)</label>
+                            <input type="number" step="0.01" class="form-control" id="modal_awal" name="modal_awal"
+                                required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Mulai Shift</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 
 
     <!-- Modal Konfirmasi Batal -->
@@ -884,10 +875,83 @@
         </div>
     </div>
 
+    <!-- Modal Tutup Shift -->
+    <div class="modal fade" id="modalTutupShift" tabindex="-1" role="dialog" aria-labelledby="modalTutupShiftLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <form id="formTutupShift">
+                <div class="modal-content rounded-3 border-0 shadow">
+
+                    <div class="modal-header bg-danger text-white rounded-top">
+                        <h5 class="modal-title" id="modalTutupShiftLabel">Tutup Shift Kasir</h5>
+                    </div>
+
+                    <div class="modal-body">
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <strong>Modal Awal:</strong>
+                                <span id="modal-awal">Rp 0</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <strong>Total Penjualan:</strong>
+                                <span id="total-penjualan">Rp 0</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6 class="text-muted mb-2">Rincian Pembayaran:</h6>
+                            <div id="list-metode-pembayaran" class="ps-3"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <strong>Total Pending:</strong>
+                                <span id="total-pending">Rp 0</span>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between fs-5">
+                                <strong>Saldo Akhir:</strong>
+                                <span id="modal-akhir">Rp 0</span>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="mb-2">
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted">Transaksi Selesai:</span>
+                                <strong><span id="transaksi-selesai">0</span> transaksi</strong>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted">Transaksi Belum Terbayar:</span>
+                                <strong><span id="transaksi-pending">0</span> transaksi</strong>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer bg-light rounded-bottom">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                        <button type="button" class="btn btn-danger" id="btn-confirm-tutup-shift">Tutup Shift</button>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+    </div>
+
+
     <script>
     const base_url = "<?= base_url(); ?>";
 
     $(document).ready(function() {
+
+
         $.fn.modal.Constructor.prototype._enforceFocus = function() {};
         let extraData = {};
         let currentProdukId = null;
@@ -898,6 +962,45 @@
         let pembayaranList = [];
         let tagihanTotal = 0;
         let totalPenjualanAwal = 0; // ⬅️ simpan total penjualan awal
+
+
+        <?php if ($show_modal_awal): ?>
+        $(document).ready(function() {
+            $("#modalAwalKasir").modal({
+                backdrop: 'static',
+                keyboard: false
+            });
+        });
+        <?php endif; ?>
+
+        $("#formModalAwal").on('submit', function(e) {
+            e.preventDefault();
+            var modal_awal = $("#modal_awal").val();
+
+            $.ajax({
+                url: '<?= site_url('kasir/start_shift') ?>',
+                method: 'POST',
+                data: {
+                    modal_awal: modal_awal
+                },
+                dataType: 'json', // <-- Tambahkan ini!
+                success: function(response) {
+                    if (response.status == 'success') {
+                        Swal.fire('Berhasil', 'Shift dimulai', 'success').then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire('Gagal', response.message, 'error');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    Swal.fire('Gagal', 'Terjadi kesalahan saat koneksi ke server.',
+                        'error');
+                }
+            });
+        });
+
+
 
         function resetVoucherForm() {
             $("#input-voucher").val("").attr("readonly", false);
@@ -936,9 +1039,31 @@
             $("#total-bayar").text(formatRupiah(totalBayar > 0 ? totalBayar : 0));
         }
 
+
+        var allowSearchCustomer = true; // flag global
+
+        $("#customer-type").on("change", function() {
+            const tipe = $(this).val();
+            if (tipe === "member") {
+                allowSearchCustomer = true;
+                $("#customer-member").show();
+                $("#customer-walkin").hide();
+                $("#walkin-customer-name").val("");
+            } else {
+                allowSearchCustomer = false;
+                $("#customer-member").hide();
+                $("#customer-walkin").show();
+                $("#search-customer").val("");
+                $("#customer-id").val("");
+                $("#customer-list").hide();
+            }
+        });
+
         $("#search-customer").on("keyup", function() {
+            if (!allowSearchCustomer) return; // Kalau tidak boleh cari, langsung keluar
+
             let search = $(this).val().trim();
-            if (search.length > 1) {
+            if (search.length > 0) {
                 $.ajax({
                     url: base_url + "kasir/search_customer",
                     type: "GET",
@@ -950,7 +1075,7 @@
                         let customerHtml = "";
                         $.each(response, function(index, customer) {
                             customerHtml += `<li class="list-group-item select-customer" data-id="${customer.id}" data-nama="${customer.nama}">
-                            ${customer.nama} - ${customer.telepon}</li>`;
+                        ${customer.nama} - ${customer.telepon}</li>`;
                         });
                         $("#customer-list").html(customerHtml).show();
                     },
@@ -959,6 +1084,7 @@
                 $("#customer-list").hide();
             }
         });
+
 
         $(document).on("click", ".select-customer", function() {
             let nama = $(this).data("nama");
@@ -1000,6 +1126,23 @@
                 }
             });
         }
+
+
+        // Tampilkan tombol X saat ada ketikan
+        $('#search').on('input', function() {
+            if ($(this).val().length > 0) {
+                $('#clear-search').show();
+            } else {
+                $('#clear-search').hide();
+            }
+        });
+
+        // Klik tombol X untuk bersihkan
+        $('#clear-search').click(function() {
+            $('#search').val('');
+            $('#clear-search').hide();
+            $('#search').trigger('input'); // Untuk trigger event search lagi kalau ada
+        });
 
         $("#search").on("keyup", function() {
             let search = $(this).val().trim();
@@ -1141,7 +1284,20 @@
         });
 
 
+        // Fungsi untuk cek apakah keranjang masih ada isinya
+        function isOrderListNotEmpty() {
+            return $('#order-list').children().length > 0;
+        }
 
+        // Event sebelum unload
+        window.addEventListener('beforeunload', function(e) {
+            if (isOrderListNotEmpty()) {
+                var confirmationMessage =
+                    'Pesanan Anda belum disimpan. Apakah Anda yakin ingin keluar atau refresh halaman?';
+                (e || window.event).returnValue = confirmationMessage; // Gecko + IE
+                return confirmationMessage; // Gecko + Webkit, Safari, Chrome
+            }
+        });
         // Fungsi bantu untuk mengambil data transaksi
         function getOrderData() {
             return {
@@ -1157,11 +1313,10 @@
             };
         }
 
-        // Simpan transaksi baru atau ubah
         $("#simpan-transaksi, #simpan-perubahan").on("click", function() {
             let orderData = getOrderData();
 
-            orderData.transaksi_id = $("#transaksi-id").val(); // ✅ penting!
+            orderData.transaksi_id = $("#transaksi-id").val();
 
             $("#order-list tr[data-id]").each(function() {
                 const uid = $(this).data("uid");
@@ -1179,6 +1334,11 @@
                 });
             });
 
+            // 🔥 Tambahkan ini sebelum AJAX
+            $("#simpan-transaksi, #simpan-perubahan").prop("disabled", true);
+            $("#spinner-simpan").removeClass("d-none");
+            $("#text-simpan").text("Menyimpan...");
+
             $.ajax({
                 url: base_url + "kasir/simpan_transaksi",
                 type: "POST",
@@ -1187,6 +1347,11 @@
                     order_data: JSON.stringify(orderData)
                 },
                 success: function(response) {
+                    // 🔥 Tambahkan ini setelah sukses
+                    $("#simpan-transaksi, #simpan-perubahan").prop("disabled", false);
+                    $("#spinner-simpan").addClass("d-none");
+                    $("#text-simpan").text("Simpan Pesanan");
+
                     alert((response.status === "success" ? "✅" : "❌") + " " + response
                         .message);
                     if (response.status === "success") {
@@ -2392,20 +2557,88 @@
         }
 
 
-        // // Kirim ke cetak_void_internal
-        // function cetakVoidPilihan(void_ids) {
-        //     $.post(base_url + "kasir/cetak_void_internal", {
-        //         void_ids: void_ids
-        //     }, function(res) {
-        //         if (res.status === 'success') {
-        //             Swal.fire('Berhasil', res.message, 'success');
-        //         } else {
-        //             Swal.fire('Gagal', res.message, 'error');
-        //         }
-        //     }, "json");
-        // }
+
+        $("#btnTutupShift").click(function() {
+            $.ajax({
+                url: base_url + "kasir/cek_shift",
+                method: "GET",
+                dataType: "json",
+                success: function(response) {
+                    if (response.status === 'success') {
+                        // Set data ke modal
+                        $("#modal-awal").text(formatRupiah(response.modal_awal));
+                        $("#total-penjualan").text(formatRupiah(response.total_penjualan));
+                        $("#total-pending").text(formatRupiah(response.total_pending));
+                        $("#modal-akhir").text(formatRupiah(response.modal_akhir));
+                        $("#transaksi-selesai").text(response.transaksi_selesai);
+                        $("#transaksi-pending").text(response.transaksi_pending);
+
+                        // Bersihkan dulu rincian metode pembayaran
+                        $("#list-metode-pembayaran").html('');
+                        if (response.metode_pembayaran.length > 0) {
+                            response.metode_pembayaran.forEach(function(item) {
+                                $("#list-metode-pembayaran").append(
+                                    '<p>' + item.metode_pembayaran + ': Rp ' +
+                                    formatRupiah(item.total) + '</p>'
+                                );
+                            });
+                        }
+
+                        $("#modalTutupShift").modal('show');
+                    } else {
+                        Swal.fire('Gagal', response.message, 'error');
+                    }
+                },
+                error: function() {
+                    Swal.fire('Gagal', 'Tidak dapat menghubungi server.', 'error');
+                }
+            });
+        });
+
+        function formatRupiah(angka) {
+            return "Rp " + parseInt(angka).toLocaleString("id-ID");
+        }
 
 
+        // Fungsi bantu format rupiah
+        function formatRupiah(angka) {
+            return parseInt(angka).toLocaleString('id-ID');
+        }
+
+
+        function formatRupiah(angka) {
+            return "Rp " + parseInt(angka).toLocaleString("id-ID");
+        }
+
+        // Tombol konfirmasi tutup shift
+        $("#btn-confirm-tutup-shift").click(function() {
+            Swal.fire({
+                title: "Tutup Shift?",
+                text: "Pastikan semua transaksi sudah selesai.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Tutup Shift",
+                cancelButtonText: "Batal"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: base_url + "kasir/tutup_shift",
+                        type: "POST",
+                        dataType: "json",
+                        success: function(res) {
+                            if (res.status === 'success') {
+                                Swal.fire("Sukses", res.message, "success").then(
+                                    () => {
+                                        location.reload();
+                                    });
+                            } else {
+                                Swal.fire("Gagal", res.message, "error");
+                            }
+                        }
+                    });
+                }
+            });
+        });
 
 
     });
