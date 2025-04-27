@@ -826,41 +826,61 @@ public function simpan_pembayaran($transaksi_id, $pembayaran, $kasir_id)
 public function generate_refund_struk($transaksi, $produk_refund, $printer, $struk_data, $lokasi)
 {
     $out = '';
-    $width = 32;
-    $waktu = date('d-m-Y H:i');
+    $width = 32; // lebar struk (optional ambil dari printer setting)
+    $waktu_refund = date('d-m-Y H:i'); // waktu saat ini
 
-    if (empty($produk_refund)) return '';
+    if (empty($produk_refund)) {
+        return '';
+    }
 
     $no_transaksi = $transaksi['no_transaksi'] ?? '-';
     $customer = $transaksi['customer'] ?? '-';
     $nomor_meja = $transaksi['nomor_meja'] ?? '-';
     $kasir_order = $transaksi['kasir_order'] ?? '-';
-    $alasan = $produk_refund[0]['alasan'] ?? '-';
+    $alasan_refund = $produk_refund[0]['alasan'] ?? '-';
+
+    $lokasi = strtoupper($printer['lokasi_printer']);
+    $isChecker = ($lokasi == 'CHECKER');
 
     $out .= $this->center_text("[ $lokasi REFUND ]", $width) . "\n";
     $out .= str_repeat("-", $width) . "\n";
-    $out .= "No: $no_transaksi\n";
-    $out .= "Order: $kasir_order\n";
-    $out .= "Customer: $customer\n";
-    $out .= "Meja: $nomor_meja\n";
-    $out .= "Refund: $waktu\n";
+    $out .= "No: " . $no_transaksi . "\n";
+    $out .= "Order: " . $kasir_order . "\n";
+    $out .= "Customer: " . $customer . "\n";
+    $out .= "Meja: " . $nomor_meja . "\n";
+    $out .= "Refund: " . $waktu_refund . "\n";
     $out .= str_repeat("-", $width) . "\n";
+
+    $total = 0;
 
     foreach ($produk_refund as $item) {
         $jumlah = intval($item['jumlah']);
         $harga = intval($item['harga']);
-        $line_left = !empty($item['nama_extra']) ? "> {$jumlah}x {$item['nama_extra']}" : "{$jumlah}x {$item['nama_produk']}";
-        $line_right = number_format($harga, 0, ',', '.');
+        $subtotal = $jumlah * $harga;
+        $total += $subtotal;
+
+        if (!empty($item['nama_extra'])) {
+            $line_left = "> {$jumlah}x {$item['nama_extra']}";
+        } else {
+            $line_left = "{$jumlah}x {$item['nama_produk']}";
+        }
+
+        $line_right = number_format($subtotal, 0, ',', '.');
         $out .= $this->format_struk_line($line_left, $line_right, $width) . "\n";
     }
 
     $out .= str_repeat("-", $width) . "\n";
-    $out .= "Alasan: $alasan\n";
+    $out .= $this->format_struk_line("Total Refund", number_format($total, 0, ',', '.'), $width) . "\n";
+    $out .= str_repeat("-", $width) . "\n";
+    $out .= "Alasan: " . $alasan_refund . "\n";
     $out .= str_repeat("-", $width) . "\n";
     $out .= date('d/m/Y H:i:s') . "\n";
 
     return $out;
 }
+
+
+
 public function get_daftar_refund($tanggal_awal, $tanggal_akhir)
 {
     return $this->db

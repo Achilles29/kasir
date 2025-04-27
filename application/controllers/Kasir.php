@@ -1151,9 +1151,6 @@ if (!empty($detail_ids)) {
 
     }
 
-
-
-
     // Tambah poin customer hanya jika transaksi sudah LUNAS
     if ($transaksi->customer_id && $status_pembayaran == 'LUNAS') {
         $detail = $this->db->get_where('pr_detail_transaksi', [
@@ -1598,59 +1595,87 @@ public function rincian_pesanan($id)
 public function cetak_refund_internal()
 {
     $kode_refund = $this->input->post('kode_refund');
-    if (!$kode_refund) {
-        echo json_encode(['status' => 'error', 'message' => 'Kode refund tidak ditemukan.']);
+    $this->load->model('Setting_model');
+    $this->load->model('Printer_model');
+
+    if (empty($kode_refund)) {
+        echo json_encode(['status' => 'error', 'message' => 'Kode refund kosong.']);
         return;
     }
 
-    $this->load->model('Setting_model');
-    $this->load->model('Printer_model');
-    $this->load->model('Refund_model');
-    $this->load->model('Kasir_model');
+    // Ambil semua refund item berdasarkan kode refund
+    $refunds = $this->db
+        ->select('
+            r.*, 
+            dt.pr_produk_id, 
+            p.nama_produk, 
+            r.produk_extra_id, 
+            e.nama_extra, 
+            t.no_transaksi, 
+            t.customer, 
+            t.nomor_meja, 
+            k.pr_divisi_id, 
+            pg.nama as kasir_order
+        ')
+        ->from('pr_refund r')
+        ->join('pr_detail_transaksi dt', 'dt.id = r.pr_detail_transaksi_id', 'left')
+        ->join('pr_produk p', 'p.id = dt.pr_produk_id', 'left')
+        ->join('pr_produk_extra e', 'e.id = r.produk_extra_id', 'left')
+        ->join('pr_kategori k', 'k.id = p.kategori_id', 'left')
+        ->join('pr_transaksi t', 't.id = r.pr_transaksi_id', 'left')
+        ->join('abs_pegawai pg', 'pg.id = t.kasir_order', 'left')
+        ->where('r.kode_refund', $kode_refund)
+        ->get()
+        ->result_array();
 
-    $refunds = $this->Refund_model->get_refund_by_kode($kode_refund);
-    if (!$refunds) {
+
+    if (empty($refunds)) {
         echo json_encode(['status' => 'error', 'message' => 'Data refund tidak ditemukan.']);
         return;
     }
 
-    // Ambil data transaksi untuk header struk
-    $transaksi = $this->db
-        ->select('t.no_transaksi, t.customer, t.nomor_meja, p.nama as kasir_order')
-        ->from('pr_transaksi t')
-        ->join('abs_pegawai p', 'p.id = t.kasir_order', 'left')
-        ->where('t.no_transaksi', $refunds[0]->no_transaksi)
-        ->get()->row_array();
+    $transaksi = [
+        'no_transaksi' => $refunds[0]['no_transaksi'],
+        'customer' => $refunds[0]['customer'],
+        'nomor_meja' => $refunds[0]['nomor_meja'],
+        'kasir_order' => $refunds[0]['kasir_order']
+    ];
 
     $struk_data = $this->Setting_model->get_data_struk();
 
-    // Group data refund berdasarkan divisi
+    // Group refund per divisi
     $refund_per_divisi = [];
     foreach ($refunds as $r) {
-        $divisi = $r->nama_divisi ?: 'OTHER';
-        $refund_per_divisi[$divisi][] = (array) $r;
+        $divisi_id = $r['pr_divisi_id'] ?: 0;
+        $refund_per_divisi[$divisi_id][] = $r;
     }
 
-    foreach ($refund_per_divisi as $divisi => $list) {
-        $printer = $this->Printer_model->get_by_lokasi($divisi);
+    // Cetak per divisi
+    foreach ($refund_per_divisi as $divisi_id => $list_refund) {
+        $printer = $this->Printer_model->get_by_divisi($divisi_id);
         if (!$printer) continue;
 
         $lokasi = strtoupper($printer['lokasi_printer']);
         if (!in_array($lokasi, ['BAR', 'KITCHEN'])) continue;
 
-        $struk_text = $this->Kasir_model->generate_refund_struk($transaksi, $list, $printer, $struk_data, $lokasi);
+        $tampilan = $this->Setting_model->get_tampilan_struk($printer['id']);
+        $struk_text = $this->Kasir_model->generate_refund_struk($transaksi, $list_refund, $printer, $struk_data, $lokasi);
+
         $this->send_to_python_service($lokasi, $struk_text);
     }
 
     // Cetak ke CHECKER
     $printer_checker = $this->Printer_model->get_by_lokasi('CHECKER');
     if ($printer_checker) {
-        $struk_checker = $this->Kasir_model->generate_refund_struk($transaksi, (array) $refunds, $printer_checker, $struk_data, 'CHECKER');
+        $tampilan_checker = $this->Setting_model->get_tampilan_struk($printer_checker['id']);
+        $struk_checker = $this->Kasir_model->generate_refund_struk($transaksi, $refunds, $printer_checker, $struk_data, 'CHECKER');
+
         $this->send_to_python_service('CHECKER', $struk_checker);
     }
 
     echo json_encode(['status' => 'success', 'message' => 'Refund berhasil dicetak']);
 }
+
 
 
 public function refund_produk($detail_id)
@@ -1926,22 +1951,7 @@ public function refund_semua($transaksi_id)
 
 }
 
-// public function daftar_refund()
-// {
-//     $data['title'] = "Daftar Refund";
 
-//     $tanggal_awal = $this->input->get('tanggal_awal') ?: date('Y-m-d');
-//     $tanggal_akhir = $this->input->get('tanggal_akhir') ?: date('Y-m-d');
-
-//     $data['tanggal_awal'] = $tanggal_awal;
-//     $data['tanggal_akhir'] = $tanggal_akhir;
-
-//     $data['refunds'] = $this->Kasir_model->get_daftar_refund($tanggal_awal, $tanggal_akhir);
-
-//     $this->load->view('templates/header', $data);
-//     $this->load->view('kasir/daftar_refund', $data);
-//     $this->load->view('templates/footer');
-// }
 
 public function daftar_refund()
 {

@@ -37,6 +37,7 @@
     padding: 1.5rem;
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <div class="container-fluid mt-4">
     <h4 class="mb-4"><i class="fas fa-undo-alt"></i> Laporan Refund</h4>
@@ -155,7 +156,7 @@ $(document).ready(function() {
                             <button type="button" class="btn btn-sm btn-info btn-detail" data-kode="${kode}" title="Detail">
                                 <i class="fas fa-eye"></i>
                             </button>
-                            <button type="button" class="btn btn-sm btn-danger btn-cetak" data-kode="${kode}" title="Cetak">
+                            <button class="btn btn-danger btn-sm btn-cetak" data-kode="${kode}" title="Cetak Refund">
                                 <i class="fas fa-print"></i>
                             </button>`;
                     }
@@ -206,25 +207,23 @@ $(document).ready(function() {
 
         Swal.fire({
             title: 'Cetak Refund?',
-            text: "Apakah ingin mencetak refund ini?",
+            text: "Cetak refund ini ke printer?",
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#800000',
-            cancelButtonColor: '#aaa',
+            cancelButtonColor: '#d33',
             confirmButtonText: 'Ya, Cetak!'
         }).then((result) => {
             if (result.isConfirmed) {
-                $.post(base_url + "kasir/cetak_refund_internal", {
+                $.post(base_url + 'kasir/cetak_refund_internal', {
                     kode_refund: kode_refund
                 }, function(res) {
-                    if (res.status === 'success') {
-                        Swal.fire('Berhasil', res.message, 'success');
+                    if (res.status == 'success') {
+                        Swal.fire('Sukses', res.message, 'success');
                     } else {
                         Swal.fire('Gagal', res.message, 'error');
                     }
-                }, "json").fail(function() {
-                    Swal.fire('Error', 'Gagal menghubungi server.', 'error');
-                });
+                }, 'json');
             }
         });
     });

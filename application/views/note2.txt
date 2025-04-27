@@ -208,6 +208,7 @@ v ubah pesanan, total_penjualan menjumlah semua termasuk yang sudah tervoid
 v ubah pesanan, pesanan baru taruh atas
 v cetak simpan transaksi, jika ada detail_unit_id dan atau extra nya yang sama maka gabungkan di cetaknya, jangan dipisah
 v simpan menu Batalkan pesanan
+V rincian_pesanan => refund error
 
 
 
@@ -255,12 +256,40 @@ print cetak void manual
 print cetak refund manual
 
 
-hapus pesanan
+hapus pesanan kosong ( pesanan yang void semua isinya jangan ditampikan)
 
-rincian_pesanan => refund error
 
 
 
 CLEAR
-pr_detail_transaksi berisi : 	id 	pr_transaksi_id 	pr_produk_id 	detail_unit_id 	jumlah 	harga 	catatan 	is_printed 	status 	created_at 	updated_at
+pr_transaksi berisi : id 	customer_id 	tanggal 	no_transaksi 	waktu_order 	waktu_bayar 	jenis_order_id 	customer 	nomor_meja 	total_penjualan 	kasir_order 	kasir_bayar 	kode_voucher 	diskon 	total_pembayaran 	sisa_pembayaran 	status_pembayaran 	created_at 	updated_at 	
+
+pr_detail_transaksi berisi 	id 	pr_transaksi_id 	pr_produk_id 	detail_unit_id 	jumlah 	harga 	catatan 	is_printed 	status 	created_at 	updated_at 	
+
 pr_detail_extra : id 	detail_transaksi_id 	pr_produk_extra_id 	jumlah 	harga 	subtotal 	sku 	satuan 	hpp 	created_at 	updated_at 	status
+
+
+
+LAPORAN
+    LAPORAN PENJUALAN
+        Ringkasa penjualan
+        detail penjualan
+        Laporan per periode
+        Laporan Jenis Bayar
+        Laporan Jenis Order
+        Laporan void
+        Laporan refund
+
+    Laporan Dapur
+        Laporan Proses Order
+        Laporan Proses Produk
+    Laporan Produk
+        Penjualan Produk
+        Penjualan divisi
+        Penjualan kategori_id
+        Penjualan Ekstra
+    Laporan Promo & Loyalti
+        Laporan Promo
+        Laporan Poin
+        Laporan Voucher
+        Laporan Komplimen

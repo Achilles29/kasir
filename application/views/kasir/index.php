@@ -35,7 +35,6 @@
 
 
     <style>
-    /* Fullscreen Mode */
     body,
     html {
         margin: 0;
@@ -46,25 +45,204 @@
 
     .container-fluid {
         display: flex;
-        height: 100vh;
+        height: calc(100vh - 45px);
+        /* dikurangi topmenu */
+        background: #f5f0eb;
     }
 
-    /* Sidebar pesanan belum dibayar */
     .sidebar {
+        width: 270px;
+        background: #6b0f1a;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        padding: 10px;
+        border-right: 2px solid #f5f0eb;
+        overflow: hidden;
+        /* Fix utama: overflow hidden */
+        position: relative;
+        /* Tambah position relative */
+    }
+
+    .sidebar {
+        width: 270px;
+        background: #6b0f1a;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        padding: 10px;
+        border-right: 2px solid #f5f0eb;
+        overflow: hidden;
+        /* Fix utama: overflow hidden */
+        position: relative;
+        /* Tambah position relative */
+    }
+
+    .sidebar h4 {
+        color: #ffe7d6;
+        font-weight: bold;
+    }
+
+    #pending-orders-container {
+        flex-grow: 1;
+        overflow-y: auto;
+        margin-bottom: 100px;
+        /* Beri ruang untuk tombol di bawah */
+    }
+
+    #menu-actions {
+        position: absolute;
+        /* Fix: absolute di dalam relative sidebar */
+        bottom: 10px;
+        /* Jarak dari bawah */
+        width: calc(100% - 20px);
+        /* Sesuai padding sidebar */
+        background: #6b0f1a;
+        /* Warna latar sama sidebar */
+    }
+
+    .main-content {
+        display: flex;
+        flex: 1;
+    }
+
+    .detail-pesanan {
+        flex: 0 0 45%;
+        padding: 10px;
+        overflow-y: auto;
+        background: #ffffff;
+        border-right: 2px solid #f5f0eb;
+    }
+
+    .produk-pilihan {
+        flex: 0 0 55%;
+        padding: 10px;
+        overflow-y: auto;
+        background: #ffffff;
+    }
+
+    .kasir-content h4 {
+        color: #6b0f1a;
+        font-weight: bold;
+    }
+
+    .btn-primary,
+    .btn-info,
+    .btn-danger,
+    .btn-warning {
+        border: none;
+        border-radius: 6px;
+    }
+
+    .btn-primary {
+        background-color: #6b0f1a;
+    }
+
+    .btn-info {
+        background-color: #a6482a;
+    }
+
+    .btn-danger {
+        background-color: #c1121f;
+    }
+
+    .top-menu {
+        height: 45px;
+        background-color: #6b0f1a;
+        color: #ffe7d6;
+        display: flex;
+        align-items: center;
+        padding: 0 10px;
+    }
+
+    .top-menu a {
+        color: #ffe7d6;
+        margin-right: 15px;
+        font-weight: bold;
+    }
+
+
+
+    /* Sidebar Pesanan Item */
+    .pesanan-item {
+        background: #ffffff;
+        padding: 8px;
+        margin-bottom: 8px;
+        border-radius: 6px;
+        color: #6b0f1a;
+        border: 1px solid #eee;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .pesanan-item:hover {
+        background: #ffe7d6;
+    }
+
+    .pesanan-item.selected {
+        background: #6b0f1a;
+        color: #ffffff;
+    }
+
+    /* Tengah dan Kanan */
+    .kasir-content {
+        display: flex;
+        flex: 1;
+        background: #f5f0eb;
+    }
+
+
+    /* Tombol */
+    .btn {
+        font-size: 14px;
+        border-radius: 6px;
+    }
+
+    /* Top bar */
+    .top-menu {
+        height: 45px;
+        background: #6b0f1a;
+        display: flex;
+        align-items: center;
+        padding: 0 10px;
+        color: white;
+    }
+
+
+    .top-menu a:hover {
+        text-decoration: underline;
+    }
+
+    /* Fullscreen Mode */
+    /* body,
+    html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+    } */
+
+    /* .container-fluid {
+        display: flex;
+        height: 100vh;
+    } */
+
+    /* Sidebar pesanan belum dibayar */
+    /* .sidebar {
         display: flex;
         flex-direction: column;
         height: 100vh;
         background: #f8f9fa;
         padding: 10px;
         border-right: 1px solid #ddd;
-    }
+    } */
 
     /* Container untuk pending orders dengan scrolling */
-    #pending-orders-container {
+    /* #pending-orders-container {
         flex-grow: 1;
         overflow-y: auto;
         padding-bottom: 10px;
-    }
+    } */
 
     /* Pending Orders */
     #pending-orders {
@@ -73,7 +251,7 @@
     }
 
     /* Menu tindakan tetap di bawah */
-    #menu-actions {
+    /* #menu-actions {
         position: relative;
         bottom: 0;
         width: 100%;
@@ -98,20 +276,18 @@
 
     .pesanan-item.selected {
         background: #343a40 !important;
-        /* Warna abu-abu gelap */
         color: #fff !important;
-        /* Warna teks putih */
         font-weight: bold;
-    }
+    } */
 
 
     /* Area kasir utama */
-
+    /* 
     .kasir-content {
         flex-grow: 1;
         padding: 10px;
         overflow-y: auto;
-    }
+    } */
 
     /* Kategori Produk */
     #kategori-tab button {
@@ -222,10 +398,10 @@
         /* merah VOIDED */
     }
 
-    .top-menu {
+    /* .top-menu {
         height: 45px;
         background-color: #f8f9fa;
-    }
+    } */
 
     .top-menu .nav-item {
         display: inline-block;
@@ -295,135 +471,110 @@
         <div class="sidebar">
             <h4>Pesanan Belum Dibayar</h4>
 
-            <!-- Tombol Cetak -->
-            <!-- <button id="btn-cetak" class="btn btn-dark mb-2">
-                <i class="fas fa-print"></i> Cetak
-            </button> -->
             <button id="btn-cetak-divisi" class="btn btn-info mt-2">Cetak per Divisi</button>
-            <!-- <button id="btn-cetak-baru" class="btn btn-dark mt-2">Cetak Pesanan Baru</button> -->
 
-
-            <!-- Pending Orders dengan scrolling -->
             <div id="pending-orders-container">
-                <!-- <div id="pending-orders"></div> -->
                 <div id="pending-orders" class="mt-2"></div>
             </div>
 
-            <!-- Menu Aksi -->
             <div id="menu-actions">
-                <button id="ubah-pesanan" class="btn btn-primary">Ubah Pesanan</button>
+                <button id="ubah-pesanan" class="btn btn-warning">Ubah Pesanan</button>
                 <button id="rincian-pesanan" class="btn btn-info">Lihat Rincian</button>
-                <!-- <button id="cetak-kot" class="btn btn-warning">Cetak ulang KOT</button>
-                <button id="faktur" class="btn btn-info">Faktur</button>
-                <button id="tagihan" class="btn btn-success">Tagihan</button> -->
-                <!-- <button id="batalkan-pesanan" class="btn btn-danger">Batalkan Pesanan</button> -->
                 <button id="btnVoidPilihanModal" class="btn btn-danger">
                     <i class="fas fa-times-circle"></i> Void Pesanan
                 </button>
-                <button id="batalkan-pesanan" class="btn btn-danger"></button>
             </div>
         </div>
 
+        <!-- Area Utama (Tengah + Kanan) -->
+        <div class="main-content">
+            <div class="detail-pesanan">
+                <h4>Detail Pesanan</h4>
 
-        <!-- Area Utama POS -->
-        <div class="kasir-content">
-            <h2 class="text-center mt-3">POS - Namua Coffee & Eatery</h2>
-
-            <div class="row">
-                <div class="col-md-6">
-                    <h4>Detail Pesanan</h4>
-
-                    <!-- Jenis Order -->
-                    <div class="form-group">
-                        <label>Jenis Order</label>
-                        <select id="jenis-order" class="form-control">
-                            <?php foreach ($jenis_order as $jo): ?>
-                            <option value="<?= $jo['id']; ?>" <?= $jo['id'] == 1 ? 'selected' : '' ?>>
-                                <?= $jo['jenis_order']; ?>
-                            </option>
-                            <?php endforeach; ?>
-                        </select>
-
-                    </div>
-
-                    <!-- Customer -->
-                    <div class="form-group">
-                        <label>Pilih Customer</label>
-                        <select id="customer-type" class="form-control">
-                            <option value="member">Customer Member</option>
-                            <option value="walkin">Walk-in Customer</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group" id="customer-member">
-                        <label>Cari Customer</label>
-                        <input type="text" id="search-customer" class="form-control" placeholder="Cari Nama Customer">
-                        <ul id="customer-list" class="list-group"></ul>
-                    </div>
-
-                    <div class="form-group" id="customer-walkin" style="display:none;">
-                        <label>Nama Customer</label>
-                        <input type="hidden" id="customer-id" value="">
-                        <input type="text" id="walkin-customer-name" class="form-control"
-                            placeholder="Masukkan Nama Customer">
-                    </div>
-
-                    <!-- Nomor Meja -->
-                    <div class="form-group">
-                        <label>Nomor Meja</label>
-                        <input type="text" id="nomor-meja" class="form-control"
-                            placeholder="Masukkan nomor meja (jika ada)">
-                    </div>
-
-                    <table class="table mt-3">
-                        <thead>
-                            <tr>
-                                <th>Barang</th>
-                                <th>Harga</th>
-                                <th>Jumlah</th>
-                                <th>Total</th>
-                                <th>Extra</th>
-                                <th>Catatan</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="order-list"></tbody>
-                    </table>
-
-                    <!-- Total Harga Sebelum Diskon -->
-                    <h4>Total Harga: <span id="total-harga">Rp 0</span></h4>
-
-                    <!-- Nominal Diskon -->
-                    <!-- <h4>Diskon: <span id="nominal-diskon">Rp 0</span></h4> -->
-
-                    <!-- Total Bayar Setelah Diskon -->
-                    <h3>Total Bayar: <span id="total-bayar">Rp 0</span></h3>
-                    <!-- <h4>Total Bayar: <span id="total-bayar">Rp 0</span></h4> -->
-                    <button id="btn-batal" class="btn btn-danger">Batal</button>
-                    <input type="hidden" id="transaksi-id" value="">
-                    <button class="btn btn-warning" id="simpan-transaksi">Simpan Pesanan</button>
-                    <button class="btn btn-info" id="simpan-perubahan" style="display:none;">Simpan Perubahan</button>
-                    <!-- <button id="rincian-pesanan" class="btn btn-success">Selesaikan Pembayaran</button> -->
-
-                </div>
-
-                <div class="col-md-6">
-                    <h4>Cari Produk</h4>
-                    <input type="text" id="search" class="form-control" placeholder="Cari produk...">
-                    <h4 class="mt-3">Kategori</h4>
-                    <div id="kategori-tab">
-                        <button class="btn btn-outline-dark active" data-kategori="">Semua</button>
-                        <?php foreach ($kategori as $k): ?>
-                        <button class="btn btn-outline-dark" data-kategori="<?= $k['id']; ?>">
-                            <?= $k['nama_kategori']; ?>
-                        </button>
+                <!-- Jenis Order -->
+                <div class="form-group">
+                    <label>Jenis Order</label>
+                    <select id="jenis-order" class="form-control">
+                        <?php foreach ($jenis_order as $jo): ?>
+                        <option value="<?= $jo['id']; ?>" <?= $jo['id'] == 1 ? 'selected' : '' ?>>
+                            <?= $jo['jenis_order']; ?>
+                        </option>
                         <?php endforeach; ?>
-                    </div>
-                    <h4 class="mt-3">Daftar Produk</h4>
-                    <div class="row" id="produk-list"></div>
+                    </select>
                 </div>
+
+                <!-- Customer -->
+                <div class="form-group">
+                    <label>Pilih Customer</label>
+                    <select id="customer-type" class="form-control">
+                        <option value="member">Customer Member</option>
+                        <option value="walkin">Walk-in Customer</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="customer-member">
+                    <label>Cari Customer</label>
+                    <input type="text" id="search-customer" class="form-control" placeholder="Cari Nama Customer">
+                    <ul id="customer-list" class="list-group"></ul>
+                </div>
+
+                <div class="form-group" id="customer-walkin" style="display:none;">
+                    <label>Nama Customer</label>
+                    <input type="hidden" id="customer-id" value="">
+                    <input type="text" id="walkin-customer-name" class="form-control"
+                        placeholder="Masukkan Nama Customer">
+                </div>
+
+                <!-- Nomor Meja -->
+                <div class="form-group">
+                    <label>Nomor Meja</label>
+                    <input type="text" id="nomor-meja" class="form-control"
+                        placeholder="Masukkan nomor meja (jika ada)">
+                </div>
+
+                <table class="table mt-3">
+                    <thead>
+                        <tr>
+                            <th>Barang</th>
+                            <th>Harga</th>
+                            <th>Jumlah</th>
+                            <th>Total</th>
+                            <th>Extra</th>
+                            <th>Catatan</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="order-list"></tbody>
+                </table>
+
+                <h4>Total Harga: <span id="total-harga">Rp 0</span></h4>
+                <h3>Total Bayar: <span id="total-bayar">Rp 0</span></h3>
+
+                <button id="btn-batal" class="btn btn-danger">Batal</button>
+                <input type="hidden" id="transaksi-id" value="">
+                <button class="btn btn-warning" id="simpan-transaksi">Simpan Pesanan</button>
+                <button class="btn btn-info" id="simpan-perubahan" style="display:none;">Simpan Perubahan</button>
+            </div>
+
+            <div class="produk-pilihan">
+                <h4>Cari Produk</h4>
+                <input type="text" id="search" class="form-control" placeholder="Cari produk...">
+
+                <h4 class="mt-3">Kategori</h4>
+                <div id="kategori-tab">
+                    <button class="btn btn-outline-dark active" data-kategori="">Semua</button>
+                    <?php foreach ($kategori as $k): ?>
+                    <button class="btn btn-outline-dark" data-kategori="<?= $k['id']; ?>">
+                        <?= $k['nama_kategori']; ?>
+                    </button>
+                    <?php endforeach; ?>
+                </div>
+
+                <h4 class="mt-3">Daftar Produk</h4>
+                <div class="row" id="produk-list"></div>
             </div>
         </div>
+
     </div>
 
 

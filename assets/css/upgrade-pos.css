@@ -1,0 +1,139 @@
+/* assets/css/upgrade-pos.css */
+/* Upgrade POS Namua - Full Modernization */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+/* Upgrade POS Namua */
+body {
+    font-family: 'Nunito', sans-serif;
+    background: #f5f5f5;
+}
+
+.navbar {
+    background: #ffffff;
+}
+
+.card {
+    border-radius: 10px;
+}
+
+#produk-list .card {
+    transition: transform 0.3s;
+}
+
+#produk-list .card:hover {
+    transform: scale(1.05);
+}
+
+.table th, .table td {
+    font-size: 14px;
+}
+
+.list-group-item {
+    font-size: 14px;
+}
+
+input.form-control {
+    font-size: 14px;
+}
+
+
+body, html {
+    font-family: 'Poppins', sans-serif;
+    background: #f4f6f8;
+}
+
+/* Sidebar */
+.sidebar {
+    background: linear-gradient(180deg, #f8f9fa, #ffffff);
+    border-right: 1px solid #dee2e6;
+    border-radius: 10px 0 0 10px;
+    overflow: hidden;
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Pending Orders */
+.pesanan-item {
+    background: #ffffff;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    padding: 10px;
+    box-shadow: 0px 2px 6px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+}
+.pesanan-item:hover {
+    transform: scale(1.03);
+    box-shadow: 0px 4px 10px rgba(0,0,0,0.12);
+}
+.pesanan-item.selected {
+    background: #800000;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+/* Button di Sidebar */
+#menu-actions button, #btn-cetak-divisi {
+    border-radius: 50px;
+    font-weight: 600;
+}
+
+
+
+/* Top Menu */
+.top-menu {
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    background: #ffffff;
+}
+.top-menu .nav-link {
+    border-radius: 8px;
+    transition: 0.3s;
+}
+.top-menu .nav-link:hover {
+    background-color: rgba(128,0,0,0.15);
+}
+
+/* Modal */
+.modal-content {
+    border-radius: 12px;
+    box-shadow: 0px 10px 25px rgba(0,0,0,0.2);
+}
+
+/* List produk / extra */
+.list-group-item.produk:hover,
+.list-group-item.extra:hover {
+    background-color: #f2f2f2;
+}
+
+/* Badge Produk */
+.badge-produk {
+    background: #0d6efd;
+    font-size: 12px;
+}
+.badge-extra {
+    background: #6c757d;
+    font-size: 11px;
+}
+.badge-voided {
+    background: #dc3545;
+    font-size: 12px;
+}
+
+/* Table efek hover */
+#order-list tr:hover, #rinci-item-list tr:hover {
+    background-color: #f0f0f0;
+}
+
+/* Loading Spinner Button */
+button.loading::after {
+    content: "";
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    margin-left: 5px;
+    border: 2px solid #fff;
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}

@@ -1,0 +1,83 @@
+
+/* pos-modern.css */
+/* Full Modernization POS Namua */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+body, html {
+    font-family: 'Poppins', sans-serif;
+    background: #f8f9fa;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow-x: hidden;
+}
+
+/* Sidebar */
+.sidebar {
+    background: linear-gradient(180deg, #ffffff, #f1f1f1);
+    border-right: 1px solid #dee2e6;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+    padding: 10px;
+    border-radius: 10px 0 0 10px;
+}
+
+/* Top menu */
+.top-menu {
+    background: #ffffff;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    align-items: center;
+    padding: 5px 10px;
+    gap: 10px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+/* Produk Card */
+#produk-list .card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+}
+#produk-list .card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+}
+
+/* Pending Order Item */
+.pesanan-item {
+    background: #fff;
+    padding: 10px;
+    border: 1px solid #ddd;
+    margin-bottom: 5px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.pesanan-item:hover {
+    background-color: #f1f1f1;
+}
+.pesanan-item.selected {
+    background: #800000;
+    color: white;
+    font-weight: bold;
+}
+
+/* Buttons */
+button, .btn {
+    border-radius: 30px !important;
+    font-weight: 600;
+}
+
+/* Modal */
+.modal-content {
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+
+/* Utility */
+.text-center {
+    text-align: center;
+}

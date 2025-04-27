@@ -1,138 +1,71 @@
-:root {
-    --maroon: #800000;
-    --maroon-dark: #5e0000;
-    --maroon-light: #a52a2a;
-}
-
-/* Sidebar background & item aktif */
+/* Sidebar (tetap maroon) */
 .bg-gradient-primary {
-    background-color: var(--maroon) !important;
+    background-color: #800000 !important; /* Maroon solid */
     background-image: none !important;
 }
 
-.sidebar .nav-item .nav-link,
-.sidebar .nav-link span {
-    color: #ffffff !important;
+/* Link sidebar */
+.sidebar .nav-item .nav-link {
+    color: #ffffff;
+}
+.sidebar .nav-item .nav-link:hover {
+    color: #ffd700;
 }
 
-.sidebar .nav-link:hover,
-.sidebar .nav-link:focus {
-    background-color: var(--maroon-dark) !important;
-    color: #fff !important;
+/* Sidebar aktif */
+.sidebar .nav-item.active .nav-link {
+    color: #ffffff;
+    background-color: #660000;
 }
 
-.sidebar-heading {
-    color: #f8d7da !important;
+/* Background body (konten belakang) jadi krem */
+body,
+#wrapper,
+#content-wrapper {
+    background-color: #f5f5dc !important; /* Cream */
 }
 
-.sidebar-divider {
-    border-top: 1px solid #ffffff40;
+/* Topbar tetap putih */
+.topbar {
+    background-color: #ffffff !important; /* Putih */
+    border-bottom: 1px solid #ddd;
 }
 
-/* Active menu item */
-.nav-item.active .nav-link {
-    background-color: var(--maroon-light) !important;
-    color: #ffffff !important;
+/* Card dan box konten tetap putih */
+.card, .bg-white, .shadow {
+    background-color: #ffffff !important;
 }
 
-/* Topbar background */
-.navbar, .topbar {
-    background-color: var(--maroon) !important;
-    color: white;
+/* Button utama */
+.btn-primary {
+    background-color: #800000;
+    border-color: #800000;
+}
+.btn-primary:hover {
+    background-color: #660000;
+    border-color: #660000;
 }
 
-.navbar .nav-link,
-.navbar .navbar-brand,
-.navbar .form-inline .form-control {
-    color: #fff !important;
-}
-
-/* Topbar dropdown text */
-.dropdown-menu .dropdown-item {
-    color: #212529;
-}
-
-.dropdown-menu .dropdown-item:hover {
-    background-color: var(--maroon-light);
-    color: #fff;
-}
-
-/* Topbar search button */
-.navbar .btn-primary {
-    background-color: var(--maroon-dark);
-    border: none;
-}
-
-.navbar .btn-primary:hover {
-    background-color: #4a0000;
-}
-
-/* Badge counter (notification) */
+/* Badge counter di notifikasi */
 .badge-danger {
-    background-color: #ff4d4d !important;
+    background-color: #cc0000;
 }
 
-/* Sidebar */
-.sidebar {
-    width: 250px;
-    min-height: 100vh;
-    background-color: var(--maroon);
+/* Search box background */
+.navbar-search input {
+    background-color: #f5f5dc; /* Cream */
 }
 
-.sidebar a:hover {
-    background-color: var(--maroon-dark);
-    color: #fff;
+/* Sidebar toggler */
+#sidebarToggle, #sidebarToggleTop {
+    background-color: #660000;
+    color: #ffffff;
+}
+#sidebarToggle:hover, #sidebarToggleTop:hover {
+    background-color: #990000;
 }
 
-/* Navbar */
-.bg-maroon {
-    background-color: maroon !important;
-    color: white !important;
-}
-
-.navbar-brand {
-    font-weight: bold;
-}
-
-/* Cards */
-.card-header {
-    background-color: var(--maroon) !important;
-    color: #fff;
-}
-
-.card {
-    border: none;
-    border-radius: 10px;
-}
-
-.card-body h4 {
-    font-weight: bold;
-}
-
-/* Buttons */
-.btn-maroon {
-    background-color: var(--maroon);
-    color: white;
-    border: none;
-}
-
-.btn-maroon:hover {
-    background-color: var(--maroon-dark);
-}
-
-
-
-.text-maroon {
-    color: maroon;
-}
-
-
-.refund-extra {
-    padding-left: 20px;
-    font-style: italic;
-    color: #555;
-}
-
-.modal-title {
-    font-weight: bold;
+/* Divider garis sidebar */
+hr.sidebar-divider {
+    border-top: 1px solid #cfa7a7;
 }
