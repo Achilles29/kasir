@@ -890,24 +890,38 @@
 
                         <div class="mb-3">
                             <div class="d-flex justify-content-between">
+                                <strong>Kasir:</strong>
+                                <span id="nama-kasir">-</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <strong>Waktu Buka:</strong>
+                                <span id="waktu-buka">-</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <strong>Waktu Tutup:</strong>
+                                <span id="waktu-tutup">-</span>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
                                 <strong>Modal Awal:</strong>
                                 <span id="modal-awal">Rp 0</span>
                             </div>
-                            <div class="d-flex justify-content-between">
-                                <strong>Total Penjualan:</strong>
-                                <span id="total-penjualan">Rp 0</span>
-                            </div>
                         </div>
 
                         <div class="mb-3">
-                            <h6 class="text-muted mb-2">Rincian Pembayaran:</h6>
+                            <h6 class="text-muted mb-2">Rincian Penjualan:</h6>
                             <div id="list-metode-pembayaran" class="ps-3"></div>
+
                         </div>
 
                         <div class="mb-3">
                             <div class="d-flex justify-content-between">
-                                <strong>Total Pending:</strong>
-                                <span id="total-pending">Rp 0</span>
+                                <strong>Total Penerimaan Kasir:</strong>
+                                <span id="total-penerimaan">Rp 0</span>
                             </div>
                         </div>
 
@@ -922,7 +936,7 @@
 
                         <hr>
 
-                        <div class="mb-2">
+                        <div class="mb-3">
                             <div class="d-flex justify-content-between">
                                 <span class="text-muted">Transaksi Selesai:</span>
                                 <strong><span id="transaksi-selesai">0</span> transaksi</strong>
@@ -930,6 +944,10 @@
                             <div class="d-flex justify-content-between">
                                 <span class="text-muted">Transaksi Belum Terbayar:</span>
                                 <strong><span id="transaksi-pending">0</span> transaksi</strong>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted">Nominal Belum Terbayar (Rp):</span>
+                                <strong><span id="total-pending">Rp 0</span></strong>
                             </div>
                         </div>
 
@@ -2556,7 +2574,7 @@
             }, "json");
         }
 
-
+        // TUTUP SHIFT
 
         $("#btnTutupShift").click(function() {
             $.ajax({
@@ -2564,27 +2582,53 @@
                 method: "GET",
                 dataType: "json",
                 success: function(response) {
+                    console.log(response); // <<<<<< DEBUG
                     if (response.status === 'success') {
-                        // Set data ke modal
-                        $("#modal-awal").text(formatRupiah(response.modal_awal));
-                        $("#total-penjualan").text(formatRupiah(response.total_penjualan));
-                        $("#total-pending").text(formatRupiah(response.total_pending));
-                        $("#modal-akhir").text(formatRupiah(response.modal_akhir));
-                        $("#transaksi-selesai").text(response.transaksi_selesai);
-                        $("#transaksi-pending").text(response.transaksi_pending);
+                        // Data umum
+                        $("#nama-kasir").text(response.nama_kasir || '-');
+                        $("#waktu-buka").text(formatTanggalWaktu(response.waktu_buka) ||
+                            '-');
+                        $("#waktu-tutup").text(formatTanggalWaktu(response.waktu_tutup) ||
+                            '-');
 
-                        // Bersihkan dulu rincian metode pembayaran
-                        $("#list-metode-pembayaran").html('');
-                        if (response.metode_pembayaran.length > 0) {
+                        // Data uang
+                        $("#modal-awal").text(formatRupiah(response.modal_awal || 0));
+                        $("#modal-akhir").text(formatRupiah(response.modal_akhir || 0));
+                        $("#total-penerimaan").text(formatRupiah(response
+                            .total_penerimaan || 0));
+                        $("#total-penjualan").text(formatRupiah(response.total_penjualan ||
+                            0));
+                        $("#total-pending").text(formatRupiah(response.total_pending || 0));
+
+                        // Data transaksi
+                        $("#transaksi-selesai").text(response.transaksi_selesai +
+                            " transaksi");
+                        $("#transaksi-pending").text(response.transaksi_pending +
+                            " transaksi");
+                        $("#nominal-belum-terbayar").text("Rp " + formatRupiah(response
+                            .total_pending || 0));
+
+                        // Rincian metode pembayaran (INI YANG PENTING)
+                        $("#list-metode-pembayaran").empty();
+                        if (response.metode_pembayaran && response.metode_pembayaran
+                            .length > 0) {
                             response.metode_pembayaran.forEach(function(item) {
-                                $("#list-metode-pembayaran").append(
-                                    '<p>' + item.metode_pembayaran + ': Rp ' +
-                                    formatRupiah(item.total) + '</p>'
-                                );
+                                $("#list-metode-pembayaran").append(`
+                                <div class="d-flex justify-content-between border-bottom py-1">
+                                    <span>${item.metode_pembayaran}</span>
+                                    <span>Rp ${formatRupiah(item.total)}</span>
+                                </div>
+                            `);
                             });
+                        } else {
+                            $("#list-metode-pembayaran").append(`
+                        <div class="text-muted">Tidak ada rincian pembayaran.</div>
+                    `);
                         }
 
+                        // ✅ Show modal
                         $("#modalTutupShift").modal('show');
+
                     } else {
                         Swal.fire('Gagal', response.message, 'error');
                     }
@@ -2595,19 +2639,25 @@
             });
         });
 
+
+        // Fungsi format Rupiah
         function formatRupiah(angka) {
             return "Rp " + parseInt(angka).toLocaleString("id-ID");
         }
 
-
-        // Fungsi bantu format rupiah
-        function formatRupiah(angka) {
-            return parseInt(angka).toLocaleString('id-ID');
-        }
-
-
-        function formatRupiah(angka) {
-            return "Rp " + parseInt(angka).toLocaleString("id-ID");
+        // Fungsi format tanggal dan jam
+        function formatTanggalWaktu(datetime) {
+            if (!datetime) return '-';
+            const options = {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            };
+            return new Date(datetime).toLocaleString('id-ID', options);
         }
 
         // Tombol konfirmasi tutup shift

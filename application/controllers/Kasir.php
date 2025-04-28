@@ -11,6 +11,7 @@ class Kasir extends CI_Controller {
         $this->load->model('Kasir_model');
         $this->load->model('Setting_model');
         $this->load->model('Refund_model');
+        $this->load->model('KasirShift_model');
 
         log_message('debug', 'Kasir Controller Initialized');
         // Periksa apakah pengguna sudah login
@@ -82,6 +83,7 @@ public function cek_shift()
 {
     $kasir_id = $this->session->userdata('pegawai_id');
     $this->load->model('KasirShift_model');
+    $this->load->model('Pegawai_model');
 
     $shift = $this->KasirShift_model->get_open_shift($kasir_id);
 
@@ -90,14 +92,17 @@ public function cek_shift()
         return;
     }
 
-    // Hitung total penjualan selesai (status LUNAS)
+    // Data kasir
+    $kasir = $this->Pegawai_model->get_pegawai_by_id($kasir_id);
+
+    // Hitung total penjualan (hanya LUNAS)
     $this->db->select_sum('total_penjualan');
     $this->db->where('kasir_order', $kasir_id);
     $this->db->where('DATE(waktu_order)', date('Y-m-d'));
     $this->db->where('status_pembayaran', 'LUNAS');
     $total_penjualan = $this->db->get('pr_transaksi')->row()->total_penjualan ?? 0;
 
-    // Hitung total pending (sisa pembayaran)
+    // Hitung total pending (belum lunas)
     $this->db->select_sum('sisa_pembayaran');
     $this->db->where('kasir_order', $kasir_id);
     $this->db->where('DATE(waktu_order)', date('Y-m-d'));
@@ -110,33 +115,40 @@ public function cek_shift()
     $this->db->where('status_pembayaran', 'LUNAS');
     $transaksi_selesai = $this->db->count_all_results('pr_transaksi');
 
-    // Hitung transaksi belum terbayar
+    // Hitung transaksi pending
     $this->db->where('kasir_order', $kasir_id);
     $this->db->where('DATE(waktu_order)', date('Y-m-d'));
     $this->db->where('status_pembayaran !=', 'LUNAS');
     $transaksi_pending = $this->db->count_all_results('pr_transaksi');
 
-    // Detail per metode pembayaran
-    $this->db->select('pr_metode_pembayaran.metode_pembayaran, SUM(pr_pembayaran.jumlah) as total')
+    // Ambil rincian pembayaran dari transaksi yang LUNAS
+    $metode_pembayaran = $this->db->select('pr_metode_pembayaran.metode_pembayaran, SUM(pr_pembayaran.jumlah) as total')
         ->from('pr_pembayaran')
         ->join('pr_metode_pembayaran', 'pr_metode_pembayaran.id = pr_pembayaran.metode_id', 'left')
+        ->join('pr_transaksi', 'pr_transaksi.id = pr_pembayaran.transaksi_id', 'left')
         ->where('pr_pembayaran.kasir_id', $kasir_id)
         ->where('DATE(pr_pembayaran.waktu_bayar)', date('Y-m-d'))
-        ->group_by('pr_pembayaran.metode_id');
+        ->where('pr_transaksi.status_pembayaran', 'LUNAS')  // ✅ Pastikan hanya LUNAS
+        ->group_by('pr_pembayaran.metode_id')
+        ->get()
+        ->result_array();
 
-    $metode_pembayaran = $this->db->get()->result_array();
 
-    // Hitung total pembayaran masuk
-    $total_bayar_masuk = array_sum(array_column($metode_pembayaran, 'total'));
+    // Hitung total penerimaan kasir
+    $total_penerimaan = array_sum(array_column($metode_pembayaran, 'total'));
 
-    // Modal akhir dihitung otomatis
-    $modal_akhir = $shift->modal_awal + $total_bayar_masuk;
+    // Saldo akhir
+    $modal_akhir = $shift->modal_awal + $total_penerimaan;
 
     echo json_encode([
         'status' => 'success',
+        'nama_kasir' => $kasir->nama,
+        'waktu_buka' => $shift->waktu_mulai,
+        'waktu_tutup' => date('Y-m-d H:i:s'),
         'modal_awal' => (float) $shift->modal_awal,
         'total_penjualan' => (float) $total_penjualan,
         'total_pending' => (float) $total_pending,
+        'total_penerimaan' => (float) $total_penerimaan,
         'modal_akhir' => (float) $modal_akhir,
         'transaksi_selesai' => (int) $transaksi_selesai,
         'transaksi_pending' => (int) $transaksi_pending,

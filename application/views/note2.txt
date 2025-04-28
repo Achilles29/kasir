@@ -178,6 +178,9 @@ SET FOREIGN_KEY_CHECKS = 0;
 TRUNCATE TABLE pr_detail_extra;
 TRUNCATE TABLE pr_detail_transaksi;
 TRUNCATE TABLE pr_transaksi;
+TRUNCATE TABLE pr_refund;
+TRUNCATE TABLE pr_void;
+TRUNCATE TABLE pr_kasir_shift;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
@@ -261,6 +264,8 @@ hapus pesanan kosong ( pesanan yang void semua isinya jangan ditampikan)
 
 cetak divisi => pesanan baru (date create terbaru ) dan semua pesanan
 
+halaman login percantik
+spiner pembayaran
 
 
 
@@ -270,6 +275,12 @@ pr_transaksi berisi : id 	customer_id 	tanggal 	no_transaksi 	waktu_order 	waktu
 pr_detail_transaksi berisi 	id 	pr_transaksi_id 	pr_produk_id 	detail_unit_id 	jumlah 	harga 	catatan 	is_printed 	status 	created_at 	updated_at 	
 
 pr_detail_extra : id 	detail_transaksi_id 	pr_produk_extra_id 	jumlah 	harga 	subtotal 	sku 	satuan 	hpp 	created_at 	updated_at 	status
+
+pr_pembayaran :	id 	transaksi_id 	metode_id 	jumlah 	waktu_bayar 	keterangan 	kasir_id 	created_at 	updated_at
+
+pr_metode_pembayaran:	id 	metode_pembayaran 	bl_rekening_id 	created_at 	updated_at 	
+
+
 
 
 
