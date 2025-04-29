@@ -892,14 +892,27 @@
                                 </table>
                                 <div class="row mb-2">
                                     <div class="col">
-                                        <div class="summary-box text-sm">
+                                        <!-- <div class="summary-box text-sm">
                                             <p><strong>Total Penjualan:</strong> Rp 87.000</p>
                                             <p><strong>Diskon:</strong> Rp 0</p>
                                             <p><strong>Total Tagihan:</strong> Rp 87.000</p>
                                             <p><strong>Total DP:</strong> Rp 0</p>
                                             <p><strong>Total Dibayar:</strong> Rp 0</p>
                                             <p class="text-danger"><strong>Sisa Pembayaran:</strong> Rp 87.000</p>
+                                        </div> -->
+                                        <div class="summary-box text-sm">
+                                            <p><strong>Total Penjualan:</strong> <span id="multi-total-penjualan">Rp
+                                                    0</span></p>
+                                            <p><strong>Diskon:</strong> <span id="multi-diskon">Rp 0</span></p>
+                                            <p><strong>Total Tagihan:</strong> <span id="multi-tagihan">Rp 0</span></p>
+                                            <p><strong>Total DP:</strong> <span id="multi-dp">Rp 0</span></p>
+                                            <p><strong>Total Dibayar:</strong> <span id="multi-total-dibayar">Rp
+                                                    0</span></p>
+                                            <p class="text-danger"><strong>Sisa Pembayaran:</strong> <span
+                                                    id="multi-sisa">Rp 0</span></p>
                                         </div>
+
+
                                     </div>
                                     <div class="col text-right">
                                         <label>Input Cepat:</label><br>

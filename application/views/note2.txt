@@ -221,8 +221,10 @@ v REVISI WALKIN Customer
 v login kasir, input modal kasir
 v pilih voucher > munculkan cari voucher
 
-halaman pending order
-
+halaman pending order => nomor meja, total penjualan bukan total bayar, tanggal
+tambahkan nomor meja di pending order
+//bug total penjualan / bayar yang ada refund
+kode void
 
 
 LOG PENGGUNAAN jumlah_poin
