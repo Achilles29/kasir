@@ -449,6 +449,52 @@
         border-radius: 6px;
         border: none;
     }
+
+    .btn-outline-maroon {
+        color: #800000;
+        border-color: #800000;
+    }
+
+    .btn-outline-maroon:hover {
+        background-color: #800000;
+        color: #fff;
+    }
+
+    .btn-maroon {
+        background-color: #800000;
+        color: white;
+        border: none;
+    }
+
+    .btn-maroon:hover {
+        background-color: #a01c1c;
+    }
+
+    .modal-header {
+        background: linear-gradient(45deg, #800000, #cc5a00);
+        padding: 1rem 1.5rem;
+        align-items: center;
+    }
+
+    .modal-title {
+        font-weight: bold;
+        font-size: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .summary-box {
+        background: #fff;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        padding: 1rem;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    #input-cepat-dinamis .btn {
+        margin: 0 5px 5px 0;
+    }
     </style>
 </head>
 
@@ -465,6 +511,13 @@
                 <i class="fas fa-cash-register"></i> POS
             </a>
         </div>
+        <div class="nav-item">
+            <a href="<?= base_url('kasir/transaksi_pending') ?>" target="_blank"
+                class="nav-link small font-weight-bold px-3 py-2">
+                <i class="fas fa-list"></i> Transaksi Pending
+            </a>
+        </div>
+
         <div class="nav-item">
             <a href="<?= base_url('kasir/pesanan_terbayar') ?>" target="_blank"
                 class="nav-link small font-weight-bold px-3 py-2">
@@ -805,19 +858,20 @@
         <div class="modal-dialog modal-xl" role="document">
             <form id="formPembayaranMulti">
                 <div class="modal-content">
-                    <div class="modal-header bg-primary text-white">
-                        <h5 class="modal-title">Menyelesaikan Penjualan</h5>
+                    <div class="modal-header text-white" style="background: linear-gradient(45deg, #800000, #cc5a00);">
+                        <h5 class="modal-title"><span>💰</span> Menyelesaikan Penjualan</h5>
                         <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
                     </div>
                     <div class="modal-body">
                         <div class="row">
                             <!-- Bagian Metode -->
                             <div class="col-md-4">
-                                <h5>Metode Pembayaran</h5>
-                                <div id="metode-pembayaran-list" class="list-group">
+                                <h5 class="font-weight-bold mb-3">Metode Pembayaran</h5>
+                                <div id="metode-pembayaran-list"
+                                    class="list-group shadow-sm bg-white rounded border p-2">
                                     <!-- Akan diisi default TUNAI via JS -->
                                 </div>
-                                <button type="button" class="btn btn-sm btn-secondary mt-2" id="btn-tambah-metode">
+                                <button type="button" class="btn btn-sm btn-outline-maroon mt-3" id="btn-tambah-metode">
                                     + Tambah Metode
                                 </button>
                             </div>
@@ -825,8 +879,8 @@
                             <!-- Bagian Input -->
                             <div class="col-md-8">
                                 <h5>Input Pembayaran</h5>
-                                <table class="table table-bordered">
-                                    <thead>
+                                <table class="table table-sm table-bordered table-hover rounded">
+                                    <thead class="thead-light">
                                         <tr>
                                             <th>Metode</th>
                                             <th>Jumlah</th>
@@ -834,31 +888,29 @@
                                             <th></th>
                                         </tr>
                                     </thead>
-                                    <tbody id="tabel-pembayaran-multi"></tbody>
+                                    <tbody id="tabel-pembayaran-multi" class="align-middle text-sm"></tbody>
                                 </table>
                                 <div class="row mb-2">
                                     <div class="col">
-                                        <div class="col-md-12">
-                                            <p><strong>Total Penjualan:</strong> <span id="multi-total-penjualan">Rp
-                                                    0</span></p>
-                                            <p><strong>Diskon:</strong> <span id="multi-diskon">Rp 0</span></p>
-                                            <p><strong>Total Tagihan:</strong> <span id="multi-tagihan">Rp 0</span></p>
-                                            <p> <strong>Total DP:</strong> <span id="multi-dp">Rp 0</span></p>
-                                            <p><strong>Total Dibayar:</strong> <span id="multi-total-dibayar">Rp
-                                                    0</span></p>
-                                            <p><strong>Sisa Pembayaran:</strong> <span id="multi-sisa">Rp 0</span></p>
+                                        <div class="summary-box text-sm">
+                                            <p><strong>Total Penjualan:</strong> Rp 87.000</p>
+                                            <p><strong>Diskon:</strong> Rp 0</p>
+                                            <p><strong>Total Tagihan:</strong> Rp 87.000</p>
+                                            <p><strong>Total DP:</strong> Rp 0</p>
+                                            <p><strong>Total Dibayar:</strong> Rp 0</p>
+                                            <p class="text-danger"><strong>Sisa Pembayaran:</strong> Rp 87.000</p>
                                         </div>
                                     </div>
                                     <div class="col text-right">
                                         <label>Input Cepat:</label><br>
-                                        <div id="input-cepat-static" class="btn-group" role="group">
-                                            <button type="button" class="btn btn-light btn-kalkulator"
+                                        <div class="btn-group btn-group-sm mb-2" role="group" aria-label="Input Cepat">
+                                            <button type="button" class="btn btn-outline-secondary btn-kalkulator"
                                                 data-nominal="10000">10K</button>
-                                            <button type="button" class="btn btn-light btn-kalkulator"
+                                            <button type="button" class="btn btn-outline-secondary btn-kalkulator"
                                                 data-nominal="20000">20K</button>
-                                            <button type="button" class="btn btn-light btn-kalkulator"
+                                            <button type="button" class="btn btn-outline-secondary btn-kalkulator"
                                                 data-nominal="50000">50K</button>
-                                            <button type="button" class="btn btn-light btn-kalkulator"
+                                            <button type="button" class="btn btn-outline-secondary btn-kalkulator"
                                                 data-nominal="100000">100K</button>
                                         </div>
 
@@ -869,10 +921,11 @@
                                     </div>
                                 </div>
                                 <input type="hidden" name="transaksi_id" id="bayar-transaksi-id">
-                                <button type="submit" class="btn btn-success" id="btn-submit-bayar">
+                                <button type="submit" class="btn btn-maroon btn-lg btn-block mt-3"
+                                    id="btn-submit-bayar">
                                     <span id="spinner-bayar" class="spinner-border spinner-border-sm d-none"
                                         role="status" aria-hidden="true"></span>
-                                    <span id="text-bayar">Selesaikan Pembayaran</span>
+                                    <span id="text-bayar">✔ Selesaikan Pembayaran</span>
                                 </button>
 
                             </div>

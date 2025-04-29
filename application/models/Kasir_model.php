@@ -910,4 +910,23 @@ public function get_by_kode($kode_refund)
         ->result();
 }
 
+
+// UNTUK PENDING ORDER
+
+public function get_jenis_order()
+{
+    return $this->db->order_by('id', 'ASC')->get('pr_jenis_order')->result_array();
+}
+
+public function get_kategori_produk()
+{
+    return $this->db->order_by('nama_kategori', 'ASC')->get('pr_kategori')->result_array();
+}
+public function get_list_printer()
+{
+    return $this->db->order_by('lokasi_printer', 'ASC')->get('pr_printer')->result_array();
+}
+
+
+
 }

@@ -2292,6 +2292,25 @@ public function detail_refund_kode($kode_refund_encoded)
     $this->load->view('kasir/detail_refund', $data);
     $this->load->view('templates/footer');
 }
+public function transaksi_pending()
+{
+    $data['title'] = "Transaksi Belum Dibayar";
+    $data['jenis_order'] = $this->Kasir_model->get_jenis_order();
+    $data['kategori'] = $this->Kasir_model->get_kategori_produk();
+    $data['printer'] = $this->Kasir_model->get_list_printer();
+    $data['pending'] = $this->Kasir_model->get_pending_orders();
+
+    $this->load->view('templates/header', $data);
+    $this->load->view('kasir/transaksi_pending', $data);
+    $this->load->view('templates/footer');
+}
+
+public function get_transaksi_pending()
+{
+    $this->load->model('Kasir_model');
+    $pending = $this->Kasir_model->get_pending_orders();
+    echo json_encode($pending);
+}
 
 
 }

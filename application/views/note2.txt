@@ -218,16 +218,16 @@ v perbaiki fungsi scroll kanan
 v perlebar sidebar kiri
 v animasi saat simpan pesanan
 v REVISI WALKIN Customer
+v login kasir, input modal kasir
+v pilih voucher > munculkan cari voucher
 
-login kasir, input modal kasir
+halaman pending order
 
 
 
 LOG PENGGUNAAN jumlah_poin
 
 OPSI print struk kasir CR CODE
-
-
 
 simpan pembayaran => print kasir => buka laci
 
@@ -242,10 +242,6 @@ session login tetap aktif kecuali di logout
 
 cetak per divisi belum grouped
 
-pilih voucher > munculkan cari voucher
-
-
-halaman pending order
 
 
 loadpending order, data refund tampil
@@ -262,7 +258,6 @@ cetak divisi => pesanan baru (date create terbaru ) dan semua pesanan
 
 halaman login percantik
 
-walkin customer data belum terinput
 
 
 CLEAR
