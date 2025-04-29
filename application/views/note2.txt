@@ -240,10 +240,6 @@ fungsi DP
 
 session login tetap aktif kecuali di logout
 
-
-
-
-
 cetak per divisi belum grouped
 
 pilih voucher > munculkan cari voucher
@@ -265,8 +261,8 @@ hapus pesanan kosong ( pesanan yang void semua isinya jangan ditampikan)
 cetak divisi => pesanan baru (date create terbaru ) dan semua pesanan
 
 halaman login percantik
-spiner pembayaran
 
+walkin customer data belum terinput
 
 
 CLEAR

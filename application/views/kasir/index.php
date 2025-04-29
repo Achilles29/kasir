@@ -369,16 +369,85 @@
         /* Default sembunyikan */
     }
 
+    /* Modal Tutup Shift */
     #modalTutupShift .modal-content {
         border-radius: 10px;
     }
 
-    #modalTutupShift .modal-header {
-        border-bottom: 0;
+    #modalTutupShift .modal-body {
+        padding: 20px 30px;
+        font-size: 14px;
     }
 
-    #modalTutupShift .modal-footer {
-        border-top: 0;
+    #modalTutupShift hr {
+        margin: 10px 0;
+    }
+
+    #list-metode-pembayaran-shift {
+        margin-left: 10px;
+    }
+
+    #list-metode-pembayaran-shift .d-flex {
+        justify-content: space-between;
+        padding: 2px 0;
+    }
+
+    #modalTutupShift .small {
+        font-size: 13px;
+        color: #555;
+    }
+
+    #modalTutupShift strong.text-danger {
+        font-size: 18px;
+    }
+
+    .voucher-card {
+        border: 1px solid #ddd;
+        border-left: 6px solid #6b0f1a;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 20px;
+        margin-bottom: 10px;
+        background-color: #fff;
+        transition: 0.2s;
+    }
+
+    .voucher-card:hover {
+        background-color: #f9f0eb;
+        transform: scale(1.01);
+    }
+
+    .voucher-logo {
+        height: 50px;
+        width: 50px;
+        margin-right: 15px;
+    }
+
+    .voucher-info {
+        flex-grow: 1;
+    }
+
+    .voucher-info h5 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: bold;
+        color: #6b0f1a;
+    }
+
+    .voucher-info p {
+        margin: 2px 0;
+        font-size: 13px;
+        color: #555;
+    }
+
+    .btn-use-voucher {
+        background-color: #6b0f1a;
+        color: white;
+        padding: 6px 14px;
+        border-radius: 6px;
+        border: none;
     }
     </style>
 </head>
@@ -413,7 +482,7 @@
             </a>
         </div>
         <div class="nav-item">
-            <a href="<?= base_url('member') ?>" target="_blank" class="nav-link small font-weight-bold px-3 py-2">
+            <a href="<?= base_url('customer') ?>" target="_blank" class="nav-link small font-weight-bold px-3 py-2">
                 <i class="fas fa-users"></i> Member
             </a>
         </div>
@@ -554,7 +623,19 @@
                     <div class="modal-header bg-maroon text-white">
                         <h5 class="modal-title" id="modalAwalKasirLabel">Input Modal Awal Kasir</h5>
                     </div>
+
                     <div class="modal-body">
+                        <div class="form-group">
+                            <label>Keterangan Shift</label>
+                            <select class="form-control" id="shift-keterangan" name="keterangan">
+                                <option value="SHIFT 1">SHIFT 1</option>
+                                <option value="SHIFT 2">SHIFT 2</option>
+                                <option value="SHIFT 3">SHIFT 3</option>
+                                <option value="SHIFT 4">SHIFT 4</option>
+                                <option value="SHIFT 5">SHIFT 5</option>
+                            </select>
+                        </div>
+
                         <div class="form-group">
                             <label>Modal Awal (Rp)</label>
                             <input type="number" step="0.01" class="form-control" id="modal_awal" name="modal_awal"
@@ -645,17 +726,47 @@
                         </div>
                     </div>
 
+
+
                     <div class="form-group">
-                        <label for="input-voucher">Masukkan Kode Voucher:</label>
+                        <label>Voucher:</label>
+
                         <div class="input-group">
-                            <input type="text" id="input-voucher" class="form-control" placeholder="Kode Voucher">
+                            <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#modalVoucherList">
+                                Pilih Voucher
+                            </button>
+
+                            <input type="text" id="input-voucher" class="form-control"
+                                placeholder="Klik tombol pilih voucher" readonly>
                             <div class="input-group-append">
+
                                 <button class="btn btn-primary" id="btn-check-voucher">Cek Voucher</button>
-                                <button class="btn btn-danger" id="reset-voucher">Reset Voucher</button>
+                                <button class="btn btn-danger" id="reset-voucher">Reset</button>
                             </div>
                         </div>
-                        <small id="voucher-message" class="text-success"></small>
                     </div>
+                    <small id="voucher-message" class="text-success"></small>
+
+                    <!-- Modal Daftar Voucher -->
+                    <div class="modal fade" id="modalVoucherList" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                            <div class="modal-content">
+                                <!-- ⬇️ Ganti header dengan ini -->
+                                <div
+                                    class="modal-header bg-maroon text-white d-flex align-items-center justify-content-between">
+                                    <h5 class="modal-title mb-0">Pilih Voucher</h5>
+                                    <input type="text" id="searchVoucher" class="form-control ml-3"
+                                        placeholder="🔍 Cari kode voucher..." style="max-width: 300px;">
+                                </div>
+                                <!-- end header -->
+
+                                <div class="modal-body" id="voucher-list-container">
+                                    <!-- Voucher cards akan ditampilkan di sini -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
 
                     <table class="table table-bordered table-sm">
                         <thead class="thead-light">
@@ -758,7 +869,12 @@
                                     </div>
                                 </div>
                                 <input type="hidden" name="transaksi_id" id="bayar-transaksi-id">
-                                <button type="submit" class="btn btn-success">Selesaikan Pembayaran</button>
+                                <button type="submit" class="btn btn-success" id="btn-submit-bayar">
+                                    <span id="spinner-bayar" class="spinner-border spinner-border-sm d-none"
+                                        role="status" aria-hidden="true"></span>
+                                    <span id="text-bayar">Selesaikan Pembayaran</span>
+                                </button>
+
                             </div>
                         </div>
                     </div>
@@ -878,7 +994,7 @@
     <!-- Modal Tutup Shift -->
     <div class="modal fade" id="modalTutupShift" tabindex="-1" role="dialog" aria-labelledby="modalTutupShiftLabel"
         aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
             <form id="formTutupShift">
                 <div class="modal-content rounded-3 border-0 shadow">
 
@@ -888,68 +1004,53 @@
 
                     <div class="modal-body">
 
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between">
-                                <strong>Kasir:</strong>
-                                <span id="nama-kasir">-</span>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <strong>Waktu Buka:</strong>
-                                <span id="waktu-buka">-</span>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <strong>Waktu Tutup:</strong>
-                                <span id="waktu-tutup">-</span>
-                            </div>
+                        <div class="mb-3 row">
+                            <div class="col-6">Kasir:</div>
+                            <div class="col-6 text-right" id="nama-kasir">-</div>
+                            <div class="col-6">Waktu Buka:</div>
+                            <div class="col-6 text-right" id="waktu-buka">-</div>
+                            <div class="col-6">Waktu Tutup:</div>
+                            <div class="col-6 text-right" id="waktu-tutup">-</div>
                         </div>
 
                         <hr>
 
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between">
-                                <strong>Modal Awal:</strong>
-                                <span id="modal-awal">Rp 0</span>
-                            </div>
+                        <div class="mb-3 row">
+                            <div class="col-6">Modal Awal:</div>
+                            <div class="col-6 text-right" id="modal-awal">Rp 0</div>
                         </div>
 
                         <div class="mb-3">
                             <h6 class="text-muted mb-2">Rincian Penjualan:</h6>
-                            <div id="list-metode-pembayaran" class="ps-3"></div>
-
+                            <div id="list-metode-pembayaran-shift" class="ml-3"></div>
                         </div>
 
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between">
-                                <strong>Total Penerimaan Kasir:</strong>
-                                <span id="total-penerimaan">Rp 0</span>
+                        <div class="mb-3 row">
+                            <div class="col-6">Total Penerimaan Kasir:</div>
+                            <div class="col-6 text-right" id="total-penerimaan">Rp 0</div>
+                        </div>
+
+                        <hr>
+
+                        <div class="mb-3 row">
+                            <div class="col-6"><strong class="text-danger">Saldo Akhir:</strong></div>
+                            <div class="col-6 text-right"><strong class="text-danger" id="modal-akhir">Rp 0</strong>
                             </div>
                         </div>
 
                         <hr>
 
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between fs-5">
-                                <strong>Saldo Akhir:</strong>
-                                <span id="modal-akhir">Rp 0</span>
-                            </div>
+                        <div class="mb-3 row small">
+                            <div class="col-6">Transaksi Selesai:</div>
+                            <div class="col-6 text-right" id="transaksi-selesai">0 transaksi</div>
+
+                            <div class="col-6">Transaksi Belum Terbayar:</div>
+                            <div class="col-6 text-right" id="transaksi-pending">0 transaksi</div>
+
+                            <div class="col-6">Nominal Belum Terbayar:</div>
+                            <div class="col-6 text-right" id="total-pending">Rp 0</div>
                         </div>
 
-                        <hr>
-
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between">
-                                <span class="text-muted">Transaksi Selesai:</span>
-                                <strong><span id="transaksi-selesai">0</span> transaksi</strong>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <span class="text-muted">Transaksi Belum Terbayar:</span>
-                                <strong><span id="transaksi-pending">0</span> transaksi</strong>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <span class="text-muted">Nominal Belum Terbayar (Rp):</span>
-                                <strong><span id="total-pending">Rp 0</span></strong>
-                            </div>
-                        </div>
 
                     </div>
 
@@ -991,17 +1092,21 @@
         });
         <?php endif; ?>
 
+
+
         $("#formModalAwal").on('submit', function(e) {
             e.preventDefault();
             var modal_awal = $("#modal_awal").val();
+            var keterangan = $("#shift-keterangan").val();
 
             $.ajax({
-                url: '<?= site_url('kasir/start_shift') ?>',
-                method: 'POST',
+                url: base_url + "kasir/start_shift",
+                method: "POST",
                 data: {
-                    modal_awal: modal_awal
+                    modal_awal: modal_awal,
+                    keterangan: keterangan
                 },
-                dataType: 'json', // <-- Tambahkan ini!
+                dataType: "json",
                 success: function(response) {
                     if (response.status == 'success') {
                         Swal.fire('Berhasil', 'Shift dimulai', 'success').then(() => {
@@ -1011,12 +1116,12 @@
                         Swal.fire('Gagal', response.message, 'error');
                     }
                 },
-                error: function(xhr, status, error) {
-                    Swal.fire('Gagal', 'Terjadi kesalahan saat koneksi ke server.',
-                        'error');
+                error: function() {
+                    Swal.fire('Gagal', 'Terjadi kesalahan koneksi.', 'error');
                 }
             });
         });
+
 
 
 
@@ -1832,7 +1937,67 @@
         });
 
 
-        // Fungsi cek voucher
+        // Fungsi cari voucher
+
+        $("#btn-open-voucher").click(function() {
+            $("#modalPilihVoucher").modal("show");
+            loadVoucherGallery(); // Load saat dibuka
+        });
+
+        $('#modalVoucherList').on('shown.bs.modal', function() {
+            $('#searchVoucher').val('');
+            loadVoucherList(); // ⬅️ langsung tampilkan
+        });
+
+
+        function loadVoucherList(keyword = "") {
+            $.ajax({
+                url: base_url + "kasir/search_voucher",
+                method: "GET",
+                data: {
+                    keyword: keyword
+                },
+                success: function(response) {
+                    const data = JSON.parse(response);
+                    let html = "";
+
+                    if (data.length === 0) {
+                        html = "<p class='text-muted'>Voucher tidak ditemukan.</p>";
+                    } else {
+                        data.forEach(voucher => {
+                            html += `
+                                <div class="voucher-card">
+                                    <img src="${base_url}uploads/logo_1743996208.png" class="voucher-logo">
+                                    <div class="voucher-info">
+                                        <h5>${voucher.kode_voucher}</h5>
+                                        <p>Diskon: ${voucher.nilai}% | Min: Rp ${parseInt(voucher.min_pembelian).toLocaleString()}</p>
+                                        <p class="text-muted">Berlaku sampai: ${voucher.tanggal_berakhir}</p>
+                                    </div>
+                                    <button class="btn-use-voucher use-voucher" data-kode="${voucher.kode_voucher}">Gunakan</button>
+                                </div>
+                            `;
+                        });
+
+                    }
+
+                    $("#voucher-list-container").html(html);
+                }
+            });
+        }
+
+        // Search real-time
+        $("#searchVoucher").on("keyup", function() {
+            loadVoucherList($(this).val());
+        });
+
+        // Ketika klik "Gunakan"
+        $(document).on("click", ".use-voucher", function() {
+            const kode = $(this).data("kode");
+            $("#input-voucher").val(kode);
+            $("#modalVoucherList").modal("hide");
+        });
+
+        // fungsi cek voucher
         $("#btn-check-voucher").click(function() {
             const kode = $("#input-voucher").val().trim();
             const total = totalPenjualanAwal; // ✅ GANTI, ambil dari total awal
@@ -2066,12 +2231,15 @@
             updateTotalMulti();
         });
 
-
         $("#formPembayaranMulti").submit(function(e) {
             e.preventDefault();
 
-            const totalBayar = pembayaranList.reduce((sum, p) => sum + (parseInt(p.jumlah) || 0), 0);
+            // 🔄 Tampilkan spinner dan disable tombol
+            $("#btn-submit-bayar").prop("disabled", true);
+            $("#spinner-bayar").removeClass("d-none");
+            $("#text-bayar").text("Memproses...");
 
+            const totalBayar = pembayaranList.reduce((sum, p) => sum + (parseInt(p.jumlah) || 0), 0);
             const diskon = parseInt($("#multi-diskon").text().replace(/\D/g, "")) || 0;
             const kode_voucher = $("#input-voucher").val().trim() || "";
 
@@ -2081,6 +2249,10 @@
                 kode_voucher: kode_voucher,
                 diskon: diskon
             }, function(res) {
+                $("#btn-submit-bayar").prop("disabled", false);
+                $("#spinner-bayar").addClass("d-none");
+                $("#text-bayar").text("Selesaikan Pembayaran");
+
                 alert(res.message);
                 if (res.status === "success") {
                     $("#modalPembayaran").modal("hide");
@@ -2582,7 +2754,7 @@
                 method: "GET",
                 dataType: "json",
                 success: function(response) {
-                    console.log(response); // <<<<<< DEBUG
+                    // console.log(response); // <<<<<< DEBUG
                     if (response.status === 'success') {
                         // Data umum
                         $("#nama-kasir").text(response.nama_kasir || '-');
@@ -2609,19 +2781,19 @@
                             .total_pending || 0));
 
                         // Rincian metode pembayaran (INI YANG PENTING)
-                        $("#list-metode-pembayaran").empty();
+                        $("#list-metode-pembayaran-shift").empty();
                         if (response.metode_pembayaran && response.metode_pembayaran
                             .length > 0) {
                             response.metode_pembayaran.forEach(function(item) {
-                                $("#list-metode-pembayaran").append(`
+                                $("#list-metode-pembayaran-shift").append(`
                                 <div class="d-flex justify-content-between border-bottom py-1">
                                     <span>${item.metode_pembayaran}</span>
-                                    <span>Rp ${formatRupiah(item.total)}</span>
+                                    <span>${formatRupiah(item.total)}</span>
                                 </div>
                             `);
                             });
                         } else {
-                            $("#list-metode-pembayaran").append(`
+                            $("#list-metode-pembayaran-shift").append(`
                         <div class="text-muted">Tidak ada rincian pembayaran.</div>
                     `);
                         }
@@ -2679,7 +2851,8 @@
                             if (res.status === 'success') {
                                 Swal.fire("Sukses", res.message, "success").then(
                                     () => {
-                                        location.reload();
+                                        window.location.href = base_url +
+                                            "beranda";
                                     });
                             } else {
                                 Swal.fire("Gagal", res.message, "error");

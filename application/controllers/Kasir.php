@@ -61,11 +61,12 @@ public function index() {
 
 public function start_shift()
 {
-    $kasir_id = $this->session->userdata('pegawai_id'); // << ganti disini juga
+    $kasir_id = $this->session->userdata('pegawai_id');
     $modal_awal = $this->input->post('modal_awal');
+    $keterangan = $this->input->post('keterangan'); // Tambahan
 
     $this->load->model('KasirShift_model');
-    $shift_id = $this->KasirShift_model->start_shift($kasir_id, $modal_awal);
+    $shift_id = $this->KasirShift_model->start_shift($kasir_id, $modal_awal, $keterangan); // Kirim ke model
 
     if ($shift_id) {
         echo json_encode(['status' => 'success']);
@@ -73,6 +74,18 @@ public function start_shift()
         echo json_encode(['status' => 'error', 'message' => 'Gagal mulai shift']);
     }
 }
+// public function get_shift_ke()
+// {
+//     $kasir_id = $this->session->userdata('pegawai_id');
+//     log_message('debug', 'kasir_id get_shift_ke = ' . $kasir_id);
+
+//     $this->load->model('KasirShift_model');
+//     $shift = $this->KasirShift_model->get_shift_ke_berapa($kasir_id);
+
+//     echo json_encode(['keterangan' => $shift]);
+// }
+
+
 public function get_shift_aktif($kasir_id) {
     $this->db->where('kasir_id', $kasir_id);
     $this->db->where('status', 'OPEN');
@@ -872,8 +885,17 @@ public function simpan_transaksi()
     $is_edit = isset($order_data['transaksi_id']) && intval($order_data['transaksi_id']) > 0;
     $transaksi_id = $is_edit ? intval($order_data['transaksi_id']) : null;
 
-    $customer_id = ($order_data['customer_type'] !== 'walkin' && !empty($order_data['customer_id']))
-        ? intval($order_data['customer_id']) : null;
+    // $customer_id = ($order_data['customer_type'] !== 'walkin' && !empty($order_data['customer_id']))
+    //     ? intval($order_data['customer_id']) : null;
+
+    if ($order_data['customer_type'] === 'walkin') {
+        $customer_id = null;
+        $customer_nama = $order_data['customer']; // ini diisi dari walkin customer input
+    } else {
+        $customer_id = !empty($order_data['customer_id']) ? intval($order_data['customer_id']) : null;
+        $customer_nama = $order_data['customer']; // diisi dari pencarian customer
+    }
+
 
     $total_penjualan = 0;
     foreach ($order_data['items'] as $item) {
@@ -901,7 +923,7 @@ public function simpan_transaksi()
         $update_data = [
             'jenis_order_id' => $order_data['jenis_order_id'],
             'customer_id' => $customer_id,
-            'customer' => $order_data['customer'],
+            'customer' => $customer_nama,
             'nomor_meja' => $order_data['nomor_meja'] ?? null,
             'total_penjualan' => $total_penjualan,
             'updated_at' => date('Y-m-d H:i:s')
@@ -921,7 +943,7 @@ public function simpan_transaksi()
             'waktu_order' => date('Y-m-d H:i:s'),
             'jenis_order_id' => $order_data['jenis_order_id'],
             'customer_id' => $customer_id,
-            'customer' => $order_data['customer'],
+            'customer' => $customer_nama,
             'nomor_meja' => $order_data['nomor_meja'] ?? null,
             'total_penjualan' => $total_penjualan,
             'total_pembayaran' => 0, // ✅ 0
@@ -1152,6 +1174,42 @@ public function update_order() {
 }
 
 
+public function search_voucher()
+{
+    $keyword = $this->input->get('keyword');
+    $this->db->select('kode_voucher, jenis, nilai, min_pembelian, tanggal_berakhir');
+    $this->db->from('pr_voucher');
+    $this->db->where('status', 'aktif');
+
+    if (!empty($keyword)) {
+        $this->db->like('kode_voucher', $keyword);
+    }
+
+    $result = $this->db->get()->result();
+    echo json_encode($result);
+}
+
+public function get_voucher_list()
+{
+    $search = $this->input->get('search');
+    $this->db->like('kode_voucher', $search);
+    $this->db->where('sisa_voucher >', 0);
+    $result = $this->db->get('pr_voucher')->result();
+
+    $data = [];
+    foreach ($result as $v) {
+        $data[] = [
+            'id' => $v->id,
+            'kode_voucher' => $v->kode_voucher,
+            'nama_voucher' => $v->nama_voucher,
+            'diskon' => $v->nilai_diskon,
+            'foto' => $v->gambar ?? 'default.jpg'
+        ];
+    }
+
+    echo json_encode($data);
+}
+
 public function cek_voucher()
 {
     $kode_voucher = $this->input->post('kode_voucher');
@@ -1174,10 +1232,10 @@ public function cek_voucher()
         return;
     }
 
-    if (isset($voucher['sisa_voucher']) && $voucher['sisa_voucher'] <= 0) {
+    if (!isset($voucher['sisa_voucher']) || intval($voucher['sisa_voucher']) <= 0) {
         echo json_encode([
             'status' => 'error',
-            'message' => '❌ Voucher sudah habis digunakan'
+            'message' => '❌ Voucher sudah habis digunakan atau tidak tersedia'
         ]);
         return;
     }
