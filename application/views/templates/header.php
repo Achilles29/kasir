@@ -146,12 +146,40 @@
                     </div>
                 </li>
 
-                <li class="nav-item">
 
+                <li class="nav-item">
+                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseProduk"
+                        aria-expanded="true" aria-controls="collapseProduk">
+                        <i class="fas fa-fw fa-cog"></i>
+                        <span>Produk</span>
+                    </a>
+                    <div id="collapseProduk" class="collapse" aria-labelledby="headingProduk"
+                        data-parent="#accordionSidebar">
+                        <div class="bg-white py-2 collapse-inner rounded">
+                            <a class="collapse-item" href="<?= site_url('/buku_menu') ?>"><i class="far fa-id-card"></i>
+                                Buku Menu</a>
+                            <a class="collapse-item" href="<?= site_url('/divisi') ?>"><i class="fas fa-user-cog"></i>
+                                Daftar Divisi</a>
+                            <a class="collapse-item" href="<?= site_url('/kategori') ?>"><i class="fas fa-user-cog"></i>
+                                Daftar Kategori</a>
+                            <a class="collapse-item" href="<?= site_url('/produk') ?>"><i class="fas fa-user-cog"></i>
+                                Daftar Produk</a>
+                            <a class="collapse-item" href="<?= site_url('/ekstra') ?>"><i class="fas fa-user-cog"></i>
+                                Produk Ekstra</a>
+                            <a class="collapse-item" href="<?= site_url('/Produk Paket') ?>"><i
+                                    class="fas fa-user-cog"></i>
+                                Produk Paket</a>
+                            <a class="collapse-item" href="<?= site_url('/resep') ?>"><i class="fas fa-user-cog"></i>
+                                Master Resep</a>
+                        </div>
+                    </div>
+                </li>
+
+                <li class="nav-item">
                     <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseSeven"
                         aria-expanded="true" aria-controls="collapseSeven">
                         <i class="fas fa-fw fa-cog"></i>
-                        <span>Produk</span>
+                        <span>CAMPUR</span>
                     </a>
                     <div id="collapseSeven" class="collapse" aria-labelledby="headingSeven"
                         data-parent="#accordionSidebar">

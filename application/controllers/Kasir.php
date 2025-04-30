@@ -253,17 +253,27 @@ public function get_printer_list() {
 
     // Load Produk AJAX untuk pencarian & kategori
 public function load_produk() {
-    $kategori = $this->input->get('kategori');
+    $divisi = $this->input->get('divisi');
     $search = $this->input->get('search');
 
-    $this->db->select('pr_produk.id, pr_produk.nama_produk, FLOOR(pr_produk.harga_jual) AS harga_jual, pr_produk.foto, pr_kategori.urutan AS urutan_kategori');
+    $this->db->select('
+        pr_produk.id,
+        pr_produk.nama_produk,
+        FLOOR(pr_produk.harga_jual) AS harga_jual,
+        pr_produk.foto,
+        pr_kategori.urutan AS urutan_kategori,
+        pr_kategori.pr_divisi_id
+    ');
     $this->db->from('pr_produk');
     $this->db->join('pr_kategori', 'pr_produk.kategori_id = pr_kategori.id', 'left');
-    $this->db->where('pr_produk.tampil', 1); // Hanya tampilkan produk yang aktif
+    $this->db->where('pr_produk.tampil', 1); // hanya produk yang ditampilkan
 
-    if (!empty($kategori)) {
-        $this->db->where('pr_produk.kategori_id', $kategori);
+    // ✅ Filter berdasarkan divisi (dari pr_kategori.pr_divisi_id)
+    if (!empty($divisi)) {
+        $this->db->where('pr_kategori.pr_divisi_id', $divisi);
     }
+
+    // ✅ Filter pencarian nama produk
     if (!empty($search)) {
         $this->db->like('pr_produk.nama_produk', $search);
     }
@@ -274,6 +284,7 @@ public function load_produk() {
     $query = $this->db->get();
     echo json_encode($query->result_array());
 }
+
 
     // Fungsi untuk menghapus item dari transaksi
     public function hapus_item() {
@@ -973,10 +984,10 @@ public function simpan_transaksi()
 
 
 public function load_pending_orders() {
-    $this->db->select('id, no_transaksi, customer, total_penjualan');
+    $this->db->select('id, no_transaksi, customer, nomor_meja, total_penjualan');
     $this->db->from('pr_transaksi');
     //$this->db->where('status_pembayaran !=', 'LUNAS'); // ✅ ganti jadi cek status_pembayaran
-    $this->db->where_not_in('status_pembayaran', ['LUNAS', 'REFUND']);
+    $this->db->where_not_in('status_pembayaran', ['LUNAS', 'REFUND', 'BATAL']);
 
     $this->db->order_by('waktu_order', 'DESC');
     echo json_encode($this->db->get()->result_array());
@@ -1646,11 +1657,30 @@ if (!empty($detail_ids)) {
 
 // VOID BARU ///
 
+public function generate_kode_void()
+{
+    $prefix = 'V' . date('ymd'); // V240430
+    $today = date('Y-m-d');
+
+    // Hitung jumlah void hari ini
+    $jumlah = $this->db
+        ->where('DATE(created_at)', $today)
+        ->count_all_results('pr_void');
+
+    // Increment
+    $urut = str_pad($jumlah + 1, 3, '0', STR_PAD_LEFT);
+
+    return $prefix . $urut; // Hasil: V240430001
+}
+
+
+
 public function void_pilihan()
 {
     $transaksi_id = $this->input->post('transaksi_id');
     $items = json_decode($this->input->post('items'), true);
     $alasan = trim($this->input->post('alasan'));
+    
 
     if (!$items || !$alasan) {
         echo json_encode(['status' => 'error', 'message' => 'Data tidak lengkap']);
@@ -1676,8 +1706,10 @@ public function cetak_void() {
 
 public function void_semua()
 {
+    $this->load->model('Kasir_model');
     $transaksi_id = $this->input->post('transaksi_id');
     $user_id = $this->session->userdata('pegawai_id');
+    $kode_void = $this->Kasir_model->generate_kode_void();
 
     if (!$transaksi_id) {
         echo json_encode(['status' => 'error', 'message' => 'ID transaksi tidak valid']);
@@ -1706,6 +1738,7 @@ public function void_semua()
 
         $this->db->insert('pr_void', [
             'pr_transaksi_id' => $transaksi_id,
+            'kode_void' => $kode_void,
             'no_transaksi' => $transaksi->no_transaksi,
             'detail_transaksi_id' => $item->id,
             'nama_produk' => $item->nama_produk ?? 'Produk Tidak Dikenal',
@@ -1733,6 +1766,7 @@ public function void_semua()
             $this->db->where('id', $extra->id)->update('pr_detail_extra', ['status' => 'BATAL']);
             $this->db->insert('pr_void', [
                 'pr_transaksi_id' => $transaksi_id,
+                'kode_void' => $kode_void,
                 'no_transaksi' => $transaksi->no_transaksi,
                 'detail_transaksi_id' => $item->id,
                 'nama_produk' => $item->nama_produk ?? 'Produk Tidak Dikenal',
@@ -2292,13 +2326,19 @@ public function detail_refund_kode($kode_refund_encoded)
     $this->load->view('kasir/detail_refund', $data);
     $this->load->view('templates/footer');
 }
+
 public function transaksi_pending()
-{
+    {
+    $tanggal_awal = $this->input->get('tanggal_awal') ?? date('Y-m-d');
+    $tanggal_akhir = $this->input->get('tanggal_akhir') ?? date('Y-m-d');
+
     $data['title'] = "Transaksi Belum Dibayar";
+    $data['tanggal_awal'] = $tanggal_awal;
+    $data['tanggal_akhir'] = $tanggal_akhir;
     $data['jenis_order'] = $this->Kasir_model->get_jenis_order();
     $data['kategori'] = $this->Kasir_model->get_kategori_produk();
     $data['printer'] = $this->Kasir_model->get_list_printer();
-    $data['pending'] = $this->Kasir_model->get_pending_orders();
+    $data['pending'] = $this->Kasir_model->get_pending_orders_filtered($tanggal_awal, $tanggal_akhir);
 
     $this->load->view('templates/header', $data);
     $this->load->view('kasir/transaksi_pending', $data);
@@ -2310,6 +2350,26 @@ public function get_transaksi_pending()
     $this->load->model('Kasir_model');
     $pending = $this->Kasir_model->get_pending_orders();
     echo json_encode($pending);
+}
+public function detail($id)
+{
+    $this->load->model('Kasir_model');
+
+    $transaksi = $this->Kasir_model->get_transaksi_by_id($id);
+
+    if (!$transaksi) {
+        show_404();
+    }
+
+    $transaksi['items'] = $this->Kasir_model->group_items($transaksi['items']);
+    $transaksi['extra_grouped'] = $this->Kasir_model->get_detail_extra_grouped($id);
+
+    $data['title'] = "Detail Transaksi";
+    $data['transaksi'] = $transaksi;
+
+    $this->load->view('templates/header', $data);
+    $this->load->view('kasir/detail_transaksi', $data);
+    $this->load->view('templates/footer');
 }
 
 

@@ -220,11 +220,26 @@ v animasi saat simpan pesanan
 v REVISI WALKIN Customer
 v login kasir, input modal kasir
 v pilih voucher > munculkan cari voucher
+v session login tetap aktif kecuali di logout
 
+produk paket
 halaman pending order => nomor meja, total penjualan bukan total bayar, tanggal
 tambahkan nomor meja di pending order
-//bug total penjualan / bayar yang ada refund
 kode void
+tampilan struk kasir subtotal
+refund pilihan tidak muncul Ekstra
+tampilan struk kasir judul
+
+- Laporan penjualan
+Ringkasan penjualan
+Laporan Void 
+- Laporan produk
+Penjualan produk 
+Penjualan departemen 
+Penjualan kategori 
+Penjualan ekstras 
+- Laporan kasir
+Laporan tutup kasir
 
 
 LOG PENGGUNAAN jumlah_poin
@@ -240,15 +255,13 @@ halaman antrian checker dan kitchen
 fungsi DP
 
 
-session login tetap aktif kecuali di logout
 
 cetak per divisi belum grouped
 
 
 
 loadpending order, data refund tampil
-LANJUTKAN BOOST REFUND EXTRA
-default filter bukan hari ini
+default filter POS bukan hari ini
 
 print cetak void manual
 print cetak refund manual
@@ -275,6 +288,10 @@ pr_metode_pembayaran:	id 	metode_pembayaran 	bl_rekening_id 	created_at 	updated
 
 
 
+pr_divisi: id, nama_divisi, urutan_tampilan
+pr_kategiri: id, nama_kategori, pr_divisi_id, urutan, status
+pr_produk: id, nama_produk, sku, deskripsi, kategori_id, satuan, hpp, harga_jual, monitor_persediaan, tampil, foto
+
 
 
 LAPORAN
@@ -300,3 +317,12 @@ LAPORAN
         Laporan Poin
         Laporan Voucher
         Laporan Komplimen
+
+PRODUK
+    Buku Menu
+    Daftar Divisi
+    Daftar kategori
+    Daftar Produk
+    Produk Ekstra
+    Produk Paket (gabungan)
+    Master resep

@@ -590,28 +590,52 @@ private function center_text($text, $width = 32) {
     return str_repeat(' ', max(0, $padding)) . $text;
 }
 
+
+
+public function generate_kode_void()
+{
+    $prefix = 'V' . date('ymd'); // V240430
+    $today = date('Y-m-d');
+
+    // Hitung jumlah void hari ini
+    $jumlah = $this->db
+        ->where('DATE(created_at)', $today)
+        ->count_all_results('pr_void');
+
+    // Increment
+    $urut = str_pad($jumlah + 1, 3, '0', STR_PAD_LEFT);
+
+    return $prefix . $urut; // Hasil: V240430001
+}
+
+
 public function void_batch($items, $alasan)
 {
     $user_id = $this->session->userdata('pegawai_id');
     $now = date('Y-m-d H:i:s');
+    $kode_void = $this->generate_kode_void();
 
     $this->db->trans_start();
     $new_void_ids = [];
+    $transaksi_id_terakhir = null;
 
     foreach ($items as $item) {
         if ($item['type'] === 'produk') {
             $produk = $this->db->get_where('pr_detail_transaksi', ['id' => $item['id']])->row();
             if ($produk) {
-                $transaksi = $this->db->get_where('pr_transaksi', ['id' => $produk->pr_transaksi_id])->row();
+                $transaksi_id_terakhir = $produk->pr_transaksi_id;
+
+                $transaksi = $this->db->get_where('pr_transaksi', ['id' => $transaksi_id_terakhir])->row();
                 $master_produk = $this->db->get_where('pr_produk', ['id' => $produk->pr_produk_id])->row();
 
                 $this->db->where('id', $item['id'])->update('pr_detail_transaksi', ['status' => 'BATAL']);
                 $this->db->set('total_penjualan', 'total_penjualan - ' . ($produk->harga * $produk->jumlah), false);
                 $this->db->set('sisa_pembayaran', 'GREATEST(0, sisa_pembayaran - ' . ($produk->harga * $produk->jumlah) . ')', false);
-                $this->db->where('id', $produk->pr_transaksi_id)->update('pr_transaksi');
+                $this->db->where('id', $transaksi_id_terakhir)->update('pr_transaksi');
 
                 $this->db->insert('pr_void', [
-                    'pr_transaksi_id'     => $produk->pr_transaksi_id,
+                    'pr_transaksi_id'     => $transaksi_id_terakhir,
+                    'kode_void'           => $kode_void,
                     'no_transaksi'        => $transaksi->no_transaksi,
                     'detail_transaksi_id' => $produk->id,
                     'nama_produk'         => $master_produk ? $master_produk->nama_produk : $produk->nama_produk,
@@ -632,17 +656,20 @@ public function void_batch($items, $alasan)
             $extra = $this->db->get_where('pr_detail_extra', ['id' => $item['id']])->row();
             if ($extra) {
                 $produk = $this->db->get_where('pr_detail_transaksi', ['id' => $extra->detail_transaksi_id])->row();
-                $transaksi = $this->db->get_where('pr_transaksi', ['id' => $produk->pr_transaksi_id])->row();
+                $transaksi_id_terakhir = $produk->pr_transaksi_id;
+
+                $transaksi = $this->db->get_where('pr_transaksi', ['id' => $transaksi_id_terakhir])->row();
                 $master_produk = $this->db->get_where('pr_produk', ['id' => $produk->pr_produk_id])->row();
                 $extra_nama = $this->db->get_where('pr_produk_extra', ['id' => $extra->pr_produk_extra_id])->row();
 
                 $this->db->where('id', $item['id'])->update('pr_detail_extra', ['status' => 'BATAL']);
                 $this->db->set('total_penjualan', 'total_penjualan - ' . ($extra->harga * $extra->jumlah), false);
                 $this->db->set('sisa_pembayaran', 'GREATEST(0, sisa_pembayaran - ' . ($extra->harga * $extra->jumlah) . ')', false);
-                $this->db->where('id', $produk->pr_transaksi_id)->update('pr_transaksi');
+                $this->db->where('id', $transaksi_id_terakhir)->update('pr_transaksi');
 
                 $this->db->insert('pr_void', [
-                    'pr_transaksi_id'     => $produk->pr_transaksi_id,
+                    'pr_transaksi_id'     => $transaksi_id_terakhir,
+                    'kode_void'           => $kode_void,
                     'no_transaksi'        => $transaksi->no_transaksi,
                     'detail_transaksi_id' => $produk->id,
                     'nama_produk'         => $master_produk ? $master_produk->nama_produk : 'Produk Tidak Dikenal',
@@ -662,6 +689,26 @@ public function void_batch($items, $alasan)
 
                 $new_void_ids[] = $this->db->insert_id();
             }
+        }
+    }
+
+    // ✅ Cek apakah semua item dalam transaksi sudah di-void
+    if ($transaksi_id_terakhir) {
+        $sisa_produk = $this->db
+            ->where('pr_transaksi_id', $transaksi_id_terakhir)
+            ->where('status IS NULL', null, false)
+            ->count_all_results('pr_detail_transaksi');
+
+        $sisa_extra = $this->db
+            ->join('pr_detail_transaksi dt', 'dt.id = pr_detail_extra.detail_transaksi_id')
+            ->where('dt.pr_transaksi_id', $transaksi_id_terakhir)
+            ->where('pr_detail_extra.status IS NULL', null, false)
+            ->count_all_results('pr_detail_extra');
+
+        if ($sisa_produk == 0 && $sisa_extra == 0) {
+            $this->db->where('id', $transaksi_id_terakhir)->update('pr_transaksi', [
+                'status_pembayaran' => 'BATAL'
+            ]);
         }
     }
 
@@ -912,6 +959,16 @@ public function get_by_kode($kode_refund)
 
 
 // UNTUK PENDING ORDER
+public function get_pending_orders_filtered($tanggal_awal, $tanggal_akhir) {
+    return $this->db->select('id, no_transaksi, customer, nomor_meja, sisa_pembayaran, DATE(waktu_order) as tanggal')
+                    ->from('pr_transaksi')
+                    ->where('waktu_bayar IS NULL')
+                    ->where('DATE(waktu_order) >=', $tanggal_awal)
+                    ->where('DATE(waktu_order) <=', $tanggal_akhir)
+                    ->order_by('waktu_order', 'DESC')
+                    ->get()
+                    ->result_array();
+}
 
 public function get_jenis_order()
 {

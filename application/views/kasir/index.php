@@ -652,7 +652,16 @@
                     <span id="clear-search"><i class="fas fa-times"></i></span>
                 </div>
 
-                <h4 class="mt-3">Kategori</h4>
+                <h4 class="mt-3">Divisi</h4>
+                <div id="divisi-tab">
+                    <button class="btn btn-outline-dark active" data-divisi="">SEMUA</button>
+                    <?php foreach ($divisi as $d): ?>
+                    <button class="btn btn-outline-dark" data-divisi="<?= $d['id']; ?>">
+                        <?= $d['nama_divisi']; ?>
+                    </button>
+                    <?php endforeach; ?>
+                </div>
+                <!-- <h4 class="mt-3">Kategori</h4>
                 <div id="kategori-tab">
                     <button class="btn btn-outline-dark active" data-kategori="">Semua</button>
                     <?php foreach ($kategori as $k): ?>
@@ -660,7 +669,7 @@
                         <?= $k['nama_kategori']; ?>
                     </button>
                     <?php endforeach; ?>
-                </div>
+                </div> -->
 
                 <h4 class="mt-3">Daftar Produk</h4>
                 <div class="row" id="produk-list"></div>
@@ -964,7 +973,7 @@
 
 
     <!-- Modal Void Pesanan -->
-    <div class="modal fade" id="modalVoidPesanan" tabindex="-1" role="dialog" aria-labelledby="modalVoidPesananLabel"
+    <!-- <div class="modal fade" id="modalVoidPesanan" tabindex="-1" role="dialog" aria-labelledby="modalVoidPesananLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content shadow">
@@ -1002,7 +1011,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <!-- Modal Void Pilihan -->
     <div class="modal fade" id="modalVoidPilihan" tabindex="-1" aria-labelledby="modalVoidPilihanLabel"
@@ -1284,16 +1293,17 @@
             $("#customer-list").hide();
         });
 
-        function loadProduk(kategori = "", search = "") {
+        function loadProduk(divisi = "", search = "") {
             $.ajax({
                 url: base_url + "kasir/load_produk",
                 type: "GET",
                 dataType: "json",
                 data: {
-                    kategori,
+                    divisi,
                     search
                 },
                 success: function(response) {
+
                     let produkHtml = "";
                     $.each(response, function(index, produk) {
                         produkHtml += `
@@ -1339,13 +1349,21 @@
             loadProduk(kategori, search);
         });
 
-        $("#kategori-tab button").on("click", function() {
-            $("#kategori-tab button").removeClass("active");
+        // $("#kategori-tab button").on("click", function() {
+        //     $("#kategori-tab button").removeClass("active");
+        //     $(this).addClass("active");
+
+        //     let kategori = $(this).data("kategori");
+        //     let search = $("#search").val().trim();
+        //     loadProduk(kategori, search);
+        // });
+        $("#divisi-tab button").on("click", function() {
+            $("#divisi-tab button").removeClass("active");
             $(this).addClass("active");
 
-            let kategori = $(this).data("kategori");
+            let divisi = $(this).data("divisi");
             let search = $("#search").val().trim();
-            loadProduk(kategori, search);
+            loadProduk(divisi, search); // parameter diganti dari kategori ke divisi
         });
 
         loadProduk();
@@ -1667,17 +1685,17 @@
                 } else {
                     orders.forEach(order => {
                         html += `
-                        <div class="pesanan-item" data-id="${order.id}">
-                            <div><strong>${order.no_transaksi}</strong></div>
-                            <div>${order.customer}</div>
-                            <div>Rp ${parseInt(order.total_penjualan).toLocaleString("id-ID")}</div>
-                        </div>`;
+                <div class="pesanan-item" data-id="${order.id}">
+                    <div><strong>${order.no_transaksi}</strong></div>
+                    <div>${order.customer} - Meja ${order.nomor_meja}</div>
+                    <div>Rp ${parseInt(order.total_penjualan).toLocaleString("id-ID")}</div>
+                </div>`;
                     });
-
                 }
                 $("#pending-orders").html(html);
             });
         }
+
         $(document).on("click", ".pesanan-item", function() {
             $(".pesanan-item").removeClass("selected");
             $(this).addClass("selected");
