@@ -984,13 +984,24 @@ public function simpan_transaksi()
 
 
 public function load_pending_orders() {
+    $search = $this->input->get('search'); // Ambil parameter pencarian
+
     $this->db->select('id, no_transaksi, customer, nomor_meja, total_penjualan');
     $this->db->from('pr_transaksi');
-    //$this->db->where('status_pembayaran !=', 'LUNAS'); // ✅ ganti jadi cek status_pembayaran
     $this->db->where_not_in('status_pembayaran', ['LUNAS', 'REFUND', 'BATAL']);
 
+    // Jika ada keyword pencarian, filter berdasarkan customer atau nomor_meja
+    if (!empty($search)) {
+        $this->db->group_start();
+        $this->db->like('customer', $search);
+        $this->db->or_like('nomor_meja', $search);
+        $this->db->group_end();
+    }
+
     $this->db->order_by('waktu_order', 'DESC');
-    echo json_encode($this->db->get()->result_array());
+    $result = $this->db->get()->result_array();
+
+    echo json_encode($result);
 }
 
 public function get_detail_transaksi()
@@ -2074,6 +2085,7 @@ public function refund_pilihan()
     $produk_ids = $this->input->post('produk_ids');
     $alasan = $this->input->post('alasan');
     $transaksi_id = $this->input->post('transaksi_id');
+    $extra_ids = $this->input->post('extra_ids');
 
     if (!$produk_ids || !$alasan || !$transaksi_id) {
         show_error("Input tidak valid.");

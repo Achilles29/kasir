@@ -221,11 +221,13 @@ v REVISI WALKIN Customer
 v login kasir, input modal kasir
 v pilih voucher > munculkan cari voucher
 v session login tetap aktif kecuali di logout
+v kode void
+
+
 
 produk paket
 halaman pending order => nomor meja, total penjualan bukan total bayar, tanggal
 tambahkan nomor meja di pending order
-kode void
 tampilan struk kasir subtotal
 refund pilihan tidak muncul Ekstra
 tampilan struk kasir judul

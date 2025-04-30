@@ -553,8 +553,13 @@
             <div id="pending-orders-container">
                 <h4>Pesanan Belum Dibayar</h4>
                 <button id="btn-cetak-divisi" class="btn btn-info mt-2">Cetak per Divisi</button>
+                <div class="mt-2 px-2">
+                    <input type="text" id="searchPendingOrder" class="form-control form-control-sm"
+                        placeholder="Cari nama customer/meja...">
+                </div>
 
                 <div id="pending-orders" class="mt-2"></div>
+
             </div>
 
             <div id="menu-actions">
@@ -1676,8 +1681,10 @@
             extraData = {};
         }
 
-        function loadPendingOrders() {
-            $.get(base_url + "kasir/load_pending_orders", function(data) {
+        function loadPendingOrders(keyword = "") {
+            $.get(base_url + "kasir/load_pending_orders", {
+                search: keyword
+            }, function(data) {
                 let orders = JSON.parse(data);
                 let html = "";
                 if (orders.length === 0) {
@@ -1695,6 +1702,12 @@
                 $("#pending-orders").html(html);
             });
         }
+
+        $(document).on('input', '#searchPendingOrder', function() {
+            const keyword = $(this).val();
+            loadPendingOrders(keyword);
+        });
+
 
         $(document).on("click", ".pesanan-item", function() {
             $(".pesanan-item").removeClass("selected");
