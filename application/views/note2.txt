@@ -185,6 +185,11 @@ TRUNCATE TABLE pr_kasir_shift;
 SET FOREIGN_KEY_CHECKS = 1;
 
 
+SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE pr_produk;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
 
 
 
@@ -222,18 +227,20 @@ v login kasir, input modal kasir
 v pilih voucher > munculkan cari voucher
 v session login tetap aktif kecuali di logout
 v kode void
-
+v tambahkan nomor meja di pending order
 
 
 produk paket
 halaman pending order => nomor meja, total penjualan bukan total bayar, tanggal
-tambahkan nomor meja di pending order
 tampilan struk kasir subtotal
 refund pilihan tidak muncul Ekstra
 tampilan struk kasir judul
 
+export sql awalan pr_
+update database local ke vps tertentu
+
 - Laporan penjualan
-Ringkasan penjualan
+- Ringkasan penjualan
 Laporan Void 
 - Laporan produk
 Penjualan produk 
@@ -288,11 +295,16 @@ pr_pembayaran :	id 	transaksi_id 	metode_id 	jumlah 	waktu_bayar 	keterangan 	ka
 
 pr_metode_pembayaran:	id 	metode_pembayaran 	bl_rekening_id 	created_at 	updated_at 	
 
-
-
+pr_void :	id 	kode_void 	pr_transaksi_id 	no_transaksi 	detail_transaksi_id 	pr_produk_id 	nama_produk 	detail_extra_id 	produk_extra_id 	nama_extra 	jumlah 	harga 	catatan 	alasan 	void_by 	waktu 	created_at 	updated_at 	is_printed 	
 pr_divisi: id, nama_divisi, urutan_tampilan
 pr_kategiri: id, nama_kategori, pr_divisi_id, urutan, status
 pr_produk: id, nama_produk, sku, deskripsi, kategori_id, satuan, hpp, harga_jual, monitor_persediaan, tampil, foto
+
+
+
+rekap kasbon
+log kasbon
+
 
 
 

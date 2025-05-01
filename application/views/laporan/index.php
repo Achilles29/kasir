@@ -1,7 +1,5 @@
 <!-- Di header (CSS) -->
 
-<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" /> -->
-
 <div class="container-fluid">
 
     <!-- JUDUL -->
@@ -30,38 +28,56 @@
             <!-- Tanggal Awal -->
             <div class="col-md-3 col-lg-3">
                 <label class="form-label">Tanggal Awal</label>
-                <input type="date" name="tanggal_awal" class="form-control"
-                    value="<?= $tanggal_awal ?? date('Y-m-d') ?>">
+                <!-- ✅ Perubahan -->
+                <input type="date" name="tanggal_awal" id="tanggal-awal" class="form-control"
+                    value="<?= date('Y-m-d') ?>">
             </div>
 
             <!-- Tanggal Akhir -->
             <div class="col-md-3 col-lg-3">
                 <label class="form-label">Tanggal Akhir</label>
-                <input type="date" name="tanggal_akhir" class="form-control"
-                    value="<?= $tanggal_akhir ?? date('Y-m-d') ?>">
+                <!-- ✅ Perubahan -->
+                <input type="date" name="tanggal_akhir" id="tanggal-akhir" class="form-control"
+                    value="<?= date('Y-m-d') ?>">
             </div>
 
             <!-- Tombol Filter -->
             <div class="col-md-2 col-lg-2">
                 <label class="form-label d-block invisible">_</label>
-                <button type="submit" class="btn btn-success w-100">
+                <!-- ✅ Perubahan warna tombol -->
+                <button type="submit" class="btn btn-danger w-100">
                     <i class="fas fa-filter me-1"></i> Filter
                 </button>
             </div>
-
         </div>
     </form>
 
+    <!-- Dropdown tampilan per halaman -->
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <div>
+            <label class="me-2">Tampilkan:
+                <select id="perPage" class="form-select form-select-sm d-inline-block" style="width: auto;">
+                    <option value="10">10</option>
+                    <option value="30">30</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="99999">Semua</option>
+                </select> entri
+            </label>
+        </div>
+        <div id="pagination" class="d-flex flex-wrap gap-1"></div>
+    </div>
 
 
-    TABEL TRANSAKSI
     <div id="dataTransaksi">
         <?php $this->load->view('laporan/tabel_transaksi', ['transaksi' => $transaksi]); ?>
     </div>
+
 </div>
 
+
 <!-- MODAL FILTER -->
-<div class="modal fade" id="modalFilter" tabindex="-1">
+<!-- <div class="modal fade" id="modalFilter" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <form id="formFilterExtra">
@@ -104,7 +120,7 @@
             </form>
         </div>
     </div>
-</div>
+</div> -->
 
 <!-- JS Footer -->
 <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
@@ -113,54 +129,96 @@
 
 <script>
 $(function() {
-    const today = moment().format('DD/MM/YYYY');
+    function loadData(page = 1) {
+        const tanggal_awal = $('#tanggal-awal').val();
+        const tanggal_akhir = $('#tanggal-akhir').val();
+        const search = $('#searchInput').val();
+        const per_page = $('#perPage').val();
 
-    $('#tanggalRange').daterangepicker({
-        autoUpdateInput: true,
-        showDropdowns: true,
-        locale: {
-            format: 'DD/MM/YYYY',
-            separator: ' - ',
-            applyLabel: "Proses",
-            cancelLabel: "Batal"
-        },
-        ranges: {
-            'Hari Ini': [moment(), moment()],
-            'Kemarin': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-            '7 Hari Terakhir': [moment().subtract(6, 'days'), moment()],
-            '30 Hari Terakhir': [moment().subtract(29, 'days'), moment()],
-            'Bulan Ini': [moment().startOf('month'), moment().endOf('month')],
-            'Bulan Lalu': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month')
-                .endOf('month')
-            ]
-        }
-    }, function(start, end, label) {
-        $('#tanggalTampil').text(`${start.format('DD/MM/YYYY')} - ${end.format('DD/MM/YYYY')}`);
-        $('#filterForm').submit();
-    });
-
-    // Trigger AJAX filter
-    $('#filterForm').on('submit', function(e) {
-        e.preventDefault();
         $.ajax({
             url: "<?= base_url('laporan/filter') ?>",
             type: "GET",
-            data: $(this).serialize(),
+            data: {
+                tanggal_awal,
+                tanggal_akhir,
+                search,
+                page,
+                per_page
+            },
             beforeSend: () => {
                 $('#dataTransaksi').html(
-                    '<div class="text-center text-muted py-5">Memuat data...</div>');
+                    '<div class="text-center py-5 text-muted">Memuat data...</div>');
             },
             success: (res) => {
-                $('#dataTransaksi').html(res);
-            },
-            error: () => {
-                $('#dataTransaksi').html(
-                    '<div class="text-center text-danger py-5">Gagal memuat data.</div>'
-                );
+                const data = JSON.parse(res);
+                $('#dataTransaksi').html(renderTable(data.transaksi));
+                renderPagination(data.total_data, data.page, data.per_page);
             }
         });
+    }
+
+    function renderTable(transaksi) {
+        if (transaksi.length === 0) {
+            return '<div class="text-center text-muted py-5">Tidak ada data transaksi.</div>';
+        }
+
+        let html = `
+            <table class="table table-hover text-center">
+                <thead class="table-light">
+                    <tr>
+                        <th>No Transaksi</th><th>Waktu Order</th><th>Waktu Bayar</th>
+                        <th>Jenis Order</th><th>Total Penjualan</th><th>Aksi</th>
+                    </tr>
+                </thead><tbody>
+        `;
+
+        transaksi.forEach(t => {
+            html += `
+                <tr>
+                    <td>${t.no_transaksi}</td>
+                    <td>${t.waktu_order ?? '-'}</td>
+                    <td>${t.waktu_bayar ?? '-'}</td>
+                    <td>${t.jenis_order}</td>
+                    <td>Rp ${parseInt(t.total_penjualan).toLocaleString('id-ID')}</td>
+                    <td><a href="<?= base_url('laporan/detail/') ?>${t.id}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-eye"></i> Detail</a></td>
+                </tr>
+            `;
+        });
+
+        html += '</tbody></table>';
+        return html;
+    }
+
+    function renderPagination(total, page, per_page) {
+        const totalPages = Math.ceil(total / per_page);
+        let html = '';
+        for (let i = 1; i <= totalPages; i++) {
+            html +=
+                `<button class="btn btn-sm ${i === page ? 'btn-primary' : 'btn-outline-secondary'} page-btn" data-page="${i}">${i}</button>`;
+        }
+        $('#pagination').html(html);
+    }
+
+    $('#filterForm').on('submit', function(e) {
+        e.preventDefault();
+        loadData(1);
     });
 
-    $('#searchInput').on('input', () => $('#filterForm').submit());
+    $('#searchInput').on('keyup', function() {
+        $('#filterForm').submit();
+    });
+
+    $('#perPage').on('change', function() {
+        loadData(1);
+    });
+
+    $(document).on('click', '.page-btn', function() {
+        const page = $(this).data('page');
+        loadData(page);
+    });
+
+    // Load awal
+    loadData();
 });
 </script>

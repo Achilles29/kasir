@@ -69,6 +69,8 @@ public function simpan_detail_extra($detail_transaksi_id, $extras, $jumlah_produ
     }
 }
 
+
+
 // Update fungsi di Kasir_model.php
 public function get_detail_transaksi($transaksi_id, $status = null) {
 //    $this->db->select('d.*, t.no_transaksi, p.nama_produk');

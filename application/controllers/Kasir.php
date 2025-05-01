@@ -1168,8 +1168,9 @@ public function update_order() {
                 // Hapus dan simpan ulang extra
                 $this->db->delete('pr_detail_extra', ['detail_transaksi_id' => $item['id']]);
                 if (!empty($new['extra'])) {
-                    $this->Kasir_model->simpan_detail_extra($item['id'], $new['extra']);
-                    //$this->Kasir_model->simpan_detail_extra($detail_id, $item['extra'], $item['jumlah']);
+                    //$this->Kasir_model->simpan_detail_extra($item['id'], $new['extra']);
+                    $this->Kasir_model->simpan_detail_extra($item['id'], $new['extra'], $new['jumlah']);
+                    
 
                 }
                 break;
@@ -2081,62 +2082,90 @@ public function refund_pilihan()
     $kasir_id = $this->session->userdata('pegawai_id') ?? 0;
     $kode_refund = $this->Refund_model->generate_kode_refund();
     $metode_pembayaran_id = $this->input->post('metode_pembayaran_id');
-
     $produk_ids = $this->input->post('produk_ids');
+    $extra_ids  = $this->input->post('extra_ids');
     $alasan = $this->input->post('alasan');
     $transaksi_id = $this->input->post('transaksi_id');
-    $extra_ids = $this->input->post('extra_ids');
 
-    if (!$produk_ids || !$alasan || !$transaksi_id) {
+    if ((!$produk_ids && !$extra_ids) || !$alasan || !$transaksi_id) {
         show_error("Input tidak valid.");
     }
 
-    foreach ($produk_ids as $detail_id) {
-        $this->db->select('dt.*, p.nama_produk');
-        $this->db->from('pr_detail_transaksi dt');
-        $this->db->join('pr_produk p', 'dt.pr_produk_id = p.id', 'left');
-        $this->db->where('dt.id', $detail_id);
-        $detail = $this->db->get()->row();
+    $no_transaksi = $this->db->select('no_transaksi')->get_where('pr_transaksi', ['id' => $transaksi_id])->row('no_transaksi');
 
-        if (!$detail) continue;
+    // =====================
+    // ✅ Refund Produk
+    // =====================
+// ===========================
+// ✅ Refund Extra Terpisah
+// ===========================
+if (!empty($extra_ids)) {
+    foreach ($extra_ids as $extra_id) {
+        $this->db->select('de.*, e.nama_extra, dt.pr_produk_id, p.nama_produk, dt.pr_transaksi_id');
+        $this->db->from('pr_detail_extra de');
+        $this->db->join('pr_produk_extra e', 'de.pr_produk_extra_id = e.id', 'left');
+        $this->db->join('pr_detail_transaksi dt', 'de.detail_transaksi_id = dt.id', 'left');
+        $this->db->join('pr_produk p', 'dt.pr_produk_id = p.id', 'left');
+        $this->db->where('de.id', $extra_id);
+        $ex = $this->db->get()->row();
+
+        if (!$ex) continue;
+
+        $no_transaksi = $this->db->select('no_transaksi')->get_where('pr_transaksi', ['id' => $ex->pr_transaksi_id])->row('no_transaksi');
 
         $this->db->insert('pr_refund', [
             'kode_refund' => $kode_refund,
-            'pr_transaksi_id' => $transaksi_id,
-            'pr_detail_transaksi_id' => $detail->id,
-            'pr_produk_id' => $detail->pr_produk_id,
-            'no_transaksi' => $this->db->get_where('pr_transaksi', ['id' => $transaksi_id])->row('no_transaksi'),
-            'nama_produk' => $detail->nama_produk,
-            'jumlah' => $detail->jumlah,
-            'harga' => $detail->harga,
-            'catatan' => 'Refund pilihan',
+            'pr_transaksi_id' => $ex->pr_transaksi_id,
+            'pr_detail_transaksi_id' => $ex->detail_transaksi_id,
+            'pr_produk_id' => $ex->pr_produk_id,
+            'no_transaksi' => $no_transaksi,
+            'nama_produk' => $ex->nama_produk,
+            'jumlah' => $ex->jumlah,
+            'harga' => $ex->harga,
+            'catatan' => 'Refund pilihan - extra',
             'alasan' => $alasan,
             'refund_by' => $kasir_id,
             'metode_pembayaran_id' => $metode_pembayaran_id,
             'waktu_refund' => date('Y-m-d H:i:s'),
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s'),
+            'detail_extra_id' => $ex->id,
+            'produk_extra_id' => $ex->pr_produk_extra_id,
+            'nama_extra' => $ex->nama_extra,
         ]);
 
-        $this->db->set('status', 'REFUND');
-        $this->db->where('id', $detail_id);
-        $this->db->update('pr_detail_transaksi');
+        // Set status REFUND di pr_detail_extra
+        $this->db->set('status', 'REFUND')->where('id', $ex->id)->update('pr_detail_extra');
+    }
+}
 
-        // Refund extra juga
-        $this->db->select('de.*, e.nama_extra');
-        $this->db->from('pr_detail_extra de');
-        $this->db->join('pr_produk_extra e', 'de.pr_produk_extra_id = e.id', 'left');
-        $this->db->where('de.detail_transaksi_id', $detail_id);
-        $extras = $this->db->get()->result();
+    // =====================
+    // ✅ Refund Extra
+    // =====================
+    if (!empty($extra_ids)) {
+        foreach ($extra_ids as $extra_id) {
+            $this->db->select('de.id, de.pr_produk_extra_id, de.harga, de.jumlah, de.detail_transaksi_id, e.nama_extra');
+            $this->db->from('pr_detail_extra de');
+            $this->db->join('pr_produk_extra e', 'de.pr_produk_extra_id = e.id', 'left');
+            $this->db->where('de.id', $extra_id);
+            $ex = $this->db->get()->row();
 
-        foreach ($extras as $ex) {
+            if (!$ex) continue;
+
+            // Ambil produk induknya (optional)
+            $produk = $this->db->select('dt.*, p.nama_produk')
+                ->from('pr_detail_transaksi dt')
+                ->join('pr_produk p', 'dt.pr_produk_id = p.id', 'left')
+                ->where('dt.id', $ex->detail_transaksi_id)
+                ->get()->row();
+
             $this->db->insert('pr_refund', [
                 'kode_refund' => $kode_refund,
                 'pr_transaksi_id' => $transaksi_id,
-                'pr_detail_transaksi_id' => $detail->id,
-                'pr_produk_id' => $detail->pr_produk_id,
-                'no_transaksi' => $this->db->get_where('pr_transaksi', ['id' => $transaksi_id])->row('no_transaksi'),
-                'nama_produk' => $detail->nama_produk,
+                'pr_detail_transaksi_id' => $ex->detail_transaksi_id,
+                'pr_produk_id' => $produk->pr_produk_id ?? null,
+                'no_transaksi' => $no_transaksi,
+                'nama_produk' => $produk->nama_produk ?? null,
                 'jumlah' => $ex->jumlah,
                 'harga' => $ex->harga,
                 'catatan' => 'Refund pilihan - extra',
@@ -2157,9 +2186,9 @@ public function refund_pilihan()
         }
     }
 
-    // Update status transaksi jika semua item refund
-    $cek = $this->db->where(['pr_transaksi_id' => $transaksi_id, 'status' => 'BERHASIL'])->count_all_results('pr_detail_transaksi');
-    if ($cek == 0) {
+    // Cek jika semua produk utama sudah refund
+    $sisa = $this->db->where(['pr_transaksi_id' => $transaksi_id, 'status' => 'BERHASIL'])->count_all_results('pr_detail_transaksi');
+    if ($sisa == 0) {
         $this->db->set('status_pembayaran', 'REFUND');
         $this->db->where('id', $transaksi_id);
         $this->db->update('pr_transaksi');
@@ -2171,7 +2200,6 @@ public function refund_pilihan()
         'redirect' => base_url('kasir/rincian_pesanan/' . $transaksi_id . '?kode_refund=' . $kode_refund)
     ]);
 }
-
 
 public function refund_semua($transaksi_id)
 {

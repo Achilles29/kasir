@@ -47,9 +47,12 @@ tbody tr {
                                 <?php if (!empty($item->extra)): ?>
                                 <ul class="list-unstyled mb-0">
                                     <?php foreach ($item->extra as $ex): ?>
-                                    <li><i class="fas fa-plus text-success"></i>
-                                        <?= $ex->nama ?> (Rp <?= number_format($ex->harga, 0, ',', '.') ?>)
+                                    <li>
+                                        <i class="fas fa-plus text-success"></i>
+                                        <span class="extra-item" data-id="<?= $ex->pr_produk_extra_id ?? '' ?>">
 
+                                            <?= $ex->nama ?> (Rp <?= number_format($ex->harga, 0, ',', '.') ?>)
+                                        </span>
                                     </li>
                                     <?php endforeach; ?>
                                 </ul>
@@ -57,6 +60,8 @@ tbody tr {
                                 <span class="text-muted">-</span>
                                 <?php endif; ?>
                             </td>
+
+
                             <td class="text-center">
                                 <?php if ($item->status == 'REFUND'): ?>
                                 <span class="badge badge-danger">REFUND</span>
@@ -289,7 +294,8 @@ $(document).ready(function() {
             const produkNama = $(this).find("td").eq(0).text();
             const harga = $(this).find("td").eq(2).text();
 
-            if (produkId !== undefined) { // Kalau belum refund
+            if (produkId !== undefined) {
+                // Buat checkbox untuk produk utama
                 html.push(`
                 <div class="form-check mb-2">
                     <input class="form-check-input refund-check" type="checkbox" name="produk_id[]" value="${produkId}" id="produk-${produkId}">
@@ -298,6 +304,24 @@ $(document).ready(function() {
                     </label>
                 </div>
             `);
+
+                // Ambil extra dari tag <ul> extra di kolom ke-5
+                const extraList = $(this).find("td").eq(4).find("li");
+                extraList.each(function() {
+                    const span = $(this).find("span.extra-item");
+                    if (span.length > 0) {
+                        const extraId = span.data("id");
+                        const extraNama = span.text();
+                        html.push(`
+                        <div class="form-check ml-4 mb-2">
+                            <input class="form-check-input refund-check" type="checkbox" name="extra_id[]" value="${extraId}" id="extra-${extraId}">
+                            <label class="form-check-label text-muted" for="extra-${extraId}">
+                                <i class="fas fa-plus text-success"></i> ${extraNama}
+                            </label>
+                        </div>
+                    `);
+                    }
+                });
             }
         });
 
@@ -305,34 +329,42 @@ $(document).ready(function() {
     });
 
 
+
     $("#formRefundPilihan").submit(function(e) {
         e.preventDefault();
-        const selected = $(".refund-check:checked").map(function() {
+
+        const selectedProduk = $("input[name='produk_id[]']:checked").map(function() {
+            return $(this).val();
+        }).get();
+
+        const selectedExtra = $("input[name='extra_id[]']:checked").map(function() {
             return $(this).val();
         }).get();
 
         const alasan = $("#alasanRefundPilihan").val();
         const transaksiId = $("#transaksi-id").val();
+        const metodeId = $("#metode_refund_pilihan").val();
 
-        if (selected.length === 0) {
-            alert("Pilih produk terlebih dahulu.");
+        if (selectedProduk.length === 0 && selectedExtra.length === 0) {
+            alert("Pilih produk atau extra terlebih dahulu.");
             return;
         }
 
         $("#modalRefundPilihan").modal("hide");
         $("#loadingRefund").show();
 
-        // Kirim ke backend
         $.post(base_url + "kasir/refund_pilihan", {
-            produk_ids: selected,
+            produk_ids: selectedProduk,
+            extra_ids: selectedExtra,
             alasan: alasan,
             transaksi_id: transaksiId,
-            metode_pembayaran_id: $("#metode_refund_pilihan").val()
+            metode_pembayaran_id: metodeId
         }, function(kode_refund) {
             window.location.href = base_url + "kasir/rincian_pesanan/" + transaksiId +
                 "?kode_refund=" + kode_refund;
         });
     });
+
 
     function cetakRefundInternal(kode_refund) {
         $.post(base_url + "kasir/cetak_refund_internal", {

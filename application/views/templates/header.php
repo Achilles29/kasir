@@ -118,6 +118,10 @@
                             <a class="collapse-item" href="<?= site_url('/kasir/daftar_refund') ?>"><i
                                     class="far fa-id-card"></i>
                                 Laporan Refund</a>
+                            <a class="collapse-item" href="<?= site_url('/laporan/void') ?>"><i
+                                    class="far fa-id-card"></i>
+                                Laporan Void</a>
+
                             <a class="collapse-item" href="<?= site_url('/stok') ?>"><i class="far fa-id-card"></i> Stok
                                 Bahan Baku</a>
                             <a class="collapse-item" href="<?= site_url('/stok/log') ?>"><i class="far fa-id-card"></i>
