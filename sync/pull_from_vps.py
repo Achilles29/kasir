@@ -17,10 +17,28 @@ config_vps = {
     "database": "namua",
 }
 
+# Tabel dengan kolom unik khusus
 special_tables = {
     "bl_penjualan_produk": ["tanggal", "sku"],
     "bl_penjualan_majoo": ["tanggal", "no_nota"],
 }
+
+# Tabel yang akan dilewati (tidak di-pull)
+excluded_tables = [
+    "pr_customer_poin",
+    "pr_detail_extra",
+    "pr_detail_transaksi",
+    "pr_kasir_shift",
+    "pr_log_voucher",
+    "pr_lokasi_printer",
+    "pr_pembayaran",
+    "pr_pengaturan",
+    "pr_printer",
+    "pr_printer_setting",
+    "pr_refund",
+    "pr_transaksi",
+    "pr_void",
+]
 
 
 def connect_db(config):
@@ -43,14 +61,14 @@ def get_all_tables(cursor):
 
 
 def fetch_data(cursor, table, unique_cols):
-    cursor.execute(f"SELECT * FROM `{table}`")
+    cursor.execute(f"SELECT * FROM {table}")
     rows = cursor.fetchall()
     return {tuple(row[col] for col in unique_cols): row for row in rows}
 
 
 def sync_table(table, unique_cols, cur_local, cur_vps, conn_local):
-    local_data = fetch_data(cur_local, table, unique_cols)
     vps_data = fetch_data(cur_vps, table, unique_cols)
+    local_data = fetch_data(cur_local, table, unique_cols)
 
     for key, vps_row in vps_data.items():
         local_row = local_data.get(key)
@@ -62,7 +80,7 @@ def sync_table(table, unique_cols, cur_local, cur_vps, conn_local):
                     [f"{col} = %s" for col in vps_row if col not in unique_cols]
                 )
                 condition = " AND ".join([f"{col} = %s" for col in unique_cols])
-                sql = f"UPDATE `{table}` SET {updates} WHERE {condition}"
+                sql = f"UPDATE {table} SET {updates} WHERE {condition}"
                 values = [
                     vps_row[col] for col in vps_row if col not in unique_cols
                 ] + list(key)
@@ -70,11 +88,12 @@ def sync_table(table, unique_cols, cur_local, cur_vps, conn_local):
         else:
             cols = ", ".join(vps_row.keys())
             placeholders = ", ".join(["%s"] * len(vps_row))
-            sql = f"INSERT INTO `{table}` ({cols}) VALUES ({placeholders})"
+            sql = f"INSERT INTO {table} ({cols}) VALUES ({placeholders})"
             values = [vps_row[col] for col in vps_row]
             cur_local.execute(sql, values)
+
     conn_local.commit()
-    print(f"[✓] Sinkronisasi tabel `{table}` selesai.")
+    print(f"[✓] Pull tabel {table} selesai.")
 
 
 def run_sync():
@@ -94,20 +113,24 @@ def run_sync():
         return
 
     for table in tables:
+        if table in excluded_tables:
+            print(f"🚫 Lewati tabel '{table}' (excluded)")
+            continue
+
         try:
             # Skip VIEW
             cur_vps.execute(
                 f"""
                 SELECT TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS 
                 WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = %s
-            """,
+                """,
                 (table,),
             )
             if cur_vps.fetchone():
                 print(f"ℹ️  Lewati VIEW '{table}'")
                 continue
 
-            cur_local.execute(f"SHOW COLUMNS FROM `{table}`")
+            cur_local.execute(f"SHOW COLUMNS FROM {table}")
             kolom = [row["Field"] for row in cur_local.fetchall()]
 
             if table in special_tables:
@@ -132,7 +155,7 @@ def run_sync():
 if __name__ == "__main__":
     try:
         run_sync()
-    except Exception as e:
+    except Exception:
         print("Terjadi error:")
         traceback.print_exc()
     input("\n>> Tekan ENTER untuk keluar...")

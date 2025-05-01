@@ -21,5 +21,5 @@ while True:
         traceback.print_exc()
 
     # Tunggu 5 menit sebelum sync berikutnya
-    print(f"[{datetime.now()}] Menunggu 5 menit...\n")
-    time.sleep(300)
+    print(f"[{datetime.now()}] Menunggu 3 menit...\n")
+    time.sleep(180)

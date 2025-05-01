@@ -843,26 +843,34 @@ public function simpan_pembayaran($transaksi_id, $pembayaran, $kasir_id)
     $this->db->trans_start();
 
     foreach ($pembayaran as $p) {
+        $metode_id   = intval($p['metode_id']);
+        $jumlah      = intval($p['jumlah']) ?: 0;
+        $keterangan  = isset($p['keterangan']) ? $p['keterangan'] : '';
+
+        // Skip jika jumlah = 0
+        if ($jumlah <= 0) continue;
+
+        // Cek apakah sudah ada metode yang sama untuk transaksi ini
         $existing = $this->db
             ->where('transaksi_id', $transaksi_id)
-            ->where('metode_id', $p['metode_id'])
+            ->where('metode_id', $metode_id)
             ->get('pr_pembayaran')
             ->row();
 
         if ($existing) {
-            // ❗❗ TIMPA nilai jumlah DENGAN jumlah baru (bukan ditambah)
+            // TIMPA nilai jumlah DENGAN yang baru
             $this->db->where('id', $existing->id)->update('pr_pembayaran', [
-                'jumlah' => $p['jumlah'],
-                'keterangan' => $p['keterangan'] ?: $existing->keterangan,
+                'jumlah' => $jumlah,
+                'keterangan' => $keterangan ?: $existing->keterangan,
                 'kasir_id' => $kasir_id,
                 'waktu_bayar' => date('Y-m-d H:i:s')
             ]);
         } else {
             $this->db->insert('pr_pembayaran', [
                 'transaksi_id' => $transaksi_id,
-                'metode_id' => $p['metode_id'],
-                'jumlah' => $p['jumlah'],
-                'keterangan' => $p['keterangan'],
+                'metode_id' => $metode_id,
+                'jumlah' => $jumlah,
+                'keterangan' => $keterangan,
                 'kasir_id' => $kasir_id,
                 'waktu_bayar' => date('Y-m-d H:i:s')
             ]);
@@ -871,6 +879,7 @@ public function simpan_pembayaran($transaksi_id, $pembayaran, $kasir_id)
 
     $this->db->trans_complete();
 }
+
 
 public function generate_refund_struk($transaksi, $produk_refund, $printer, $struk_data, $lokasi)
 {
