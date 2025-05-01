@@ -181,14 +181,46 @@ TRUNCATE TABLE pr_transaksi;
 TRUNCATE TABLE pr_refund;
 TRUNCATE TABLE pr_void;
 TRUNCATE TABLE pr_kasir_shift;
+TRUNCATE TABLE pr_customer_poin;
+TRUNCATE TABLE pr_log_voucher;
+TRUNCATE TABLE pr_pembayaran;
+TRUNCATE TABLE pr_poin;
+TRUNCATE TABLE pr_voucher;
 
 SET FOREIGN_KEY_CHECKS = 1;
-
 
 SET FOREIGN_KEY_CHECKS = 0;
-TRUNCATE TABLE pr_produk;
+
+-- Hapus dari tabel paling bawah relasinya (anak)
+DELETE FROM pr_detail_extra;
+DELETE FROM pr_detail_transaksi;
+DELETE FROM pr_pembayaran;
+DELETE FROM pr_refund;
+DELETE FROM pr_void;
+DELETE FROM pr_kasir_shift;
+DELETE FROM pr_customer_poin;
+DELETE FROM pr_log_voucher;
+DELETE FROM pr_poin;
+DELETE FROM pr_voucher;
+
+-- Baru induk
+DELETE FROM pr_transaksi;
+
+-- Reset AUTO_INCREMENT semuanya
+ALTER TABLE pr_detail_extra AUTO_INCREMENT = 1;
+ALTER TABLE pr_detail_transaksi AUTO_INCREMENT = 1;
+ALTER TABLE pr_pembayaran AUTO_INCREMENT = 1;
+ALTER TABLE pr_refund AUTO_INCREMENT = 1;
+ALTER TABLE pr_void AUTO_INCREMENT = 1;
+ALTER TABLE pr_kasir_shift AUTO_INCREMENT = 1;
+ALTER TABLE pr_customer_poin AUTO_INCREMENT = 1;
+ALTER TABLE pr_log_voucher AUTO_INCREMENT = 1;
+ALTER TABLE pr_poin AUTO_INCREMENT = 1;
+ALTER TABLE pr_voucher AUTO_INCREMENT = 1;
+ALTER TABLE pr_transaksi AUTO_INCREMENT = 1;
 
 SET FOREIGN_KEY_CHECKS = 1;
+
 
 
 

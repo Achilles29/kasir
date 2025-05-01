@@ -1,0 +1,97 @@
+pair 86:67:7A:29:91:43
+trust 86:67:7A:87:17:7B
+connect 86:67:7A:87:17:7B
+
+sudo rfcomm
+
+sudo rfcomm bind 2 86:67:7A:87:17:7B
+
+
+ls -l /dev/rfcomm0
+
+crw-rw---- 1 root dialout 216, 0 Apr 26 13:40 /dev/rfcomm0
+
+sudo chmod 666 /dev/rfcomm0
+
+
+
+sudo rfcomm bind 0 10:22:33:E4:54:39
+sudo rfcomm bind 1 10:22:33:E4:54:39
+sudo rfcomm bind 2 86:67:7A:87:17:7B
+sudo rfcomm bind 3 86:67:7A:29:91:43
+
+
+
+sudo rfcomm release 3
+
+cd /opt/lampp/htdocs/kasir/printer_server
+python3 -m venv venv
+source venv/bin/activate
+
+
+./venv/bin/python /opt/lampp/htdocs/kasir/printer_server/ubuntu_bar.py
+
+
+/opt/lampp/htdocs/kasir/printer_server/ubuntu_bar.py
+
+
+
+
+python3 -m venv venv
+
+source venv/bin/activate
+
+
+sudo nano /etc/systemd/system/rfcomm-binds.service
+[Unit]
+Description=Bind multiple RFCOMM Bluetooth ports
+After=bluetooth.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /usr/local/bin/rfcomm-binds.sh
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target
+
+
+sudo nano /usr/local/bin/rfcomm-binds.sh
+#!/bin/bash
+
+rfcomm bind 0 10:22:33:E4:54:39
+rfcomm bind 1 10:22:33:E4:54:39
+rfcomm bind 2 86:67:7A:87:17:7B
+rfcomm bind 3 86:67:7A:29:91:43
+
+
+
+/opt/lampp/htdocs/kasir/printer_server/ubuntu_kasir.py
+/opt/lampp/htdocs/kasir/printer_server/ubuntu_bar.py
+/opt/lampp/htdocs/kasir/printer_server/ubuntu_kitchen.py
+/opt/lampp/htdocs/kasir/printer_server/ubuntu_checker.py
+
+
+
+
+sudo systemctl daemon-reload
+sudo systemctl enable ubuntu_kasir.service
+sudo systemctl enable ubuntu_bar.service
+sudo systemctl enable ubuntu_kitchen.service
+sudo systemctl enable ubuntu_checker.service
+
+
+
+sudo systemctl daemon-reload
+sudo systemctl enable ubuntu_kasir.service
+sudo systemctl start ubuntu_kasir.service
+
+sudo systemctl enable ubuntu_bar.service
+sudo systemctl start ubuntu_bar.service
+
+sudo systemctl enable ubuntu_kitchen.service
+sudo systemctl start ubuntu_kitchen.service
+
+sudo systemctl enable ubuntu_checker.service
+sudo systemctl start ubuntu_checker.service
+
