@@ -29,10 +29,10 @@ def connect_db(config):
 
 def get_all_tables(cursor):
     try:
-        cursor.execute("SHOW TABLES LIKE 'pr_%'")
+        cursor.execute("SHOW TABLES")
         rows = cursor.fetchall()
         if not rows:
-            print("❌ Tidak ada tabel 'pr_' yang ditemukan.")
+            print("❌ Tidak ada tabel ditemukan.")
             return []
         return [
             list(row.values())[0] if isinstance(row, dict) else row[0] for row in rows
@@ -55,7 +55,9 @@ def sync_table(table, unique_cols, cur_local, cur_vps, conn_local):
     for key, vps_row in vps_data.items():
         local_row = local_data.get(key)
         if local_row:
-            if vps_row["updated_at"] > local_row["updated_at"]:
+            if vps_row.get("updated_at") and vps_row["updated_at"] > local_row.get(
+                "updated_at"
+            ):
                 updates = ", ".join(
                     [f"{col} = %s" for col in vps_row if col not in unique_cols]
                 )
@@ -86,24 +88,36 @@ def run_sync():
         input(">> Tekan ENTER untuk keluar...")
         return
 
-    tables = get_all_tables(cur_local)
+    tables = get_all_tables(cur_vps)
     if not tables:
         print("❌ Tidak ada tabel ditemukan.")
         return
 
     for table in tables:
-        cur_local.execute(f"SHOW COLUMNS FROM `{table}`")
-        kolom = [row["Field"] for row in cur_local.fetchall()]
-
-        if table in special_tables:
-            unique_cols = special_tables[table]
-        elif "id" in kolom:
-            unique_cols = ["id"]
-        else:
-            print(f"⚠️  Lewati tabel '{table}' (tidak ada 'id' atau pengecualian)")
-            continue
-
         try:
+            # Skip VIEW
+            cur_vps.execute(
+                f"""
+                SELECT TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS 
+                WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = %s
+            """,
+                (table,),
+            )
+            if cur_vps.fetchone():
+                print(f"ℹ️  Lewati VIEW '{table}'")
+                continue
+
+            cur_local.execute(f"SHOW COLUMNS FROM `{table}`")
+            kolom = [row["Field"] for row in cur_local.fetchall()]
+
+            if table in special_tables:
+                unique_cols = special_tables[table]
+            elif "id" in kolom:
+                unique_cols = ["id"]
+            else:
+                print(f"⚠️  Lewati tabel '{table}' (tidak ada 'id' atau pengecualian)")
+                continue
+
             sync_table(table, unique_cols, cur_local, cur_vps, conn_local)
         except Exception as e:
             print(f"❌ Error saat sinkronisasi tabel '{table}': {e}")
