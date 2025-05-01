@@ -909,13 +909,27 @@ public function simpan_transaksi()
 
 
     $total_penjualan = 0;
+    // foreach ($order_data['items'] as $item) {
+    //     $subtotal_produk = $item['harga'] * $item['jumlah'];
+    //     $subtotal_extra = 0;
+
+    //     if (!empty($item['extra'])) {
+    //         foreach ($item['extra'] as $extra) {
+    //             $subtotal_extra += $extra['harga'] * $item['jumlah'];
+    //         }
+    //     }
+
+    //     $total_penjualan += $subtotal_produk + $subtotal_extra;
+    // }
+
     foreach ($order_data['items'] as $item) {
-        $subtotal_produk = $item['harga'] * $item['jumlah'];
+        $jumlah_produk = $item['jumlah'];
+        $subtotal_produk = $item['harga'] * $jumlah_produk;
         $subtotal_extra = 0;
 
         if (!empty($item['extra'])) {
             foreach ($item['extra'] as $extra) {
-                $subtotal_extra += $extra['harga'] * $item['jumlah'];
+                $subtotal_extra += $extra['harga'] * $jumlah_produk;
             }
         }
 

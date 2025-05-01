@@ -24,29 +24,26 @@
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($detail as $d): ?>
+            <?php foreach ($detail_grouped as $d): ?>
             <tr>
-                <td><?= $d['nama_produk'] ?>
+                <td>
+                    <?= $d['nama_produk'] ?>
                     <?php if (!empty($d['catatan'])): ?>
                     <br><small class="text-muted">Catatan: <?= $d['catatan'] ?></small>
                     <?php endif; ?>
-
                     <?php if (!empty($d['extra'])): ?>
-                    <?php foreach ($d['extra'] as $e): ?>
-                    <div class="text-secondary ms-2">+ <?= $e->nama_extra ?> (x<?= $e->qty ?>)</div>
+                    <?php foreach ($d['extra'] as $extra_nama => $qty): ?>
+                    <div class="text-secondary ms-2">+ <?= $extra_nama ?> (x<?= $qty ?>)</div>
                     <?php endforeach; ?>
                     <?php endif; ?>
-
-
                 </td>
                 <td><?= $d['jumlah'] ?></td>
                 <td>Rp <?= number_format($d['harga'], 0, ',', '.') ?></td>
-                <?php $subtotal = ($d['jumlah'] ?? 0) * ($d['harga'] ?? 0); ?>
-                <td>Rp <?= number_format($d['subtotal'] ?? 0, 0, ',', '.') ?></td>
+                <td>Rp <?= number_format($d['subtotal'], 0, ',', '.') ?></td>
             </tr>
-
             <?php endforeach; ?>
         </tbody>
+
     </table>
 
     <!-- DETAIL PEMESANAN -->

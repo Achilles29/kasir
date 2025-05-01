@@ -641,13 +641,20 @@
 
                 <button id="btn-batal" class="btn btn-danger">Batal</button>
                 <input type="hidden" id="transaksi-id" value="">
-                <!-- <button class="btn btn-warning" id="simpan-transaksi">Simpan Pesanan</button> -->
-                <button class="btn btn-warning" id="simpan-transaksi">
-                    <span id="spinner-simpan" class="spinner-border spinner-border-sm d-none" role="status"
+                <!-- Tombol Simpan Transaksi Baru -->
+                <button id="simpan-transaksi" class="btn btn-primary">
+                    <span id="spinner-transaksi" class="spinner-border spinner-border-sm d-none" role="status"
                         aria-hidden="true"></span>
-                    <span id="text-simpan">Simpan Pesanan</span>
+                    <span id="text-transaksi">Simpan Pesanan</span>
                 </button>
-                <button class="btn btn-info" id="simpan-perubahan" style="display:none;">Simpan Perubahan</button>
+
+                <!-- Tombol Simpan Perubahan -->
+                <button id="simpan-perubahan" class="btn btn-success">
+                    <span id="spinner-perubahan" class="spinner-border spinner-border-sm d-none" role="status"
+                        aria-hidden="true"></span>
+                    <span id="text-perubahan">Simpan Perubahan</span>
+                </button>
+
             </div>
 
             <div class="produk-pilihan">
@@ -1354,14 +1361,6 @@
             loadProduk(kategori, search);
         });
 
-        // $("#kategori-tab button").on("click", function() {
-        //     $("#kategori-tab button").removeClass("active");
-        //     $(this).addClass("active");
-
-        //     let kategori = $(this).data("kategori");
-        //     let search = $("#search").val().trim();
-        //     loadProduk(kategori, search);
-        // });
         $("#divisi-tab button").on("click", function() {
             $("#divisi-tab button").removeClass("active");
             $(this).addClass("active");
@@ -1525,9 +1524,57 @@
             };
         }
 
+        // $("#simpan-transaksi, #simpan-perubahan").on("click", function() {
+        //     let orderData = getOrderData();
+
+        //     orderData.transaksi_id = $("#transaksi-id").val();
+
+        //     $("#order-list tr[data-id]").each(function() {
+        //         const uid = $(this).data("uid");
+
+        //         orderData.items.push({
+        //             pr_produk_id: $(this).data("id"),
+        //             detail_id: $(this).data("detail-id") ?? null,
+        //             jumlah: $(this).find(".qty").val(),
+        //             harga: $(this).find(".qty").data("harga"),
+        //             subtotal: $(this).find(".total").text().replace("Rp ", "").replace(
+        //                 /\./g, ""),
+        //             catatan: $(this).find(".catatan").val(),
+        //             extra: extraData[$(this).data("uid")] || [],
+        //             is_printed: $(this).data("printed") || 0
+        //         });
+        //     });
+
+        //     // 🔥 Tambahkan ini sebelum AJAX
+        //     $("#simpan-transaksi, #simpan-perubahan").prop("disabled", true);
+        //     $("#spinner-simpan").removeClass("d-none");
+        //     $("#text-simpan").text("Menyimpan...");
+
+        //     $.ajax({
+        //         url: base_url + "kasir/simpan_transaksi",
+        //         type: "POST",
+        //         dataType: "json",
+        //         data: {
+        //             order_data: JSON.stringify(orderData)
+        //         },
+        //         success: function(response) {
+        //             // 🔥 Tambahkan ini setelah sukses
+        //             $("#simpan-transaksi, #simpan-perubahan").prop("disabled", false);
+        //             $("#spinner-simpan").addClass("d-none");
+        //             $("#text-simpan").text("Simpan Pesanan");
+
+        //             alert((response.status === "success" ? "✅" : "❌") + " " + response
+        //                 .message);
+        //             if (response.status === "success") {
+        //                 kosongkanKeranjang();
+        //                 resetFormToBaru();
+        //                 loadPendingOrders();
+        //             }
+        //         }
+        //     });
+        // });
         $("#simpan-transaksi, #simpan-perubahan").on("click", function() {
             let orderData = getOrderData();
-
             orderData.transaksi_id = $("#transaksi-id").val();
 
             $("#order-list tr[data-id]").each(function() {
@@ -1546,10 +1593,15 @@
                 });
             });
 
-            // 🔥 Tambahkan ini sebelum AJAX
+            // 🔥 Deteksi tombol yang ditekan
+            const isEdit = $(this).attr("id") === "simpan-perubahan";
+            const spinnerId = isEdit ? "#spinner-perubahan" : "#spinner-transaksi";
+            const textId = isEdit ? "#text-perubahan" : "#text-transaksi";
+
+            // 🔃 Tampilkan loading
             $("#simpan-transaksi, #simpan-perubahan").prop("disabled", true);
-            $("#spinner-simpan").removeClass("d-none");
-            $("#text-simpan").text("Menyimpan...");
+            $(spinnerId).removeClass("d-none");
+            $(textId).text("Menyimpan...");
 
             $.ajax({
                 url: base_url + "kasir/simpan_transaksi",
@@ -1559,10 +1611,10 @@
                     order_data: JSON.stringify(orderData)
                 },
                 success: function(response) {
-                    // 🔥 Tambahkan ini setelah sukses
+                    // ✅ Kembalikan tampilan tombol
                     $("#simpan-transaksi, #simpan-perubahan").prop("disabled", false);
-                    $("#spinner-simpan").addClass("d-none");
-                    $("#text-simpan").text("Simpan Pesanan");
+                    $(spinnerId).addClass("d-none");
+                    $(textId).text(isEdit ? "Simpan Perubahan" : "Simpan Pesanan");
 
                     alert((response.status === "success" ? "✅" : "❌") + " " + response
                         .message);
@@ -1913,15 +1965,16 @@
 
             const list = extraData[uid].map(e =>
                 `<li>
-    ➕ ${jumlahProduk}x ${e.nama}
-    <span class="float-right">Rp ${(e.harga * jumlahProduk).toLocaleString('id-ID')}</span>
-    <button class='btn btn-sm btn-outline-warning btn-kurangi-extra ml-2'>-</button>
-    <button class='btn btn-sm btn-outline-danger btn-hapus-extra ml-1'><i class='fas fa-times'></i></button>
-</li>`
+            ➕ ${jumlahProduk}x ${e.nama}
+            <span class="float-right">Rp ${(e.harga * jumlahProduk).toLocaleString('id-ID')}</span>
+            <button class='btn btn-sm btn-outline-warning btn-kurangi-extra ml-2'>-</button>
+            <button class='btn btn-sm btn-outline-danger btn-hapus-extra ml-1'><i class='fas fa-times'></i></button>
+        </li>`
             ).join("");
 
             $(`.list-extra[data-uid="${uid}"]`).html(list);
         }
+
 
         function removeRow($tr) {
             const uid = $tr.data("uid");

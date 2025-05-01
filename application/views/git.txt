@@ -30,3 +30,4 @@ Update VPS
 cd /www/wwwroot/kasir
 
 git pull origin main
+    

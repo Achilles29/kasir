@@ -173,6 +173,8 @@ public function get_void_by_kode($kode_void)
         SELECT 
             d.detail_unit_id, 
             p.nama_produk,
+            t.no_transaksi,  -- ✅ TAMBAHKAN INI
+            v.kode_void,
             SUM(d.jumlah) as total_jumlah,
             d.harga,
             SUM(d.jumlah * d.harga) as total_subtotal,
@@ -180,15 +182,18 @@ public function get_void_by_kode($kode_void)
             ap.nama AS nama_pegawai,
             v.alasan,
             v.created_at
+
         FROM pr_void v
         LEFT JOIN pr_detail_transaksi d ON d.id = v.detail_transaksi_id
         LEFT JOIN pr_produk p ON p.id = d.pr_produk_id
         LEFT JOIN pr_transaksi t ON t.id = v.pr_transaksi_id
         LEFT JOIN abs_pegawai ap ON ap.id = v.void_by
         WHERE v.kode_void = ?
+            AND v.detail_extra_id IS NULL
         GROUP BY d.detail_unit_id
         ORDER BY d.detail_unit_id ASC
     ", [$kode_void])->result();
+
 
     // 2. AMBIL daftar extra (group by detail_unit_id + extra)
     $extras = $this->db->query("

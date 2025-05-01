@@ -56,7 +56,41 @@ public function detail($id)
     $data['kasir_bayar'] = $this->db->get_where('users', ['id' => $data['transaksi']['kasir_bayar']])->row('nama') ?? '-';
 
     // Detail produk
-    $data['detail'] = $this->Laporan_model->get_detail_produk($id);
+$data['detail'] = $this->Laporan_model->get_detail_produk($id);
+
+// Kelompokkan berdasarkan detail_unit_id
+$grouped = [];
+foreach ($data['detail'] as $d) {
+    $key = $d['detail_unit_id'];
+
+    if (!isset($grouped[$key])) {
+        $grouped[$key] = [
+            'nama_produk' => $d['nama_produk'],
+            'jumlah' => 0,
+            'harga' => $d['harga'],
+            'subtotal' => 0,
+            'catatan' => '',
+            'extra' => []
+        ];
+    }
+
+    $grouped[$key]['jumlah'] += $d['jumlah'];
+    $grouped[$key]['subtotal'] += $d['jumlah'] * $d['harga'];
+
+    // Catatan hanya diambil jika belum ada
+    if (empty($grouped[$key]['catatan']) && !empty($d['catatan'])) {
+        $grouped[$key]['catatan'] = $d['catatan'];
+    }
+
+    // Ambil extra untuk setiap item
+    $extra_list = $this->Laporan_model->get_extra_by_detail_id($d['id']);
+    foreach ($extra_list as $e) {
+        $extra_name = $e->nama_extra;
+        $grouped[$key]['extra'][$extra_name] = ($grouped[$key]['extra'][$extra_name] ?? 0) + $e->qty;
+    }
+}
+
+$data['detail_grouped'] = array_values($grouped);
 
     // 🟩 Tambahkan extra untuk setiap detail produk
     foreach ($data['detail'] as &$d) {
@@ -134,9 +168,22 @@ public function detail_void($kode_void)
     $data['voids'] = $this->Laporan_model->get_void_by_kode($kode_void);
     if (!$data['voids']) show_404();
 
+    // ✅ TARUH DI SINI:
+    $data['total_void'] = 0;
+    foreach ($data['voids']['items'] as $item) {
+        $data['total_void'] += $item->total_subtotal;
+
+        if (!empty($data['voids']['extras'][$item->detail_unit_id])) {
+            foreach ($data['voids']['extras'][$item->detail_unit_id] as $extra) {
+                $data['total_void'] += $extra->subtotal;
+            }
+        }
+    }
+
     $this->load->view('templates/header', $data);
     $this->load->view('laporan/detail_void', $data);
     $this->load->view('templates/footer');
 }
+
 
 }
