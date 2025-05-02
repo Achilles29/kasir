@@ -13,7 +13,7 @@ class Auth extends CI_Controller {
     public function index() {
         // Jika sudah login, redirect ke beranda
         if ($this->session->userdata('logged_in')) {
-            redirect('kasir');
+            redirect('beranda');
         }
 
         $this->load->view('auth/login');

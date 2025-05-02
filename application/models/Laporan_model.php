@@ -59,7 +59,7 @@ public function filter_transaksi($search = '', $tanggal_awal = '', $tanggal_akhi
         $this->db->where('t.tanggal <=', $tanggal_akhir);
     }
 
-    $this->db->order_by('t.tanggal', 'DESC');
+    $this->db->order_by('t.no_transaksi', 'ASC');
 
     if ($limit != 99999) {
         $this->db->limit($limit, $offset);
@@ -136,6 +136,7 @@ public function filter_void($search = '', $tanggal_awal = '', $tanggal_akhir = '
         $this->db->where('DATE(v.created_at) <=', $tanggal_akhir);
     }
 
+    
     $this->db->group_by('v.kode_void');
     $this->db->order_by('MIN(v.id)', 'ASC');
     $this->db->limit($limit, $offset);

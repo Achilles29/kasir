@@ -84,7 +84,8 @@
                 <td><?= $t['jenis_order'] ?></td>
                 <td>Rp <?= number_format($t['total_penjualan'], 0, ',', '.') ?></td>
                 <td>
-                    <a href="<?= base_url('laporan/detail/' . $t['id']) ?>" class="btn btn-sm btn-outline-primary">
+                    <a href="<?= base_url('laporan/laporan_penjualan_detail/' . $t['id']) ?>"
+                        class="btn btn-sm btn-outline-primary">
                         <i class="fas fa-eye"></i> Detail
                     </a>
                 </td>

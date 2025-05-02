@@ -22,6 +22,21 @@ public function index()
   $this->load->view('templates/footer');
 }
 
+public function laporan_penjualan()
+{
+  $today = date('Y-m-d');
+  $data['title'] = "Laporan Penjualan";
+  $data['tanggal_awal'] = $today;
+  $data['tanggal_akhir'] = $today;
+
+  $data['transaksi'] = $this->Laporan_model->filter_transaksi('', $today, $today);
+  $this->load->view('templates/header', $data);
+  $this->load->view('laporan/laporan_penjualan', $data);
+  $this->load->view('templates/footer');
+}
+
+
+
 public function filter()
 {
     $search = $this->input->get('search');
@@ -44,7 +59,7 @@ public function filter()
 
 
 
-public function detail($id)
+public function laporan_penjualan_detail($id)
 {
     $data['title'] = "Detail Transaksi";
 
@@ -123,23 +138,20 @@ $data['detail_grouped'] = array_values($grouped);
         ])->get('pr_customer_poin')->row()->jumlah_poin ?? 0;
 
     $this->load->view('templates/header', $data);
-    $this->load->view('laporan/detail', $data);
+    $this->load->view('laporan/laporan_penjualan_detail', $data);
     $this->load->view('templates/footer');
 }
 
 
-
-
-
 //// VOID
 
-public function void()
+public function laporan_void()
 {
     $data['title'] = 'Laporan Void';
     $data['voids'] = $this->Laporan_model->get_laporan_void();
 
     $this->load->view('templates/header', $data);
-    $this->load->view('laporan/void', $data);
+    $this->load->view('laporan/laporan_void', $data);
     $this->load->view('templates/footer');
 }
 public function ajax_void()
@@ -161,7 +173,7 @@ public function ajax_void()
         'per_page' => $per_page
     ]);
 }
-public function detail_void($kode_void)
+public function laporan_void_detail($kode_void)
 {
     $data['title'] = 'Detail Void';
 
@@ -181,9 +193,99 @@ public function detail_void($kode_void)
     }
 
     $this->load->view('templates/header', $data);
-    $this->load->view('laporan/detail_void', $data);
+    $this->load->view('laporan/laporan_void_detail', $data);
     $this->load->view('templates/footer');
 }
+
+
+/// REFUND 
+public function laporan_refund()
+{
+    $data['title'] = "Laporan Refund";
+    $this->load->view('templates/header', $data);
+    $this->load->view('laporan/laporan_refund', $data);
+    $this->load->view('templates/footer');
+}
+
+public function get_refund_data_ajax()
+{
+    $tanggal_awal = $this->input->get('tanggal_awal');
+    $tanggal_akhir = $this->input->get('tanggal_akhir');
+    $keyword = $this->input->get('keyword');
+
+    if (!$tanggal_awal || !$tanggal_akhir) {
+        $tanggal_awal = date('Y-m-d');
+        $tanggal_akhir = date('Y-m-d');
+    }
+
+    $this->db->select('
+        r.kode_refund, 
+        r.no_transaksi, 
+        t.customer, 
+        t.nomor_meja, 
+        MAX(r.waktu_refund) as waktu, 
+        SUM(r.harga * r.jumlah) as total_refund, 
+        mp.metode_pembayaran
+    ');
+    $this->db->from('pr_refund r');
+    $this->db->join('pr_transaksi t', 't.id = r.pr_transaksi_id', 'left');
+    $this->db->join('pr_metode_pembayaran mp', 'mp.id = r.metode_pembayaran_id', 'left');
+
+    if ($keyword) {
+        $this->db->group_start();
+        $this->db->like('r.kode_refund', $keyword);
+        $this->db->or_like('r.no_transaksi', $keyword);
+        $this->db->or_like('t.customer', $keyword);
+        $this->db->group_end();
+    }
+
+    $this->db->where('r.waktu_refund >=', $tanggal_awal . ' 00:00:00');
+    $this->db->where('r.waktu_refund <=', $tanggal_akhir . ' 23:59:59');
+    $this->db->group_by('r.kode_refund, r.no_transaksi, t.customer, t.nomor_meja, mp.metode_pembayaran');
+    $this->db->order_by('waktu', 'DESC');
+
+    $result = $this->db->get()->result();
+    echo json_encode($result);
+}
+
+public function laporan_refund_modal_detail()
+{
+    $kode = $this->input->get('kode_refund');
+    $this->load->model('Refund_model');
+    $data['refund'] = $this->Refund_model->get_by_kode($kode);
+
+    if (!$data['refund']) {
+        echo '<div class="text-danger">Data refund tidak ditemukan.</div>';
+        return;
+    }
+
+    $this->load->view('laporan/laporan_refund_modal_detail', $data);
+}
+
+
+
+// LAPORAN METODE
+
+public function laporan_metode_pembayaran($tanggal_awal, $tanggal_akhir)
+{
+    $this->db->select('
+        mp.metode_pembayaran,
+        mp.id as metode_id,
+        COUNT(p.id) as jumlah_transaksi,
+        SUM(p.jumlah) as total_pembayaran
+    ');
+    $this->db->from('pr_pembayaran p');
+    $this->db->join('pr_metode_pembayaran mp', 'mp.id = p.metode_id', 'left');
+    $this->db->where('DATE(p.waktu_bayar) >=', $tanggal_awal);
+    $this->db->where('DATE(p.waktu_bayar) <=', $tanggal_akhir);
+    $this->db->group_by('p.metode_id');
+    $this->db->order_by('total_pembayaran', 'DESC');
+
+    return $this->db->get()->result();
+}
+
+
+
 
 
 }

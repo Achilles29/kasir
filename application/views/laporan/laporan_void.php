@@ -127,7 +127,7 @@ function loadData(page = 1) {
                         <td>${v.alasan}</td>
                         <td>${v.nama_pegawai ?? '-'}</td>
                         <td>
-                            <a href="<?= base_url('laporan/detail_void/') ?>${v.kode_void}" class="btn btn-sm btn-info text-white">
+                            <a href="<?= base_url('laporan/laporan_void_detail/') ?>${v.kode_void}" class="btn btn-sm btn-info text-white">
                                 <i class="fas fa-eye"></i> Detail
                             </a>
                         </td>

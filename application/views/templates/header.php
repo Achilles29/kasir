@@ -113,12 +113,17 @@
                     <div id="collapseLaporan" class="collapse" aria-labelledby="headingLaporan"
                         data-parent="#accordionSidebar">
                         <div class="bg-white py-2 collapse-inner rounded">
-                            <a class="collapse-item" href="<?= site_url('/laporan') ?>"><i class="far fa-id-card"></i>
+                            <a class="collapse-item" href="<?= site_url('/laporan/laporan_penjualan') ?>"><i
+                                    class="far fa-id-card"></i>
                                 Detail Penjualan</a>
                             <a class="collapse-item" href="<?= site_url('/kasir/daftar_refund') ?>"><i
                                     class="far fa-id-card"></i>
                                 Laporan Refund</a>
-                            <a class="collapse-item" href="<?= site_url('/laporan/void') ?>"><i
+
+                            <a class="collapse-item" href="<?= site_url('/laporan/laporan_refund') ?>"><i
+                                    class="far fa-id-card"></i>
+                                Laporan Refund</a>
+                            <a class="collapse-item" href="<?= site_url('/laporan/laporan_void') ?>"><i
                                     class="far fa-id-card"></i>
                                 Laporan Void</a>
 
