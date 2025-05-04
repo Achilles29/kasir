@@ -173,13 +173,31 @@
                                 Daftar Kategori</a>
                             <a class="collapse-item" href="<?= site_url('/produk') ?>"><i class="fas fa-user-cog"></i>
                                 Daftar Produk</a>
-                            <a class="collapse-item" href="<?= site_url('/ekstra') ?>"><i class="fas fa-user-cog"></i>
+                            <a class="collapse-item" href="<?= site_url('/extra') ?>"><i class="fas fa-user-cog"></i>
                                 Produk Ekstra</a>
                             <a class="collapse-item" href="<?= site_url('/Produk Paket') ?>"><i
                                     class="fas fa-user-cog"></i>
                                 Produk Paket</a>
                             <a class="collapse-item" href="<?= site_url('/resep') ?>"><i class="fas fa-user-cog"></i>
                                 Master Resep</a>
+                        </div>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePromo"
+                        aria-expanded="true" aria-controls="collapsePromo">
+                        <i class="fas fa-fw fa-cog"></i>
+                        <span>Promo</span>
+                    </a>
+                    <div id="collapsePromo" class="collapse" aria-labelledby="headingPromo"
+                        data-parent="#accordionSidebar">
+                        <div class="bg-white py-2 collapse-inner rounded">
+                            <a class="collapse-item" href="<?= site_url('/promo') ?>"><i class="far fa-id-card"></i>
+                                Promo</a>
+                            <a class="collapse-item" href="<?= site_url('/voucher') ?>"><i class="fas fa-user-cog"></i>
+                                Daftar voucher</a>
+                            <a class="collapse-item" href="<?= site_url('/poin') ?>"><i class="fas fa-user-cog"></i>
+                                Daftar Poin</a>
                         </div>
                     </div>
                 </li>
@@ -220,6 +238,11 @@
                     <a class="nav-link" href="/profil">
                         <i class="fas fa-fw fa-chart-area"></i>
                         <span>Profil</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/retry_sync">
+                        <i class="fas fa-fw fa-chart-area"></i>
+                        <span>Retry Sync</span></a>
                 </li>
                 <li class="nav-item">
 

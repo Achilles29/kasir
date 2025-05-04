@@ -502,6 +502,12 @@
     <!-- Top Tab Navigation -->
     <div class="top-menu bg-light d-flex align-items-center px-2" style="border-bottom: 1px solid #ddd;">
         <div class="nav-item">
+            <button id="btn-sync-data-umum" class="btn btn-warning font-weight-bold mx-2 my-1">
+                🔄 Sinkronisasi Data Umum
+            </button>
+        </div>
+
+        <div class="nav-item">
             <a href="<?= base_url('beranda') ?>" target="_blank" class="nav-link small font-weight-bold px-3 py-2">
                 <i class="fas fa-home"></i> Beranda
             </a>
@@ -1179,6 +1185,8 @@
         });
         <?php endif; ?>
 
+        // Sembunyikan tombol simpan perubahan saat halaman dimuat
+        $("#simpan-perubahan").hide();
 
 
         $("#formModalAwal").on('submit', function(e) {
@@ -1228,12 +1236,14 @@
 
         function updateTotal() {
             let total = 0;
+
             $("#order-list tr[data-id]").each(function() {
                 const qty = parseInt($(this).find(".qty").val()) || 1;
                 const harga = parseInt($(this).find(".qty").data("harga")) || 0;
                 const uid = $(this).data("uid");
 
                 let subtotal = qty * harga;
+
                 if (extraData[uid]) {
                     extraData[uid].forEach(extra => {
                         subtotal += extra.harga * qty;
@@ -1376,31 +1386,43 @@
             const id = $(this).data("id");
             const nama = $(this).data("nama");
             const harga = parseInt($(this).data("harga"));
-
             const uid = Date.now(); // unique row id for extra reference
 
-            const row = `
-        <tr data-id="${id}" data-uid="${uid}">
-            <td>${nama}</td>
-            <td>${formatRupiah(harga)}</td>
-            <td><input type="number" class="form-control qty" value="1" min="1" data-harga="${harga}"></td>
-            <td class="total">${formatRupiah(harga)}</td>
-            <td>
-                <button class="btn btn-sm btn-secondary btn-extra" data-id="${id}" data-uid="${uid}">Tambah Extra</button>
-            </td>
-            <td><input type="text" class="form-control catatan" placeholder="Tambahkan catatan (opsional)"></td>
-            <td><button class="btn btn-danger btn-sm delete-item"><i class="fas fa-trash-alt"></i></button></td>
-        </tr>
-        <tr class="extra-row" data-parent="${uid}">
-            <td colspan="7">
-                <ul class="list-extra pl-4 mb-0 text-muted small" data-uid="${uid}"></ul>
-            </td>
-        </tr>`;
+            // ✅ Siapkan data extra kosong agar tidak error saat trigger input
+            if (!extraData[uid]) extraData[uid] = [];
 
-            // $("#order-list").append(row);
-            $(row).hide().prependTo("#order-list").fadeIn();
-            updateTotal();
+            const row = $(`
+            <tr data-id="${id}" data-uid="${uid}">
+                <td>${nama}</td>
+                <td>${formatRupiah(harga)}</td>
+                <td><input type="number" class="form-control qty" value="1" min="1" data-harga="${harga}"></td>
+                <td class="total"></td> <!-- Kosongkan dulu -->
+                <td>
+                    <button class="btn btn-sm btn-secondary btn-extra" data-id="${id}" data-uid="${uid}">Tambah Extra</button>
+                </td>
+                <td><input type="text" class="form-control catatan" placeholder="Tambahkan catatan (opsional)"></td>
+                <td><button class="btn btn-danger btn-sm delete-item"><i class="fas fa-trash-alt"></i></button></td>
+            </tr>`);
+
+            const extraRow = $(`
+            <tr class="extra-row" data-parent="${uid}">
+                <td colspan="7">
+                    <ul class="list-extra pl-4 mb-0 text-muted small" data-uid="${uid}"></ul>
+                </td>
+            </tr>`);
+
+            // Masukkan row utama dan row extra ke DOM
+            $("#order-list").prepend(extraRow.hide().fadeIn());
+            $("#order-list").prepend(row.hide().fadeIn());
+
+            // ✅ Panggil trigger input setelah masuk DOM agar total terhitung
+            setTimeout(() => {
+                row.find(".qty").trigger("input");
+            }, 0);
         });
+
+
+
         $(document).on("input", ".qty", function() {
             const qty = parseInt($(this).val()) || 1;
             const harga = parseInt($(this).data("harga")) || 0;
@@ -1524,55 +1546,7 @@
             };
         }
 
-        // $("#simpan-transaksi, #simpan-perubahan").on("click", function() {
-        //     let orderData = getOrderData();
 
-        //     orderData.transaksi_id = $("#transaksi-id").val();
-
-        //     $("#order-list tr[data-id]").each(function() {
-        //         const uid = $(this).data("uid");
-
-        //         orderData.items.push({
-        //             pr_produk_id: $(this).data("id"),
-        //             detail_id: $(this).data("detail-id") ?? null,
-        //             jumlah: $(this).find(".qty").val(),
-        //             harga: $(this).find(".qty").data("harga"),
-        //             subtotal: $(this).find(".total").text().replace("Rp ", "").replace(
-        //                 /\./g, ""),
-        //             catatan: $(this).find(".catatan").val(),
-        //             extra: extraData[$(this).data("uid")] || [],
-        //             is_printed: $(this).data("printed") || 0
-        //         });
-        //     });
-
-        //     // 🔥 Tambahkan ini sebelum AJAX
-        //     $("#simpan-transaksi, #simpan-perubahan").prop("disabled", true);
-        //     $("#spinner-simpan").removeClass("d-none");
-        //     $("#text-simpan").text("Menyimpan...");
-
-        //     $.ajax({
-        //         url: base_url + "kasir/simpan_transaksi",
-        //         type: "POST",
-        //         dataType: "json",
-        //         data: {
-        //             order_data: JSON.stringify(orderData)
-        //         },
-        //         success: function(response) {
-        //             // 🔥 Tambahkan ini setelah sukses
-        //             $("#simpan-transaksi, #simpan-perubahan").prop("disabled", false);
-        //             $("#spinner-simpan").addClass("d-none");
-        //             $("#text-simpan").text("Simpan Pesanan");
-
-        //             alert((response.status === "success" ? "✅" : "❌") + " " + response
-        //                 .message);
-        //             if (response.status === "success") {
-        //                 kosongkanKeranjang();
-        //                 resetFormToBaru();
-        //                 loadPendingOrders();
-        //             }
-        //         }
-        //     });
-        // });
         $("#simpan-transaksi, #simpan-perubahan").on("click", function() {
             let orderData = getOrderData();
             orderData.transaksi_id = $("#transaksi-id").val();
@@ -3012,6 +2986,46 @@
                 }
             });
         });
+
+        // SYNC DATA VPS KE LOKAL //
+        $("#btn-sync-data-umum").click(function() {
+            Swal.fire({
+                title: 'Sinkronisasi Data Umum?',
+                text: 'Ini akan mengambil data produk, extra, metode pembayaran, dan lainnya dari VPS.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Sinkronkan',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Sedang sinkronisasi...',
+                        html: 'Mohon tunggu beberapa saat',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    $.get("<?= base_url('sync_data/ambil_semua') ?>", function(res) {
+                        Swal.close(); // tutup loading
+
+                        const response = JSON.parse(res);
+                        let html = "<ul>";
+                        for (const [table, status] of Object.entries(response.result)) {
+                            html += `<li><b>${table}</b>: ${status}</li>`;
+                        }
+                        html += "</ul>";
+
+                        Swal.fire("Selesai", html, "success");
+                    }).fail(function() {
+                        Swal.close();
+                        Swal.fire("Gagal", "Tidak bisa menghubungi VPS.", "error");
+                    });
+                }
+            });
+        });
+
 
 
     });

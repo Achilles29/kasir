@@ -1,264 +1,213 @@
-<!-- Bootstrap JS + Popper.js -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<div class="container mt-5">
+    <div class="d-flex justify-content-between mb-3">
+        <h4><i class="fas fa-users me-2"></i>Daftar Pelanggan</h4>
+        <button class="btn btn-primary" onclick="showModalTambah()">
+            <i class="fas fa-plus me-1"></i> Tambah Pelanggan
+        </button>
+    </div>
 
-<div class="container mt-4">
-    <h2 class="text-center">Daftar Pelanggan</h2>
-    
     <div class="row mb-3">
-        <div class="col-md-4">
-            <input type="text" id="search" class="form-control" placeholder="Cari pelanggan...">
-        </div>
-        <div class="col-md-4">
-            <select id="limit" class="form-control">
-                <option value="10">10 Baris</option>
-                <option value="25">25 Baris</option>
-                <option value="50">50 Baris</option>
-                <option value="all">Tampilkan Semua</option>
+        <div class="col-md-2">
+            <select id="per_page" class="form-select">
+                <option value="10">Tampilkan 10</option>
+                <option value="25">Tampilkan 25</option>
+                <option value="50">Tampilkan 50</option>
+                <option value="100">Tampilkan 100</option>
+                <option value="1000000">Semua</option>
             </select>
         </div>
-        <div class="col-md-4 text-right">
-            <button class="btn btn-primary" data-toggle="modal" data-target="#customerModal" id="add-customer">Tambah Pelanggan</button>
+        <div class="col-md-4">
+            <input type="text" id="search" class="form-control" placeholder="🔍 Cari nama, telepon, atau kode...">
         </div>
     </div>
 
-    <table class="table table-striped mt-3">
-        <thead>
-            <tr>
-                <th>NAMA</th>
-                <th>KODE PELANGGAN</th>
-                <th>ALAMAT</th>
-                <th>TELEPON</th>
-                <th>JENIS KELAMIN</th>
-                <th>POIN</th>
-                <th>SALDO DEPOSIT</th>
-                <th></th> <!-- Untuk titik tiga -->
-            </tr>
-        </thead>
-        <tbody id="customer-list"></tbody>
-
-    </table>
-
-    <div class="text-center">
-        <ul class="pagination"></ul>
+    <div class="table-responsive shadow-sm">
+        <table class="table table-bordered text-center align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Nama</th>
+                    <th>Kode</th>
+                    <th>JK</th>
+                    <th>Tanggal Lahir</th>
+                    <th>Email</th>
+                    <th>Telepon</th>
+                    <th>Alamat</th>
+                    <th>Poin</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="customer_list"></tbody>
+        </table>
+    </div>
+    <div class="mt-3 d-flex justify-content-center">
+        <ul class="pagination" id="pagination"></ul>
     </div>
 </div>
 
-<!-- Modal Tambah/Edit -->
+<!-- MODAL Pelanggan -->
 <div class="modal fade" id="customerModal" tabindex="-1">
     <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Tambah/Edit Pelanggan</h5>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <form id="formCustomer">
+            <div class="modal-content">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title">Tambah Pelanggan</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="id" id="customer_id">
+                    <div class="mb-3"><label>Nama</label><input type="text" name="nama" id="nama" class="form-control"
+                            required></div>
+                    <div class="mb-3"><label>Kode Pelanggan</label><input type="text" id="kode_pelanggan"
+                            class="form-control" disabled></div>
+                    <div class="mb-3"><label>Tanggal Lahir</label><input type="date" name="tanggal_lahir"
+                            id="tanggal_lahir" class="form-control"></div>
+                    <div class="mb-3"><label>Jenis Kelamin</label>
+                        <select name="jenis_kelamin" id="jenis_kelamin" class="form-select">
+                            <option value="">- Pilih -</option>
+                            <option value="Laki-Laki">Laki-Laki</option>
+                            <option value="Perempuan">Perempuan</option>
+                        </select>
+                    </div>
+                    <div class="mb-3"><label>Telepon</label><input type="text" name="telepon" id="telepon"
+                            class="form-control"></div>
+                    <div class="mb-3"><label>Email</label><input type="email" name="email" id="email"
+                            class="form-control"></div>
+                    <div class="mb-3"><label>Alamat</label><textarea name="alamat" id="alamat"
+                            class="form-control"></textarea></div>
+                    <div class="mb-3"><label>Foto</label><input type="file" name="foto" id="foto" class="form-control">
+                    </div>
+                    <img id="foto-preview" src="" width="100" style="display:none;" class="mb-2 rounded">
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Simpan</button>
+                </div>
             </div>
-            <div class="modal-body">
-                <input type="hidden" id="customer-id">
-                <div class="form-group">
-                    <label>Nama</label>
-                    <input type="text" id="customer-name" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Tanggal Lahir</label>
-                    <input type="date" id="customer-dob" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Jenis Kelamin</label>
-                    <select id="customer-gender" class="form-control">
-                        <option value="">- Pilih -</option>
-                        <option value="Laki-Laki">Laki-Laki</option>
-                        <option value="Perempuan">Perempuan</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="text" id="customer-email" class="form-control">
-                </div>
-
-                <div class="form-group">
-                    <label>Telepon</label>
-                    <input type="text" id="customer-phone" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Alamat</label>
-                    <textarea id="customer-address" class="form-control"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Foto</label>
-                    <input type="file" id="customer-foto" name="foto" class="form-control">
-                    <img id="foto-preview" src="" width="100" style="display:none;" class="mb-2">
-                </div>
-
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                <button class="btn btn-primary" id="save-customer">Simpan</button>
-            </div>
-        </div>
+        </form>
     </div>
 </div>
 
+
 <script>
-$(document).ready(function(){
-    function loadCustomers(page = 1) {
-        let search = $("#search").val();
-        let limit = $("#limit").val();
-        let offset = (page - 1) * limit;
+$(document).ready(function() {
+    function loadCustomer(page = 1) {
+        const search = $("#search").val();
+        const per_page = $("#per_page").val();
 
-        if (limit === "all") {
-            limit = 10000;
-            offset = 0;
-        }
-
-        $.ajax({
-            url: "<?= site_url('customer/load_customers'); ?>",
-            type: "GET",
-            data: { start: offset, limit: limit, search: search },
-            success: function(response) {
-                let data = JSON.parse(response);
-                let html = "";
-                $.each(data.customers, function(index, customer) {
-                html += `<tr>
-                    <td>${customer.nama}</td>
-                    <td>${customer.kode_pelanggan}</td>
-                    <td>${customer.alamat ?? '-'}</td>
-                    <td>${customer.telepon}</td>
-                    <td>${customer.jenis_kelamin ?? '-'}</td>
-                    <td>${customer.total_poin ?? 0}</td>
-                    <td>Rp 0</td>
+        $.get("<?= site_url('customer/load_data') ?>", {
+            page,
+            search,
+            per_page
+        }, function(res) {
+            let html = '';
+            $.each(res.data, function(i, c) {
+                html += `
+                <tr>
+                    <td class="text-start">${c.nama}</td>
+                    <td>${c.kode_pelanggan}</td>
+                    <td>${c.jenis_kelamin || '-'}</td>
+                    <td>${c.tanggal_lahir || '-'}</td>
+                    <td>${c.email || '-'}</td>
+                    <td>${c.telepon}</td>
+                    <td>${c.alamat || '-'}</td>
+                    <td>${c.total_poin}</td>
                     <td>
-                        <div class="dropdown">
-                            <button class="btn btn-light dropdown-toggle" type="button" id="dropdownMenu${customer.id}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                ⋮
-                            </button>
-                            <div class="dropdown-menu" aria-labelledby="dropdownMenu${customer.id}">
-                                <a class="dropdown-item edit-customer" href="#" data-id="${customer.id}">Ubah</a>
-                                <a class="dropdown-item" href="<?= site_url('customer/transaksi/'); ?>${customer.id}">Lihat Daftar Transaksi Pelanggan</a>
-                                <a class="dropdown-item" href="<?= site_url('customer/detail/'); ?>${customer.id}">Lihat Detail Pelanggan</a>
-                                <a class="dropdown-item delete-customer text-danger" href="#" data-id="${customer.id}">Hapus</a>
-                            </div>
+                        <div class="d-flex flex-wrap gap-1 justify-content-center">
+                            <button class="btn btn-warning btn-sm btn-edit" data-id="${c.id}" title="Edit"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-danger btn-sm btn-delete" data-id="${c.id}" title="Hapus"><i class="fas fa-trash-alt"></i></button>
+                            <a href="<?= site_url('customer/detail/') ?>${c.id}" class="btn btn-info btn-sm" title="Detail"><i class="fas fa-user"></i></a>
+                            <a href="<?= site_url('customer/transaksi/') ?>${c.id}" class="btn btn-primary btn-sm" title="Riwayat Pembelian"><i class="fas fa-receipt"></i></a>
+                            <a href="<?= site_url('customer/poin/') ?>${c.id}" class="btn btn-success btn-sm" title="Riwayat Poin"><i class="fas fa-star"></i></a>
                         </div>
                     </td>
                 </tr>`;
-                });
-               $("#customer-list").html(html);
-                renderPagination(data.total, limit, page);
-            }
-        });
+            });
+
+            $("#customer_list").html(html);
+            $("#pagination").html(res.pagination);
+        }, 'json');
     }
 
-    function renderPagination(total, limit, currentPage) {
-        let totalPages = Math.ceil(total / limit);
-        let paginationHtml = "";
+    loadCustomer();
 
-        if (totalPages > 1 && limit !== "all") {
-            for (let i = 1; i <= totalPages; i++) {
-                paginationHtml += `<li class="page-item ${i === currentPage ? 'active' : ''}">
-                    <a class="page-link pagination-link" href="#" data-page="${i}">${i}</a>
-                </li>`;
-            }
-        }
+    $("#search, #per_page").on("input change", () => loadCustomer(1));
 
-        $(".pagination").html(paginationHtml);
-    }
+    $(document).on("click", ".pagination .page-link", function(e) {
+        e.preventDefault();
+        const page = $(this).data("page");
+        if (page) loadCustomer(page);
+    });
 
-    $("#save-customer").click(function(){
-        let id = $("#customer-id").val();
-        let nama = $("#customer-name").val();
-        let telepon = $("#customer-phone").val();
-        let alamat = $("#customer-address").val();
-        let tanggal_lahir = $("#customer-dob").val();
-        let jenis_kelamin = $("#customer-gender").val();
-        let email = $("#customer-email").val();
 
-        if(nama === '' || telepon === '') {
-            alert("Nama dan Telepon wajib diisi!");
-            return;
-        }
+    // Tambah Pelanggan
+    window.showModalTambah = function() {
+        $('#formCustomer')[0].reset();
+        $('#foto-preview').hide();
+        $('#customer_id').val('');
+        $('#customerModal .modal-title').text('Tambah Pelanggan');
+        $('#customerModal').modal('show');
+    };
 
-        let url = id ? "<?= site_url('customer/edit_customer/'); ?>" + id : "<?= site_url('customer/add_customer'); ?>";
-        
-        let formData = new FormData();
-        formData.append("nama", nama);
-        formData.append("telepon", telepon);
-        formData.append("alamat", alamat);
-        formData.append("tanggal_lahir", tanggal_lahir);
-        formData.append("jenis_kelamin", jenis_kelamin);
-        formData.append("email", email);
-        formData.append("foto", $('#customer-foto')[0].files[0]);
+    // Simpan (Tambah/Edit)
+    $("#formCustomer").submit(function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const id = $("#customer_id").val();
+        const url = id ? "<?= site_url('customer/edit_customer/') ?>" + id :
+            "<?= site_url('customer/add_customer') ?>";
 
         $.ajax({
-            url: url,
+            url,
             type: "POST",
             data: formData,
             contentType: false,
             processData: false,
-            success: function(response) {
-                let res = JSON.parse(response);
-                if(res.status === "success") {
-                    $("#customerModal").modal("hide");
-                    $("body").removeClass("modal-open");
-                    $(".modal-backdrop").remove();
-                    loadCustomers();
+            success: function(res) {
+                const data = JSON.parse(res);
+                if (data.status === 'success') {
+                    $('#customerModal').modal('hide');
+                    loadCustomer();
                 } else {
-                    alert("Terjadi kesalahan!");
+                    alert("Gagal menyimpan data.");
                 }
             }
         });
-
     });
 
-
-    $(document).on("click", ".edit-customer", function(){
-        let id = $(this).data("id");
-
-        $.ajax({
-            url: "<?= site_url('customer/get_customer/'); ?>" + id,
-            type: "GET",
-            success: function(response) {
-                let data = JSON.parse(response);
-                $("#customer-id").val(data.id);
-                $("#customer-name").val(data.nama);
-                $("#customer-phone").val(data.telepon);
-                $("#customer-address").val(data.alamat);
-                $("#customer-dob").val(data.tanggal_lahir); // Tambah baris ini
-                $("#customer-gender").val(data.jenis_kelamin); // Tambah baris ini
-                $("#customer-email").val(data.email); // Tambah baris ini
-                $("#foto-preview").attr("src", "<?= base_url('uploads/foto_pelanggan/'); ?>" + data.foto).show();
-                $("#customerModal").modal("show");
+    // Edit Pelanggan
+    $(document).on("click", ".btn-edit", function() {
+        const id = $(this).data("id");
+        $.get("<?= site_url('customer/get_customer/') ?>" + id, function(res) {
+            const data = JSON.parse(res);
+            $("#customer_id").val(data.id);
+            $("#nama").val(data.nama);
+            $("#telepon").val(data.telepon);
+            $("#alamat").val(data.alamat);
+            $("#email").val(data.email);
+            $("#tanggal_lahir").val(data.tanggal_lahir);
+            $("#jenis_kelamin").val(data.jenis_kelamin);
+            $("#kode_pelanggan").val(data.kode_pelanggan);
+            if (data.foto) {
+                $("#foto-preview").attr("src", "<?= base_url('uploads/foto_pelanggan/') ?>" +
+                    data.foto).show();
             }
+            $('#customerModal .modal-title').text('Edit Pelanggan');
+            $('#customerModal').modal('show');
         });
     });
 
-    $(document).on("click", ".delete-customer", function(){
-        let id = $(this).data("id");
-
-        if(confirm("Apakah Anda yakin ingin menghapus pelanggan ini?")) {
-            $.ajax({
-                url: "<?= site_url('customer/delete_customer/'); ?>" + id,
-                type: "POST",
-                success: function(response) {
-                    let res = JSON.parse(response);
-                    if(res.status === "success") {
-                        loadCustomers();
-                    } else {
-                        alert("Gagal menghapus pelanggan!");
-                    }
+    // Hapus Pelanggan
+    $(document).on("click", ".btn-delete", function() {
+        const id = $(this).data("id");
+        if (confirm("Yakin ingin menghapus pelanggan ini?")) {
+            $.post("<?= site_url('customer/delete_customer/') ?>" + id, function(res) {
+                const data = JSON.parse(res);
+                if (data.status === 'success') {
+                    loadCustomer();
+                } else {
+                    alert("Gagal menghapus pelanggan.");
                 }
             });
         }
     });
-
-    $("#search").on("input", function() { loadCustomers(); });
-
-    $(document).on("click", ".pagination-link", function(e){
-        e.preventDefault();
-        let page = $(this).data("page");
-        loadCustomers(page);
-    });
-
-    $("#limit").on("change", function() { loadCustomers(); });
-
-    loadCustomers();
 });
 </script>

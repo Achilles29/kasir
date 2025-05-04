@@ -260,16 +260,17 @@ v pilih voucher > munculkan cari voucher
 v session login tetap aktif kecuali di logout
 v kode void
 v tambahkan nomor meja di pending order
+v refund pilihan tidak muncul Ekstra
+v update database local ke vps tertentu
+
 
 
 produk paket
 halaman pending order => nomor meja, total penjualan bukan total bayar, tanggal
 tampilan struk kasir subtotal
-refund pilihan tidak muncul Ekstra
 tampilan struk kasir judul
 
-export sql awalan pr_
-update database local ke vps tertentu
+v export sql awalan pr_
 
 - Laporan penjualan
 - Ringkasan penjualan

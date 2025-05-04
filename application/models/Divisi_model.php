@@ -48,5 +48,28 @@ class Divisi_model extends CI_Model {
     public function cek_urutan_tampilan($urutan) {
         return $this->db->get_where('pr_divisi', ['urutan_tampilan' => $urutan])->row_array();
     }
+public function get_filtered($limit, $offset, $search = '') {
+    $this->db->select('pr_divisi.*, COUNT(pr_kategori.id) as jumlah_kategori');
+    $this->db->from('pr_divisi');
+    $this->db->join('pr_kategori', 'pr_kategori.pr_divisi_id = pr_divisi.id', 'left');
+    
+    if (!empty($search)) {
+        $this->db->like('pr_divisi.nama_divisi', $search);
+    }
+
+    $this->db->group_by('pr_divisi.id');
+    $this->db->order_by('pr_divisi.urutan_tampilan', 'ASC');
+    $this->db->limit($limit, $offset);
+    return $this->db->get()->result_array();
+}
+
+public function count_filtered($search = '') {
+    $this->db->from('pr_divisi');
+    if (!empty($search)) {
+        $this->db->like('nama_divisi', $search);
+    }
+    return $this->db->count_all_results();
+}
+
 
 }

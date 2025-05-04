@@ -41,7 +41,7 @@ public function index() {
 }
 
 public function load_data() {
-    $page = $this->input->get('page') ?: 1;
+    $page = (int) ($this->input->get('page') ?: 1);
     $per_page = $this->input->get('per_page') ?? 30;
     $per_page = ($per_page == "all") ? $this->Produk_model->count_all_produk() : $per_page;
     $offset = ($page - 1) * $per_page;
@@ -53,28 +53,123 @@ public function load_data() {
     $produk = $this->Produk_model->get_filtered_produk($per_page, $offset, $kategori_id, $status, $search);
     $total_rows = $this->Produk_model->count_filtered_produk($kategori_id, $status, $search);
 
-    // Konfigurasi pagination
-    $this->load->library('pagination');
-    $config['base_url'] = "#";
-    $config['total_rows'] = $total_rows;
-    $config['per_page'] = $per_page;
-    $config['use_page_numbers'] = true;
-    $config['attributes'] = array('class' => 'page-link');
-    $config['cur_tag_open'] = '<li class="page-item active"><a class="page-link">';
-    $config['cur_tag_close'] = '</a></li>';
-    $config['num_tag_open'] = '<li class="page-item">';
-    $config['num_tag_close'] = '</li>';
-    $config['prev_link'] = '&laquo; Sebelumnya';
-    $config['next_link'] = 'Selanjutnya &raquo;';
-    
-    $this->pagination->initialize($config);
-    $pagination = ($per_page == "all") ? "" : $this->pagination->create_links();
+    $total_pages = ceil($total_rows / $per_page);
+    $pagination = '';
+
+    if ($total_pages > 1) {
+        if ($page > 1) {
+            $pagination .= '<li class="page-item"><a class="page-link" href="#" data-page="'.($page - 1).'">&laquo;</a></li>';
+        }
+
+        for ($i = 1; $i <= $total_pages; $i++) {
+            $active = $i == $page ? 'active' : '';
+            $pagination .= '<li class="page-item '.$active.'"><a class="page-link" href="#" data-page="'.$i.'">'.$i.'</a></li>';
+        }
+
+        if ($page < $total_pages) {
+            $pagination .= '<li class="page-item"><a class="page-link" href="#" data-page="'.($page + 1).'">&raquo;</a></li>';
+        }
+    }
 
     echo json_encode([
         'produk' => $produk,
         'pagination' => $pagination
     ]);
 }
+
+public function get_by_id() {
+    $id = $this->input->get('id');
+    $data = $this->Produk_model->get_produk_by_id($id);
+    echo json_encode($data);
+}
+
+public function get_produk_by_id($id) {
+    $produk = $this->Produk_model->get_produk_by_id($id);
+    echo json_encode($produk);
+}
+
+public function simpan() {
+    $id = $this->input->post('id');
+    $data = [
+        'sku' => $this->input->post('sku'),
+        'nama_produk' => $this->input->post('nama_produk'),
+        'deskripsi' => $this->input->post('deskripsi'),
+        'kategori_id' => $this->input->post('kategori_id'),
+        'satuan' => $this->input->post('satuan'),
+        'hpp' => $this->input->post('hpp') ?: 0,
+        'harga_jual' => $this->input->post('harga_jual'),
+        'monitor_persediaan' => $this->input->post('monitor_persediaan'),
+        'tampil' => $this->input->post('tampil')
+    ];
+
+    if (!empty($_FILES['foto']['name'])) {
+        $config['upload_path'] = './uploads/produk/';
+        $config['allowed_types'] = 'jpg|jpeg|png';
+        $config['max_size'] = 2048;
+        $config['file_name'] = strtolower(str_replace(' ', '_', $data['nama_produk']));
+        $config['overwrite'] = true;
+
+        $this->load->library('upload', $config);
+        if ($this->upload->do_upload('foto')) {
+            $data['foto'] = $this->upload->data('file_name');
+        }
+    }
+
+    if ($id) {
+        $this->Produk_model->update_produk($id, $data);
+    } else {
+        $this->Produk_model->insert_produk($data);
+    }
+
+    echo json_encode(['status' => 'success']);
+}
+
+public function insert_ajax() {
+    $this->_save_produk(); // buat fungsi privat untuk simpan
+}
+
+public function update_ajax() {
+    $this->_save_produk(true);
+}
+
+private function _save_produk($is_update = false) {
+    $id = $this->input->post('id');
+    $data = [
+        'sku' => $this->input->post('sku'),
+        'nama_produk' => $this->input->post('nama_produk'),
+        'deskripsi' => $this->input->post('deskripsi'),
+        'kategori_id' => $this->input->post('kategori_id'),
+        'satuan' => $this->input->post('satuan'),
+        'hpp' => $this->input->post('hpp'),
+        'harga_jual' => $this->input->post('harga_jual'),
+        'monitor_persediaan' => $this->input->post('monitor_persediaan'),
+        'tampil' => $this->input->post('tampil')
+    ];
+
+    // Upload foto jika ada
+    if (!empty($_FILES['foto']['name'])) {
+        $config['upload_path'] = './uploads/produk/';
+        $config['allowed_types'] = 'jpg|jpeg|png';
+        $config['max_size'] = 2048;
+        $config['file_name'] = strtolower(str_replace(' ', '_', $this->input->post('nama_produk')));
+        $config['overwrite'] = true;
+        $this->load->library('upload', $config);
+
+        if ($this->upload->do_upload('foto')) {
+            $data['foto'] = $this->upload->data('file_name');
+        }
+    }
+
+    if ($is_update) {
+        $this->Produk_model->update_produk($id, $data);
+        echo json_encode(['status' => 'success', 'message' => 'Produk berhasil diperbarui']);
+    } else {
+        $this->Produk_model->insert_produk($data);
+        echo json_encode(['status' => 'success', 'message' => 'Produk berhasil ditambahkan']);
+    }
+}
+
+
 public function tambah() {
     $data['title'] = ' Tambah Produk';
     $this->load->model('Kategori_model');

@@ -17,24 +17,27 @@ class Customer_model extends CI_Model {
         return $tanggal . $next_id;
     }
 
-    // Ambil semua pelanggan dengan pagination dan pencarian
-    public function get_all_customers($limit, $start, $search = '') {
-        $this->db->select("c.*, COALESCE(SUM(p.jumlah_poin), 0) as total_poin");
-        $this->db->from("pr_customer c");
-        $this->db->join("pr_customer_poin p", "p.customer_id = c.id AND p.status = 'aktif'", "left");
-        
-        if (!empty($search)) {
-            $this->db->group_start();
-            $this->db->like("c.nama", $search);
-            $this->db->or_like("c.telepon", $search);
-            $this->db->or_like("c.kode_pelanggan", $search);
-            $this->db->group_end();
-        }
+public function get_all_customers($limit, $start, $search = '')
+{
+    $this->db->select("c.*, COALESCE(SUM(p.jumlah_poin), 0) as total_poin");
+    $this->db->from("pr_customer c");
+    $this->db->join("pr_customer_poin p", "p.customer_id = c.id AND p.status = 'aktif'", "left");
 
-        $this->db->group_by("c.id");
-        $this->db->limit($limit, $start);
-        return $this->db->get()->result_array();
+    if (!empty($search)) {
+        $this->db->group_start();
+        $this->db->like("c.nama", $search);
+        $this->db->or_like("c.telepon", $search);
+        $this->db->or_like("c.kode_pelanggan", $search);
+        $this->db->group_end();
     }
+
+    $this->db->group_by("c.id");
+    $this->db->order_by("c.created_at", "DESC");
+    $this->db->limit($limit, $start);
+
+    return $this->db->get()->result_array();
+}
+
 
     // Hitung total pelanggan untuk pagination
     public function count_customers($search = '') {
@@ -84,6 +87,48 @@ public function get_transaksi_by_customer($customer_id, $start_date, $end_date, 
     }
 
     return $this->db->get()->result_array();
+}
+public function get_poin_by_customer($customer_id) {
+    return $this->db->get_where('pr_customer_poin', ['customer_id' => $customer_id])->result_array();
+}
+public function get_transaksi_with_detail($customer_id, $start, $end, $search = '') {
+    $this->db->select("t.id, t.tanggal, t.no_transaksi, t.total_penjualan");
+    $this->db->from("pr_transaksi t");
+    $this->db->where("t.customer_id", $customer_id);
+    $this->db->where("DATE(t.tanggal) >=", $start);
+    $this->db->where("DATE(t.tanggal) <=", $end);
+    $this->db->order_by("t.tanggal", "DESC");
+    $transaksi = $this->db->get()->result_array();
+
+    $result = [];
+
+    foreach ($transaksi as $t) {
+        // Ambil detail produk
+        $this->db->select("d.id, p.nama_produk, d.jumlah, d.harga, (d.jumlah * d.harga) as subtotal");
+        $this->db->from("pr_detail_transaksi d");
+        $this->db->join("pr_produk p", "p.id = d.pr_produk_id");
+        $this->db->where("d.pr_transaksi_id", $t['id']);
+        if (!empty($search)) {
+            $this->db->like("p.nama_produk", $search);
+        }
+        $detail = $this->db->get()->result_array();
+
+        foreach ($detail as &$d) {
+            // Ambil extra per produk
+            $this->db->select("e.nama_extra, x.jumlah, x.harga, x.subtotal");
+            $this->db->from("pr_detail_extra x");
+            $this->db->join("pr_produk_extra e", "e.id = x.pr_produk_extra_id");
+            $this->db->where("x.detail_transaksi_id", $d['id']);
+            $d['extra'] = $this->db->get()->result_array();
+        }
+
+        $result[] = [
+            'transaksi' => $t,
+            'detail'    => $detail
+        ];
+    }
+
+    return $result;
 }
 
 }
