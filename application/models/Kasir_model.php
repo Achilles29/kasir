@@ -382,11 +382,14 @@ public function generate_struk_full_by_setting($transaksi, $printer, $struk_data
     $divisi_id = $printer['divisi'];
     $lokasi = strtoupper($printer['lokasi_printer']);
     $isChecker = ($lokasi == 'CHECKER');
-
+    $isKasir = ($lokasi == 'KASIR');
     
-    // --- Tambahkan Judul [KITCHEN ORDER], dst ---
-    $out .= $this->center_text("[ $lokasi ORDER ]", $width) . "\n";
-    $out .= str_repeat("-", $width) . "\n";
+    // Tampilkan judul lokasi printer, kecuali untuk KASIR
+    $isKasir = strtoupper($printer['lokasi_printer']) === 'KASIR';
+    if (!$isKasir) {
+        $out .= $this->center_text("[ $lokasi ORDER ]", $width) . "\n";
+        $out .= str_repeat("-", $width) . "\n";
+    }
 
     // Logo hanya simbolik
     if (!empty($tampilan['show_logo']) && !empty($struk_data['logo'])) {
@@ -448,41 +451,41 @@ public function generate_struk_full_by_setting($transaksi, $printer, $struk_data
     $divisi_id = $printer['divisi'];
     $isKasir = strtoupper($printer['lokasi_printer']) === 'KASIR';
 
-foreach ($transaksi['items'] as $item) {
-    if (!is_null($item['status']) && strtolower($item['status']) == 'batal') {
-        continue;
-    }
+    foreach ($transaksi['items'] as $item) {
+        if (!is_null($item['status']) && strtolower($item['status']) == 'batal') {
+            continue;
+        }
 
-    $produk = $this->db->select('k.pr_divisi_id')->from('pr_produk p')
-        ->join('pr_kategori k', 'p.kategori_id = k.id', 'left')
-        ->where('p.id', $item['pr_produk_id'])->get()->row_array();
+        $produk = $this->db->select('k.pr_divisi_id')->from('pr_produk p')
+            ->join('pr_kategori k', 'p.kategori_id = k.id', 'left')
+            ->where('p.id', $item['pr_produk_id'])->get()->row_array();
 
-    if ($divisi_id && $produk['pr_divisi_id'] != $divisi_id) continue;
+        if ($divisi_id && $produk['pr_divisi_id'] != $divisi_id) continue;
 
-    $line_left = "{$item['jumlah']}x {$item['nama_produk']}";
-    $line_right = $isKasir ? number_format($item['harga'] * $item['jumlah'], 0, ',', '.') : '';
-    $out .= $this->format_struk_line($line_left, $line_right, $width) . "\n";
-
-    // Extra langsung dari $item['extra'], BUKAN query database lagi!
-if (!empty($item['extra'])) {
-    foreach ($item['extra'] as $ex) {
-//        $nama_extra = $ex['nama_extra'] ?? $ex['nama'] ?? 'Extra';
-        $nama_extra = $ex['nama_extra'] ?? 'Extra';
-        $line_left = "  > {$ex['jumlah']}x {$nama_extra}";
-        $line_right = $isKasir ? number_format($ex['harga'] * $ex['jumlah'], 0, ',', '.') : '';
+        $line_left = "{$item['jumlah']}x {$item['nama_produk']}";
+        $line_right = $isKasir ? number_format($item['harga'] * $item['jumlah'], 0, ',', '.') : '';
         $out .= $this->format_struk_line($line_left, $line_right, $width) . "\n";
-    }
 
-}
+        // Extra langsung dari $item['extra'], BUKAN query database lagi!
+        if (!empty($item['extra'])) {
+            foreach ($item['extra'] as $ex) {
+        //        $nama_extra = $ex['nama_extra'] ?? $ex['nama'] ?? 'Extra';
+                $nama_extra = $ex['nama_extra'] ?? 'Extra';
+                $line_left = "  > {$ex['jumlah']}x {$nama_extra}";
+                $line_right = $isKasir ? number_format($ex['harga'] * $ex['jumlah'], 0, ',', '.') : '';
+                $out .= $this->format_struk_line($line_left, $line_right, $width) . "\n";
+            }
 
-    // Note
-    if (!empty($item['catatan'])) {
-        $note_lines = explode("\n", wordwrap("- " . $item['catatan'], $width - 2));
-        foreach ($note_lines as $line) {
-            $out .= "  $line\n";
+        }
+
+        // Note
+        if (!empty($item['catatan'])) {
+            $note_lines = explode("\n", wordwrap("- " . $item['catatan'], $width - 2));
+            foreach ($note_lines as $line) {
+                $out .= "  $line\n";
+            }
         }
     }
-}
 
 
 
@@ -515,6 +518,25 @@ if (!empty($item['extra'])) {
             $out .= $this->center_text(strtoupper($line), $width) . "\n";
         }
     }
+
+    // Tampilkan promo voucher otomatis jika ada
+    if ($isKasir && !empty($transaksi['voucher_otomatis'])) {
+        $out .= str_repeat("-", $width) . "\n";
+        $out .= $this->center_text("🎁 VOUCHER PROMO 🎁", $width) . "\n";
+        $out .= str_repeat("-", $width) . "\n";
+
+        foreach ($transaksi['voucher_otomatis'] as $v) {
+            $nilai_label = $v['jenis'] === 'persentase'
+                ? "{$v['nilai']}%"
+                : "Rp " . number_format($v['nilai'], 0, ',', '.');
+
+            $out .= "Kode: {$v['kode_voucher']}\n";
+            $out .= "Nilai: $nilai_label\n";
+            $out .= "*S&K Berlaku\n";
+            $out .= str_repeat("-", $width) . "\n";
+        }
+    }
+
 
     return $out;
 }

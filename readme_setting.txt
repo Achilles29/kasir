@@ -38,7 +38,11 @@ buat di cron
 */5 * * * * /usr/bin/php /path/to/index.php retry_sync
 
 
-cron status poin
+cron status poin di local dan vps
 0 0 * * * /usr/bin/curl https://yourdomain.com/customer/update_poin_status
 
 http://localhost/kasir/customer/update_poin_status
+
+cron status stamp di local dan vps
+
+http://localhost/kasir/stamp/kadaluarsa_stamp

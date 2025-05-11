@@ -91,3 +91,18 @@ pr_void : id, kode_void, pr_transaksi_id, no_transaksi, detail_transaksi_id, pr_
 pr_voucher : id, kode_voucher, jenis, nilai, min_pembelian, produk_id, jumlah_gratis, max_diskon, maksimal_voucher, sisa_voucher, status, tanggal_mulai, tanggal_berakhir, created_at, updated_at
 schedule : id, group_id, message, send_time, status, created_at, updated_at
 users : id, username, password, created_at, updated_at
+
+CREATE TABLE pr_promo_voucher_auto (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nama_promo VARCHAR(100),
+    jenis ENUM('nominal', 'persentase') NOT NULL,
+    nilai INT NOT NULL,
+    min_pembelian INT DEFAULT 0,
+    produk_id INT DEFAULT NULL,
+    kode_voucher VARCHAR(50),
+    masa_berlaku INT DEFAULT 30,
+    max_diskon INT DEFAULT 0,
+    maksimal_voucher INT DEFAULT 1,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);

@@ -11,7 +11,7 @@
  Target Server Version : 100432
  File Encoding         : 65001
 
- Date: 11/05/2025 17:59:01
+ Date: 11/05/2025 22:51:30
 */
 
 SET NAMES utf8mb4;
@@ -24,12 +24,16 @@ DROP TABLE IF EXISTS `pr_promo_voucher_auto`;
 CREATE TABLE `pr_promo_voucher_auto`  (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `nama_promo` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
-  `jenis` enum('nominal','persentase') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `nilai` int(11) NOT NULL,
+  `tipe_trigger` enum('nominal','produk') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'nominal',
+  `nilai` int(11) NULL DEFAULT 0,
+  `produk_ids` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL,
+  `masa_berlaku` int(11) NULL DEFAULT 30,
+  `jenis` enum('persentase','nominal') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `nilai_voucher` int(11) NOT NULL,
   `min_pembelian` int(11) NULL DEFAULT 0,
   `produk_id` int(11) NULL DEFAULT NULL,
-  `masa_berlaku` int(11) NULL DEFAULT 30,
   `max_diskon` int(11) NULL DEFAULT 0,
+  `aktif` tinyint(1) NULL DEFAULT 1,
   `maksimal_voucher` int(11) NULL DEFAULT 1,
   `created_at` datetime(0) NULL DEFAULT current_timestamp(0),
   `updated_at` datetime(0) NULL DEFAULT current_timestamp(0) ON UPDATE CURRENT_TIMESTAMP(0),

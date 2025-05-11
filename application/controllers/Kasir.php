@@ -1433,6 +1433,8 @@ public function get_extra_list() {
 
 public function simpan_pembayaran()
 {
+    $this->load->model('Api_model');
+
     $transaksi_id = $this->input->post('transaksi_id');
     $pembayaran = json_decode($this->input->post('pembayaran'), true);
     $kasir_id = $this->session->userdata('pegawai_id');
@@ -1464,7 +1466,7 @@ public function simpan_pembayaran()
 
     $grand_total = $total_penjualan - $diskon;
 
-    // 🔥 Step 1: Simpan pembayaran dulu
+    // 🔥 Step 1: Simpan pemb   ayaran dulu
     $this->Kasir_model->simpan_pembayaran($transaksi_id, $pembayaran, $kasir_id);
 
     // 🔥 Step 2: Ambil total pembayaran TERBARU dari database setelah disimpan
@@ -1566,7 +1568,7 @@ public function simpan_pembayaran()
             }
         }
 
-
+        
         if (!empty($poin_data)) {
             $this->db->insert_batch('pr_customer_poin', $poin_data);
         }
@@ -1593,51 +1595,34 @@ public function simpan_pembayaran()
         
     }
 
-// Simpan stamp jika memenuhi dan customer tersedia
-$stamp_data = [];
-if ($transaksi->customer_id && $status_pembayaran == 'LUNAS') {
-    $produk_transaksi = $this->db->get_where('pr_detail_transaksi', [
-        'pr_transaksi_id' => $transaksi_id,
-        'status' => 'BERHASIL'
-    ])->result();
+    // Simpan stamp jika memenuhi dan customer tersedia
+    $stamp_data = [];
+    if ($transaksi->customer_id && $status_pembayaran == 'LUNAS') {
+        $produk_transaksi = $this->db->get_where('pr_detail_transaksi', [
+            'pr_transaksi_id' => $transaksi_id,
+            'status' => 'BERHASIL'
+        ])->result();
 
-    $promo_stamp_list = $this->db->where('aktif', 1)->get('pr_promo_stamp')->result();
+        $promo_stamp_list = $this->db->where('aktif', 1)->get('pr_promo_stamp')->result();
 
-    foreach ($promo_stamp_list as $promo) {
-        $jumlah_stamp = 0;
+        foreach ($promo_stamp_list as $promo) {
+            $jumlah_stamp = 0;
 
-        $pakai_min_pembelian = $promo->minimal_pembelian > 0 && empty($promo->produk_berlaku);
-        $pakai_produk_berlaku = $promo->minimal_pembelian == 0 && !empty($promo->produk_berlaku);
-        $pakai_dua_duanya = $promo->minimal_pembelian > 0 && !empty($promo->produk_berlaku);
+            $pakai_min_pembelian = $promo->minimal_pembelian > 0 && empty($promo->produk_berlaku);
+            $pakai_produk_berlaku = $promo->minimal_pembelian == 0 && !empty($promo->produk_berlaku);
+            $pakai_dua_duanya = $promo->minimal_pembelian > 0 && !empty($promo->produk_berlaku);
 
-        // --- CASE 1: Hanya berdasarkan minimal pembelian
-        if ($pakai_min_pembelian) {
-            if ($grand_total >= $promo->minimal_pembelian) {
-                $jumlah_stamp = $promo->berlaku_kelipatan
-                    ? floor($grand_total / $promo->minimal_pembelian)
-                    : 1;
-            }
-        }
-
-        // --- CASE 2: Hanya berdasarkan produk tertentu
-        if ($pakai_produk_berlaku) {
-            $produk_ids = explode(',', $promo->produk_berlaku);
-            $jumlah_produk = 0;
-            foreach ($produk_transaksi as $item) {
-                if (in_array($item->pr_produk_id, $produk_ids)) {
-                    $jumlah_produk += $item->jumlah;
+            // --- CASE 1: Hanya berdasarkan minimal pembelian
+            if ($pakai_min_pembelian) {
+                if ($grand_total >= $promo->minimal_pembelian) {
+                    $jumlah_stamp = $promo->berlaku_kelipatan
+                        ? floor($grand_total / $promo->minimal_pembelian)
+                        : 1;
                 }
             }
-            if ($jumlah_produk > 0) {
-                $jumlah_stamp = $promo->berlaku_kelipatan
-                    ? $jumlah_produk
-                    : 1;
-            }
-        }
 
-        // --- CASE 3: Gabungan minimal pembelian dan produk tertentu
-        if ($pakai_dua_duanya) {
-            if ($grand_total >= $promo->minimal_pembelian) {
+            // --- CASE 2: Hanya berdasarkan produk tertentu
+            if ($pakai_produk_berlaku) {
                 $produk_ids = explode(',', $promo->produk_berlaku);
                 $jumlah_produk = 0;
                 foreach ($produk_transaksi as $item) {
@@ -1645,46 +1630,121 @@ if ($transaksi->customer_id && $status_pembayaran == 'LUNAS') {
                         $jumlah_produk += $item->jumlah;
                     }
                 }
-
                 if ($jumlah_produk > 0) {
-                    if ($promo->berlaku_kelipatan) {
-                        $kelipatan_total = floor($grand_total / $promo->minimal_pembelian);
-                        $jumlah_stamp = min($kelipatan_total, $jumlah_produk);
-                    } else {
-                        $jumlah_stamp = 1;
+                    $jumlah_stamp = $promo->berlaku_kelipatan
+                        ? $jumlah_produk
+                        : 1;
+                }
+            }
+
+            // --- CASE 3: Gabungan minimal pembelian dan produk tertentu
+            if ($pakai_dua_duanya) {
+                if ($grand_total >= $promo->minimal_pembelian) {
+                    $produk_ids = explode(',', $promo->produk_berlaku);
+                    $jumlah_produk = 0;
+                    foreach ($produk_transaksi as $item) {
+                        if (in_array($item->pr_produk_id, $produk_ids)) {
+                            $jumlah_produk += $item->jumlah;
+                        }
+                    }
+
+                    if ($jumlah_produk > 0) {
+                        if ($promo->berlaku_kelipatan) {
+                            $kelipatan_total = floor($grand_total / $promo->minimal_pembelian);
+                            $jumlah_stamp = min($kelipatan_total, $jumlah_produk);
+                        } else {
+                            $jumlah_stamp = 1;
+                        }
                     }
                 }
             }
+
+            if ($jumlah_stamp > 0) {
+                $masa_berlaku = date('Y-m-d', strtotime("+{$promo->masa_berlaku_hari} days"));
+                $now = date('Y-m-d H:i:s');
+
+                $stamp_data[] = [
+                    'pr_transaksi_id' => $transaksi_id,
+                    'customer_id' => $transaksi->customer_id,
+                    'promo_stamp_id' => $promo->id,
+                    'jumlah_stamp' => $jumlah_stamp,
+                    'last_stamp_at' => $now,
+                    'masa_berlaku' => $masa_berlaku,
+                    'status' => 'aktif',
+                    'created_at' => $now,
+                    'updated_at' => $now
+                ];
+            }
         }
 
-        if ($jumlah_stamp > 0) {
-            $masa_berlaku = date('Y-m-d', strtotime("+{$promo->masa_berlaku_hari} days"));
-            $now = date('Y-m-d H:i:s');
-
-            $stamp_data[] = [
-                'pr_transaksi_id' => $transaksi_id,
-                'customer_id' => $transaksi->customer_id,
-                'promo_stamp_id' => $promo->id,
-                'jumlah_stamp' => $jumlah_stamp,
-                'last_stamp_at' => $now,
-                'masa_berlaku' => $masa_berlaku,
-                'status' => 'aktif',
-                'created_at' => $now,
-                'updated_at' => $now
-            ];
+        if (!empty($stamp_data)) {
+            $this->db->insert_batch('pr_customer_stamp', $stamp_data);
         }
+
+        // Update stamp yang sudah kadaluarsa
+        $this->db->where('masa_berlaku <', date('Y-m-d'))
+            ->where('status', 'aktif')
+            ->update('pr_customer_stamp', ['status' => 'kadaluarsa']);
     }
 
-    if (!empty($stamp_data)) {
-        $this->db->insert_batch('pr_customer_stamp', $stamp_data);
+    // 🔥 AUTO VOUCHER: Cek apakah customer dapat voucher baru
+    if ($transaksi->customer_id && $status_pembayaran == 'LUNAS') {
+        $promo_voucher_list = $this->db->get_where('pr_promo_voucher_auto', ['aktif' => 1])->result();
+
+        foreach ($promo_voucher_list as $promo) {
+            $berhak = false;
+
+            if ($promo->tipe_trigger === 'nominal' && $grand_total >= intval($promo->nilai)) {
+                $berhak = true;
+            }
+
+            if ($promo->tipe_trigger === 'produk' && !empty($promo->produk_ids)) {
+                $produk_ids = explode(',', $promo->produk_ids);
+                $jumlah_produk = $this->db->where('pr_transaksi_id', $transaksi_id)
+                                        ->where_in('pr_produk_id', $produk_ids)
+                                        ->where('status', 'BERHASIL')
+                                        ->count_all_results('pr_detail_transaksi');
+                if ($jumlah_produk > 0) {
+                    $berhak = true;
+                }
+            }
+
+            if ($berhak) {
+                $voucher_code = 'PROMO-' . strtoupper(substr(md5(uniqid()), 0, 6));
+                $tanggal_mulai = date('Y-m-d');
+                $tanggal_berakhir = date('Y-m-d', strtotime("+{$promo->masa_berlaku} days"));
+                $now = date('Y-m-d H:i:s');
+
+                $voucher_auto = [
+                    'kode_voucher' => $voucher_code,
+                    'jenis' => $promo->jenis,
+                    'nilai' => $promo->nilai_voucher,
+                    'min_pembelian' => $promo->min_pembelian,
+                    'produk_id' => $promo->produk_id,
+                    'jumlah_gratis' => null,
+                    'max_diskon' => $promo->max_diskon,
+                    'maksimal_voucher' => $promo->maksimal_voucher,
+                    'sisa_voucher' => $promo->maksimal_voucher,
+                    'status' => 'aktif',
+                    'tanggal_mulai' => $tanggal_mulai,
+                    'tanggal_berakhir' => $tanggal_berakhir,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+                
+                // Setelah insert ke pr_voucher untuk promo otomatis
+                $this->db->insert('pr_voucher', $voucher_auto);
+                $inserted_id = $this->db->insert_id(); // Ambil ID yang baru saja di-insert
+
+                $voucher_terbaru = $this->db->get_where('pr_voucher', ['id' => $inserted_id])->row_array();
+                if (!empty($voucher_terbaru)) {
+                    $voucher_auto_list[] = $voucher_terbaru; // Simpan data yang valid dari DB
+                }
+
+            }
+        }
+
     }
-
-    // Update stamp yang sudah kadaluarsa
-    $this->db->where('masa_berlaku <', date('Y-m-d'))
-        ->where('status', 'aktif')
-        ->update('pr_customer_stamp', ['status' => 'kadaluarsa']);
-}
-
 
 
     $transaksi = $this->Kasir_model->get_transaksi_by_id($transaksi_id);
@@ -1694,7 +1754,6 @@ if ($transaksi->customer_id && $status_pembayaran == 'LUNAS') {
         $this->cetak_pesanan_dibayar_internal($transaksi_id);
     }
 
-    $this->load->model('Api_model');
 
     // Ambil ulang data dari database setelah semua update
     $transaksi_data = $this->db->get_where('pr_transaksi', ['id' => $transaksi_id])->row_array();
@@ -1710,6 +1769,7 @@ if ($transaksi->customer_id && $status_pembayaran == 'LUNAS') {
     $log_voucher = $this->db->get_where('pr_log_voucher', ['transaksi_id' => $transaksi_id])->result_array();
     $customer_poin = $this->db->get_where('pr_customer_poin', ['transaksi_id' => $transaksi_id])->result_array();
     $customer_stamp = $this->db->get_where('pr_customer_stamp', ['pr_transaksi_id' => $transaksi_id])->result_array();
+    
     // Kirim ke VPS via API
     $this->Api_model->kirim_data('pr_transaksi', $transaksi_data);
     $this->Api_model->kirim_data('pr_pembayaran', $pembayaran_data);
@@ -1728,9 +1788,13 @@ if ($transaksi->customer_id && $status_pembayaran == 'LUNAS') {
         $voucher_data = $this->db->get_where('pr_voucher', ['id' => $voucher->id])->row_array();
         if (!empty($voucher_data)) {
             $this->Api_model->kirim_data('pr_voucher', $voucher_data);
+            
         }
     }
-
+    if (!empty($voucher_auto_list)) {
+        $this->Api_model->kirim_data('pr_voucher', $voucher_auto_list);
+    }
+    
     if (!empty($customer_stamp)) {
         $this->Api_model->kirim_data('pr_customer_stamp', $customer_stamp);
     }
