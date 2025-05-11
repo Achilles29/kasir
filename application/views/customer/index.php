@@ -117,6 +117,8 @@ $(document).ready(function() {
                             <a href="<?= site_url('customer/detail/') ?>${c.id}" class="btn btn-info btn-sm" title="Detail"><i class="fas fa-user"></i></a>
                             <a href="<?= site_url('customer/transaksi/') ?>${c.id}" class="btn btn-primary btn-sm" title="Riwayat Pembelian"><i class="fas fa-receipt"></i></a>
                             <a href="<?= site_url('customer/poin/') ?>${c.id}" class="btn btn-success btn-sm" title="Riwayat Poin"><i class="fas fa-star"></i></a>
+                            <a href="<?= site_url('customer/stamp/') ?>${c.id}" class="btn btn-secondary btn-sm" title="Riwayat Stamp"><i class="fas fa-stamp"></i></a>
+
                         </div>
                     </td>
                 </tr>`;

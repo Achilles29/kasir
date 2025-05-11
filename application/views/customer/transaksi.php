@@ -1,5 +1,7 @@
 <div class="container mt-4">
-    <a href="<?= site_url('customer'); ?>" class="btn btn-link mb-3">← Kembali</a>
+    <a href="<?= site_url('customer'); ?>" class="btn btn-outline-primary mb-3">
+        <i class="fas fa-arrow-left"></i> Kembali ke daftar pelanggan
+    </a>
     <h4>Riwayat Transaksi Pelanggan</h4>
     <p>Pelanggan: <strong><?= $customer['kode_pelanggan']; ?> - <?= $customer['nama']; ?></strong></p>
 
@@ -43,45 +45,51 @@ $(document).ready(function() {
             } else {
                 data.forEach((trx, i) => {
                     html += `
-                        <div class="card mb-4 shadow-sm">
-                            <div class="card-header bg-dark text-white d-flex justify-content-between">
-                                <div>
-                                    <strong>${trx.transaksi.no_transaksi}</strong> | ${trx.transaksi.tanggal}
-                                </div>
-                                <div>Total: <strong>Rp ${Number(trx.transaksi.total_penjualan).toLocaleString()}</strong></div>
-                            </div>
-                            <div class="card-body p-2">
-                                <table class="table table-bordered table-sm">
-                                    <thead class="table-light text-center">
-                                        <tr><th>Produk</th><th>Jumlah</th><th>Harga</th><th>Subtotal</th></tr>
-                                    </thead>
-                                    <tbody>`;
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-dark text-white d-flex justify-content-between">
+                    <div>
+                        <strong>${trx.transaksi.no_transaksi}</strong> | ${trx.transaksi.tanggal}
+                    </div>
+                    <div>Total: <strong>Rp ${Number(trx.transaksi.total_penjualan).toLocaleString()}</strong></div>
+                </div>
+                <div class="card-body p-2">
+                    <table class="table table-bordered table-sm mb-2">
+                        <thead class="table-light text-center">
+                            <tr><th>Produk</th><th>Jumlah</th><th>Harga</th><th>Subtotal</th></tr>
+                        </thead>
+                        <tbody>`;
 
                     trx.detail.forEach(row => {
                         html += `
-                            <tr>
-                                <td>${row.nama_produk}</td>
-                                <td class="text-center">${row.jumlah}</td>
-                                <td class="text-right">Rp ${Number(row.harga).toLocaleString()}</td>
-                                <td class="text-right">Rp ${Number(row.subtotal).toLocaleString()}</td>
-                            </tr>`;
+                <tr>
+                    <td>${row.nama_produk}</td>
+                    <td class="text-center">${row.jumlah}</td>
+                    <td class="text-right">Rp ${Number(row.harga).toLocaleString()}</td>
+                    <td class="text-right">Rp ${Number(row.subtotal).toLocaleString()}</td>
+                </tr>`;
 
                         if (row.extra.length > 0) {
                             row.extra.forEach(e => {
                                 html += `
-                                <tr class="table-secondary">
-                                    <td class="ps-4">↳ ${e.nama_extra}</td>
-                                    <td class="text-center">${e.jumlah}</td>
-                                    <td class="text-right">Rp ${Number(e.harga).toLocaleString()}</td>
-                                    <td class="text-right">Rp ${Number(e.subtotal).toLocaleString()}</td>
-                                </tr>`;
+                    <tr class="table-secondary">
+                        <td class="ps-4">↳ ${e.nama_extra}</td>
+                        <td class="text-center">${e.jumlah}</td>
+                        <td class="text-right">Rp ${Number(e.harga).toLocaleString()}</td>
+                        <td class="text-right">Rp ${Number(e.subtotal).toLocaleString()}</td>
+                    </tr>`;
                             });
                         }
                     });
 
-                    html += `</tbody></table></div></div>`;
+                    // 🔽 Tambahkan baris poin setelah tabel
+                    html += `</tbody></table>
+            <div class="text-end text-muted small pe-2">
+                <i class="fas fa-star text-warning"></i> Poin didapat: <strong>${trx.transaksi.poin ?? 0}</strong>
+            </div>
+        </div></div>`;
                 });
             }
+
 
             $("#transaksi-wrapper").html(html);
         }, 'json');

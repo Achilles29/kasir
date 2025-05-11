@@ -194,6 +194,8 @@
                         <div class="bg-white py-2 collapse-inner rounded">
                             <a class="collapse-item" href="<?= site_url('/promo') ?>"><i class="far fa-id-card"></i>
                                 Promo</a>
+                            <a class="collapse-item" href="<?= site_url('/stamp') ?>"><i class="far fa-id-card"></i>
+                                Stamp</a>
                             <a class="collapse-item" href="<?= site_url('/voucher') ?>"><i class="fas fa-user-cog"></i>
                                 Daftar voucher</a>
                             <a class="collapse-item" href="<?= site_url('/poin') ?>"><i class="fas fa-user-cog"></i>

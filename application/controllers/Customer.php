@@ -7,6 +7,12 @@ class Customer extends CI_Controller {
         parent::__construct();
         $this->load->model("Customer_model");
     }
+    public function update_poin_status()
+    {
+        $this->load->model('Customer_model');
+        $this->Customer_model->update_poin_kadaluarsa();
+        echo "Status poin kedaluwarsa diperbarui dan disinkronkan.";
+    }
 
     public function index() {
         $data['title'] = "Daftar Pelanggan";
@@ -188,14 +194,22 @@ public function get_transaksi_ajax() {
     $data = $this->Customer_model->get_transaksi_by_customer($customer_id, $start, $end, $search);
     echo json_encode($data);
 }
+
 public function poin($id) {
+    $this->load->model('Customer_model');
     $data['title'] = "Riwayat Poin Pelanggan";
     $data['customer'] = $this->Customer_model->get_customer_by_id($id);
-    $data['poin'] = $this->Customer_model->get_poin_by_customer($id); // tambahkan method ini di model
-    $this->load->view("templates/header", $data);
-    $this->load->view("customer/poin", $data); // buat view poin.php
-    $this->load->view("templates/footer");
+    $data['poin'] = $this->Customer_model->get_riwayat_poin($id);
+    $data['poin_aktif'] = $this->Customer_model->get_total_poin($id);
+    $data['poin_terpakai'] = $this->Customer_model->get_total_poin_terpakai($id);
+    $data['poin_kadaluarsa'] = $this->Customer_model->get_total_poin_kadaluarsa($id);
+    $data['poin_akan_kadaluarsa'] = $this->Customer_model->get_poin_akan_kadaluarsa($id);
+
+    $this->load->view('templates/header', $data);
+    $this->load->view('customer/poin', $data);
+    $this->load->view('templates/footer');
 }
+
 
 public function get_transaksi_detail_ajax() {
     $customer_id = $this->input->get('customer_id');
@@ -208,5 +222,19 @@ public function get_transaksi_detail_ajax() {
 
     echo json_encode($result);
 }
+
+public function stamp($customer_id)
+{
+    $this->load->model('Customer_model');
+    $data['title'] = 'Riwayat Stamp';
+    $data['customer'] = $this->Customer_model->get_customer_by_id($customer_id);
+    $data['stamp'] = $this->Customer_model->get_stamp_by_customer($customer_id);
+
+    $this->load->view('templates/header', $data);
+    $this->load->view('customer/stamp', $data);
+    $this->load->view('templates/footer');
+}
+
+
 
 }

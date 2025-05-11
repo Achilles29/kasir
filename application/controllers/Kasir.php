@@ -709,6 +709,13 @@ public function cetak_void_internal()
     $this->db->where_in('id', $void_ids);
     $this->db->update('pr_void', ['is_printed' => 1]);
 
+    // 🔥 Sinkronisasi ke VPS
+    $this->load->model('Api_model');
+    $updated_voids = $this->db->where_in('id', $void_ids)->get('pr_void')->result_array();
+    if (!empty($updated_voids)) {
+        $this->Api_model->kirim_data('pr_void', $updated_voids);
+    }
+
     echo json_encode(['status' => 'success', 'message' => 'Void berhasil dicetak']);
 }
 
@@ -990,24 +997,22 @@ public function simpan_transaksi()
     $this->db->trans_complete();
 
     /// TES API
-    if (!$is_edit) {
-        $this->load->model('Api_model');
+    $this->load->model('Api_model');
 
-        // Ambil kembali detail transaksi yang baru disimpan
-        $transaksi_data = $this->db->get_where('pr_transaksi', ['id' => $transaksi_id])->row_array();
-        $detail_data = $this->db->get_where('pr_detail_transaksi', ['pr_transaksi_id' => $transaksi_id])->result_array();
+    // Ambil kembali detail transaksi yang baru disimpan
+    $transaksi_data = $this->db->get_where('pr_transaksi', ['id' => $transaksi_id])->row_array();
+    $detail_data = $this->db->get_where('pr_detail_transaksi', ['pr_transaksi_id' => $transaksi_id])->result_array();
 
-        $extras = [];
-        foreach ($detail_data as $dt) {
-            $extra = $this->db->get_where('pr_detail_extra', ['detail_transaksi_id' => $dt['id']])->result_array();
-            $extras = array_merge($extras, $extra);
-        }
+    $extras = [];
+    foreach ($detail_data as $dt) {
+        $extra = $this->db->get_where('pr_detail_extra', ['detail_transaksi_id' => $dt['id']])->result_array();
+        $extras = array_merge($extras, $extra);
+    }
 
-        $this->Api_model->kirim_data('pr_transaksi', $transaksi_data);
-        $this->Api_model->kirim_data('pr_detail_transaksi', $detail_data);
-        if (!empty($extras)) {
-            $this->Api_model->kirim_data('pr_detail_extra', $extras);
-        }
+    $this->Api_model->kirim_data('pr_transaksi', $transaksi_data);
+    $this->Api_model->kirim_data('pr_detail_transaksi', $detail_data);
+    if (!empty($extras)) {
+        $this->Api_model->kirim_data('pr_detail_extra', $extras);
     }
 
 
@@ -1223,12 +1228,10 @@ public function update_order() {
     } else {
         $this->Kasir_model->update_total_transaksi($transaksi_id);
 
-        // ✅ Cetak ulang pesanan
-        $this->cetak_pesanan_baru_internal($transaksi_id);
 
-        // ✅ Kirim ke VPS
         $this->load->model('Api_model');
 
+        // Ambil ulang data transaksi setelah update
         $transaksi_data = $this->db->get_where('pr_transaksi', ['id' => $transaksi_id])->row_array();
         $detail_data = $this->db->get_where('pr_detail_transaksi', ['pr_transaksi_id' => $transaksi_id])->result_array();
 
@@ -1238,11 +1241,16 @@ public function update_order() {
             $extras = array_merge($extras, $extra);
         }
 
+        // Kirim ke VPS
         $this->Api_model->kirim_data('pr_transaksi', $transaksi_data);
         $this->Api_model->kirim_data('pr_detail_transaksi', $detail_data);
         if (!empty($extras)) {
             $this->Api_model->kirim_data('pr_detail_extra', $extras);
         }
+
+
+        // ✅ Cetak ulang pesanan
+        $this->cetak_pesanan_baru_internal($transaksi_id);
 
         echo json_encode(['status' => 'success', 'message' => 'Pesanan berhasil diperbarui.']);
     }
@@ -1251,6 +1259,7 @@ public function update_order() {
 public function search_voucher()
 {
     $keyword = $this->input->get('keyword');
+
     $this->db->select('kode_voucher, jenis, nilai, min_pembelian, tanggal_berakhir');
     $this->db->from('pr_voucher');
     $this->db->where('status', 'aktif');
@@ -1260,8 +1269,21 @@ public function search_voucher()
     }
 
     $result = $this->db->get()->result();
-    echo json_encode($result);
+
+    $data = [];
+    foreach ($result as $v) {
+        $data[] = [
+            'kode_voucher' => $v->kode_voucher,
+            'jenis' => $v->jenis,
+            'nilai' => $v->nilai,
+            'min_pembelian' => $v->min_pembelian,
+            'tanggal_berakhir' => $v->tanggal_berakhir,
+        ];
+    }
+
+    echo json_encode($data);
 }
+
 
 public function get_voucher_list()
 {
@@ -1272,17 +1294,31 @@ public function get_voucher_list()
 
     $data = [];
     foreach ($result as $v) {
+        // Tambahkan pengecekan dan format diskon
+        if ($v->jenis_diskon === 'nominal') {
+            $diskon_text = 'Rp ' . number_format($v->nilai_diskon, 0, ',', '.');
+        } elseif ($v->jenis_diskon === 'persentase') {
+            $diskon_text = $v->nilai_diskon . '%';
+        } else {
+            $diskon_text = '-';
+        }
+
         $data[] = [
             'id' => $v->id,
             'kode_voucher' => $v->kode_voucher,
             'nama_voucher' => $v->nama_voucher,
-            'diskon' => $v->nilai_diskon,
+            'diskon' => $diskon_text,
+            'nilai_diskon' => $v->nilai_diskon,
+            'jenis_diskon' => $v->jenis_diskon,
+            'min_pembelian' => $v->min_pembelian,
+            'tanggal_berakhir' => $v->tanggal_berakhir,
             'foto' => $v->gambar ?? 'default.jpg'
         ];
     }
 
     echo json_encode($data);
 }
+
 
 public function cek_voucher()
 {
@@ -1465,20 +1501,20 @@ public function simpan_pembayaran()
         $this->db->where('pr_transaksi_id', $transaksi_id)
             ->where('status IS NULL', null, false)
             ->update('pr_detail_transaksi', ['status' => 'BERHASIL']);
-// Update juga semua extra yang terkait
-$detail_ids = $this->db->select('id')
-    ->from('pr_detail_transaksi')
-    ->where('pr_transaksi_id', $transaksi_id)
-    ->where('status', 'BERHASIL')
-    ->get()
-    ->result_array();
+        // Update juga semua extra yang terkait
+        $detail_ids = $this->db->select('id')
+            ->from('pr_detail_transaksi')
+            ->where('pr_transaksi_id', $transaksi_id)
+            ->where('status', 'BERHASIL')
+            ->get()
+            ->result_array();
 
-if (!empty($detail_ids)) {
-    $detail_id_list = array_column($detail_ids, 'id');
-    $this->db->where_in('detail_transaksi_id', $detail_id_list)
-             ->where('(status IS NULL OR status = "")', null, false)
-             ->update('pr_detail_extra', ['status' => 'BERHASIL']);
-}
+        if (!empty($detail_ids)) {
+            $detail_id_list = array_column($detail_ids, 'id');
+            $this->db->where_in('detail_transaksi_id', $detail_id_list)
+                    ->where('(status IS NULL OR status = "")', null, false)
+                    ->update('pr_detail_extra', ['status' => 'BERHASIL']);
+        }
 
     }
 
@@ -1514,10 +1550,11 @@ if (!empty($detail_ids)) {
         $poin_beli = $this->db->query("SELECT * FROM pr_poin WHERE jenis_point = 'per_pembelian' ORDER BY min_pembelian DESC")->result();
         foreach ($poin_beli as $p) {
             if ($grand_total >= $p->min_pembelian) {
+                $jumlah_kelipatan = floor($grand_total / $p->min_pembelian);
                 $poin_data[] = [
                     'customer_id' => $transaksi->customer_id,
                     'transaksi_id' => $transaksi_id,
-                    'jumlah_poin' => $p->nilai_point,
+                    'jumlah_poin' => $jumlah_kelipatan * $p->nilai_point,
                     'jenis' => 'per_pembelian',
                     'sumber' => null,
                     'tanggal_kedaluwarsa' => date('Y-m-d', strtotime("+{$p->kedaluwarsa_hari} days")),
@@ -1525,9 +1562,10 @@ if (!empty($detail_ids)) {
                     'created_at' => date('Y-m-d H:i:s'),
                     'updated_at' => date('Y-m-d H:i:s'),
                 ];
-                break;
+                break; // pakai yang maksimal dulu
             }
         }
+
 
         if (!empty($poin_data)) {
             $this->db->insert_batch('pr_customer_poin', $poin_data);
@@ -1546,11 +1584,108 @@ if (!empty($detail_ids)) {
             'kode_voucher' => $kode_voucher,
             'jumlah_diskon' => $diskon,
             'sisa_voucher' => $sisa_voucher,
-            'created_at' => date('Y-m-d H:i:s')
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s')
         ]);
 
+
         $this->db->update('pr_voucher', ['sisa_voucher' => $sisa_voucher], ['id' => $voucher->id]);
+        
     }
+
+// Simpan stamp jika memenuhi dan customer tersedia
+$stamp_data = [];
+if ($transaksi->customer_id && $status_pembayaran == 'LUNAS') {
+    $produk_transaksi = $this->db->get_where('pr_detail_transaksi', [
+        'pr_transaksi_id' => $transaksi_id,
+        'status' => 'BERHASIL'
+    ])->result();
+
+    $promo_stamp_list = $this->db->where('aktif', 1)->get('pr_promo_stamp')->result();
+
+    foreach ($promo_stamp_list as $promo) {
+        $jumlah_stamp = 0;
+
+        $pakai_min_pembelian = $promo->minimal_pembelian > 0 && empty($promo->produk_berlaku);
+        $pakai_produk_berlaku = $promo->minimal_pembelian == 0 && !empty($promo->produk_berlaku);
+        $pakai_dua_duanya = $promo->minimal_pembelian > 0 && !empty($promo->produk_berlaku);
+
+        // --- CASE 1: Hanya berdasarkan minimal pembelian
+        if ($pakai_min_pembelian) {
+            if ($grand_total >= $promo->minimal_pembelian) {
+                $jumlah_stamp = $promo->berlaku_kelipatan
+                    ? floor($grand_total / $promo->minimal_pembelian)
+                    : 1;
+            }
+        }
+
+        // --- CASE 2: Hanya berdasarkan produk tertentu
+        if ($pakai_produk_berlaku) {
+            $produk_ids = explode(',', $promo->produk_berlaku);
+            $jumlah_produk = 0;
+            foreach ($produk_transaksi as $item) {
+                if (in_array($item->pr_produk_id, $produk_ids)) {
+                    $jumlah_produk += $item->jumlah;
+                }
+            }
+            if ($jumlah_produk > 0) {
+                $jumlah_stamp = $promo->berlaku_kelipatan
+                    ? $jumlah_produk
+                    : 1;
+            }
+        }
+
+        // --- CASE 3: Gabungan minimal pembelian dan produk tertentu
+        if ($pakai_dua_duanya) {
+            if ($grand_total >= $promo->minimal_pembelian) {
+                $produk_ids = explode(',', $promo->produk_berlaku);
+                $jumlah_produk = 0;
+                foreach ($produk_transaksi as $item) {
+                    if (in_array($item->pr_produk_id, $produk_ids)) {
+                        $jumlah_produk += $item->jumlah;
+                    }
+                }
+
+                if ($jumlah_produk > 0) {
+                    if ($promo->berlaku_kelipatan) {
+                        $kelipatan_total = floor($grand_total / $promo->minimal_pembelian);
+                        $jumlah_stamp = min($kelipatan_total, $jumlah_produk);
+                    } else {
+                        $jumlah_stamp = 1;
+                    }
+                }
+            }
+        }
+
+        if ($jumlah_stamp > 0) {
+            $masa_berlaku = date('Y-m-d', strtotime("+{$promo->masa_berlaku_hari} days"));
+            $now = date('Y-m-d H:i:s');
+
+            $stamp_data[] = [
+                'pr_transaksi_id' => $transaksi_id,
+                'customer_id' => $transaksi->customer_id,
+                'promo_stamp_id' => $promo->id,
+                'jumlah_stamp' => $jumlah_stamp,
+                'last_stamp_at' => $now,
+                'masa_berlaku' => $masa_berlaku,
+                'status' => 'aktif',
+                'created_at' => $now,
+                'updated_at' => $now
+            ];
+        }
+    }
+
+    if (!empty($stamp_data)) {
+        $this->db->insert_batch('pr_customer_stamp', $stamp_data);
+    }
+
+    // Update stamp yang sudah kadaluarsa
+    $this->db->where('masa_berlaku <', date('Y-m-d'))
+        ->where('status', 'aktif')
+        ->update('pr_customer_stamp', ['status' => 'kadaluarsa']);
+}
+
+
 
     $transaksi = $this->Kasir_model->get_transaksi_by_id($transaksi_id);
    // ❗❗❗ CETAK STRUK KASIR OTOMATIS kalau sudah LUNAS
@@ -1558,6 +1693,48 @@ if (!empty($detail_ids)) {
     if ($transaksi && $transaksi['status_pembayaran'] == 'LUNAS') {
         $this->cetak_pesanan_dibayar_internal($transaksi_id);
     }
+
+    $this->load->model('Api_model');
+
+    // Ambil ulang data dari database setelah semua update
+    $transaksi_data = $this->db->get_where('pr_transaksi', ['id' => $transaksi_id])->row_array();
+    $pembayaran_data = $this->db->get_where('pr_pembayaran', ['transaksi_id' => $transaksi_id])->result_array();
+    $detail_data = $this->db->get_where('pr_detail_transaksi', ['pr_transaksi_id' => $transaksi_id])->result_array();
+
+    $extra_data = [];
+    foreach ($detail_data as $d) {
+        $extras = $this->db->get_where('pr_detail_extra', ['detail_transaksi_id' => $d['id']])->result_array();
+        $extra_data = array_merge($extra_data, $extras);
+    }
+
+    $log_voucher = $this->db->get_where('pr_log_voucher', ['transaksi_id' => $transaksi_id])->result_array();
+    $customer_poin = $this->db->get_where('pr_customer_poin', ['transaksi_id' => $transaksi_id])->result_array();
+    $customer_stamp = $this->db->get_where('pr_customer_stamp', ['pr_transaksi_id' => $transaksi_id])->result_array();
+    // Kirim ke VPS via API
+    $this->Api_model->kirim_data('pr_transaksi', $transaksi_data);
+    $this->Api_model->kirim_data('pr_pembayaran', $pembayaran_data);
+    $this->Api_model->kirim_data('pr_detail_transaksi', $detail_data);
+    if (!empty($extra_data)) {
+        $this->Api_model->kirim_data('pr_detail_extra', $extra_data);
+    }
+    if (!empty($log_voucher)) {
+        $this->Api_model->kirim_data('pr_log_voucher', $log_voucher);
+    }
+    if (!empty($customer_poin)) {
+        $this->Api_model->kirim_data('pr_customer_poin', $customer_poin);
+    }
+    // Ambil data voucher yang digunakan dan sinkronkan
+    if (!empty($kode_voucher)) {
+        $voucher_data = $this->db->get_where('pr_voucher', ['id' => $voucher->id])->row_array();
+        if (!empty($voucher_data)) {
+            $this->Api_model->kirim_data('pr_voucher', $voucher_data);
+        }
+    }
+
+    if (!empty($customer_stamp)) {
+        $this->Api_model->kirim_data('pr_customer_stamp', $customer_stamp);
+    }
+
     echo json_encode(['status' => 'success', 'message' => 'Pembayaran berhasil disimpan.']);
 }
 
@@ -1612,95 +1789,95 @@ public function cetak_void() {
 }
 
 
-public function void_semua()
-{
-    $this->load->model('Kasir_model');
-    $transaksi_id = $this->input->post('transaksi_id');
-    $user_id = $this->session->userdata('pegawai_id');
-    $kode_void = $this->Kasir_model->generate_kode_void();
+// public function void_semua()
+// {
+//     $this->load->model('Kasir_model');
+//     $transaksi_id = $this->input->post('transaksi_id');
+//     $user_id = $this->session->userdata('pegawai_id');
+//     $kode_void = $this->Kasir_model->generate_kode_void();
 
-    if (!$transaksi_id) {
-        echo json_encode(['status' => 'error', 'message' => 'ID transaksi tidak valid']);
-        return;
-    }
+//     if (!$transaksi_id) {
+//         echo json_encode(['status' => 'error', 'message' => 'ID transaksi tidak valid']);
+//         return;
+//     }
 
-    $transaksi = $this->db->get_where('pr_transaksi', ['id' => $transaksi_id])->row();
-    if (!$transaksi) {
-        echo json_encode(['status' => 'error', 'message' => 'Transaksi tidak ditemukan']);
-        return;
-    }
+//     $transaksi = $this->db->get_where('pr_transaksi', ['id' => $transaksi_id])->row();
+//     if (!$transaksi) {
+//         echo json_encode(['status' => 'error', 'message' => 'Transaksi tidak ditemukan']);
+//         return;
+//     }
 
-    // Ambil semua produk aktif (status NULL) + JOIN nama_produk
-    $items = $this->db
-        ->select('d.*, p.nama_produk')
-        ->from('pr_detail_transaksi d')
-        ->join('pr_produk p', 'p.id = d.pr_produk_id', 'left')
-        ->where('d.pr_transaksi_id', $transaksi_id)
-        ->where('d.status IS NULL', null, false)
-        ->get()
-        ->result();
+//     // Ambil semua produk aktif (status NULL) + JOIN nama_produk
+//     $items = $this->db
+//         ->select('d.*, p.nama_produk')
+//         ->from('pr_detail_transaksi d')
+//         ->join('pr_produk p', 'p.id = d.pr_produk_id', 'left')
+//         ->where('d.pr_transaksi_id', $transaksi_id)
+//         ->where('d.status IS NULL', null, false)
+//         ->get()
+//         ->result();
 
-    foreach ($items as $item) {
-        // Void produk utama
-        $this->db->where('id', $item->id)->update('pr_detail_transaksi', ['status' => 'BATAL']);
+//     foreach ($items as $item) {
+//         // Void produk utama
+//         $this->db->where('id', $item->id)->update('pr_detail_transaksi', ['status' => 'BATAL']);
 
-        $this->db->insert('pr_void', [
-            'pr_transaksi_id' => $transaksi_id,
-            'kode_void' => $kode_void,
-            'no_transaksi' => $transaksi->no_transaksi,
-            'detail_transaksi_id' => $item->id,
-            'nama_produk' => $item->nama_produk ?? 'Produk Tidak Dikenal',
-            'pr_produk_id' => $item->pr_produk_id,
-            'jumlah' => $item->jumlah,
-            'harga' => $item->harga,
-            'alasan' => 'Dibatalkan Semua',
-            'void_by' => $user_id,
-            'waktu' => date('Y-m-d H:i:s'),
-            'created_at' => date('Y-m-d H:i:s'),
-            'updated_at' => date('Y-m-d H:i:s'),
-        ]);
+//         $this->db->insert('pr_void', [
+//             'pr_transaksi_id' => $transaksi_id,
+//             'kode_void' => $kode_void,
+//             'no_transaksi' => $transaksi->no_transaksi,
+//             'detail_transaksi_id' => $item->id,
+//             'nama_produk' => $item->nama_produk ?? 'Produk Tidak Dikenal',
+//             'pr_produk_id' => $item->pr_produk_id,
+//             'jumlah' => $item->jumlah,
+//             'harga' => $item->harga,
+//             'alasan' => 'Dibatalkan Semua',
+//             'void_by' => $user_id,
+//             'waktu' => date('Y-m-d H:i:s'),
+//             'created_at' => date('Y-m-d H:i:s'),
+//             'updated_at' => date('Y-m-d H:i:s'),
+//         ]);
 
-        // Ambil semua extra aktif (status NULL) + JOIN nama_extra
-        $extras = $this->db
-            ->select('ex.*, pe.nama_extra')
-            ->from('pr_detail_extra ex')
-            ->join('pr_produk_extra pe', 'pe.id = ex.pr_produk_extra_id', 'left')
-            ->where('ex.detail_transaksi_id', $item->id)
-            ->where('ex.status IS NULL', null, false)
-            ->get()
-            ->result();
+//         // Ambil semua extra aktif (status NULL) + JOIN nama_extra
+//         $extras = $this->db
+//             ->select('ex.*, pe.nama_extra')
+//             ->from('pr_detail_extra ex')
+//             ->join('pr_produk_extra pe', 'pe.id = ex.pr_produk_extra_id', 'left')
+//             ->where('ex.detail_transaksi_id', $item->id)
+//             ->where('ex.status IS NULL', null, false)
+//             ->get()
+//             ->result();
 
-        foreach ($extras as $extra) {
-            $this->db->where('id', $extra->id)->update('pr_detail_extra', ['status' => 'BATAL']);
-            $this->db->insert('pr_void', [
-                'pr_transaksi_id' => $transaksi_id,
-                'kode_void' => $kode_void,
-                'no_transaksi' => $transaksi->no_transaksi,
-                'detail_transaksi_id' => $item->id,
-                'nama_produk' => $item->nama_produk ?? 'Produk Tidak Dikenal',
-                'pr_produk_id' => $item->pr_produk_id,
-                'detail_extra_id' => $extra->id,
-                'produk_extra_id' => $extra->pr_produk_extra_id,
-                'nama_extra' => $extra->nama_extra ?? 'Extra Tidak Dikenal',
-                'jumlah' => $extra->jumlah,
-                'harga' => $extra->harga,
-                'alasan' => 'Dibatalkan Semua',
-                'void_by' => $user_id,
-                'waktu' => date('Y-m-d H:i:s'),
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s'),
-            ]);
-        }
-    }
+//         foreach ($extras as $extra) {
+//             $this->db->where('id', $extra->id)->update('pr_detail_extra', ['status' => 'BATAL']);
+//             $this->db->insert('pr_void', [
+//                 'pr_transaksi_id' => $transaksi_id,
+//                 'kode_void' => $kode_void,
+//                 'no_transaksi' => $transaksi->no_transaksi,
+//                 'detail_transaksi_id' => $item->id,
+//                 'nama_produk' => $item->nama_produk ?? 'Produk Tidak Dikenal',
+//                 'pr_produk_id' => $item->pr_produk_id,
+//                 'detail_extra_id' => $extra->id,
+//                 'produk_extra_id' => $extra->pr_produk_extra_id,
+//                 'nama_extra' => $extra->nama_extra ?? 'Extra Tidak Dikenal',
+//                 'jumlah' => $extra->jumlah,
+//                 'harga' => $extra->harga,
+//                 'alasan' => 'Dibatalkan Semua',
+//                 'void_by' => $user_id,
+//                 'waktu' => date('Y-m-d H:i:s'),
+//                 'created_at' => date('Y-m-d H:i:s'),
+//                 'updated_at' => date('Y-m-d H:i:s'),
+//             ]);
+//         }
+//     }
 
-    // Update transaksi utama: total_penjualan 0, status_pembayaran BATAL
-    $this->db->where('id', $transaksi_id)->update('pr_transaksi', [
-        'total_penjualan' => 0,
-        'status_pembayaran' => 'BATAL'
-    ]);
+//     // Update transaksi utama: total_penjualan 0, status_pembayaran BATAL
+//     $this->db->where('id', $transaksi_id)->update('pr_transaksi', [
+//         'total_penjualan' => 0,
+//         'status_pembayaran' => 'BATAL'
+//     ]);
 
-    echo json_encode(['status' => 'success', 'message' => 'Semua item berhasil dibatalkan.']);
-}
+//     echo json_encode(['status' => 'success', 'message' => 'Semua item berhasil dibatalkan.']);
+// }
 
 
 public function pesanan_terbayar()

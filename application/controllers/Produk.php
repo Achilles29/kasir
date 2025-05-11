@@ -88,6 +88,8 @@ public function get_produk_by_id($id) {
     echo json_encode($produk);
 }
 
+
+
 public function simpan() {
     $id = $this->input->post('id');
     $data = [
@@ -265,5 +267,31 @@ public function edit($id) {
         redirect('produk');
     }
 
+
+   // UNTUK STAMP 
+public function ajax_search() {
+    $q = $this->input->get('q');
+    $this->db->like('nama_produk', $q);
+    $result = $this->db->get('pr_produk')->result();
+
+    $output = [];
+    foreach ($result as $row) {
+        $output[] = [
+            'id' => $row->id,
+            'nama_produk' => $row->nama_produk
+        ];
+    }
+
+    echo json_encode($output);
+}
+
+
+public function get_by_id_stamp($id = null) {
+    if (!$id) $id = $this->input->get('id');
+    $data = $this->Produk_model->get_produk_by_id($id);
+    echo json_encode($data);
+}
+
+//////
 
 }

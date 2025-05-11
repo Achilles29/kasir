@@ -1055,7 +1055,11 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" id="btnVoidPilihan" class="btn btn-danger">Void Pilihan</button>
+                    <button id="btnVoidPilihan" class="btn btn-danger">
+                        <span class="spinner-border spinner-border-sm d-none" id="spinnerVoid" role="status"
+                            aria-hidden="true"></span>
+                        Void Pilihan
+                    </button>
                 </div>
             </div>
         </div>
@@ -2089,25 +2093,34 @@
                         html = "<p class='text-muted'>Voucher tidak ditemukan.</p>";
                     } else {
                         data.forEach(voucher => {
-                            html += `
-                                <div class="voucher-card">
-                                    <img src="${base_url}uploads/logo_1743996208.png" class="voucher-logo">
-                                    <div class="voucher-info">
-                                        <h5>${voucher.kode_voucher}</h5>
-                                        <p>Diskon: ${voucher.nilai}% | Min: Rp ${parseInt(voucher.min_pembelian).toLocaleString()}</p>
-                                        <p class="text-muted">Berlaku sampai: ${voucher.tanggal_berakhir}</p>
-                                    </div>
-                                    <button class="btn-use-voucher use-voucher" data-kode="${voucher.kode_voucher}">Gunakan</button>
-                                </div>
-                            `;
-                        });
+                            // ✅ Format diskon
+                            let diskon_text = "-";
+                            if (voucher.jenis === "nominal") {
+                                diskon_text = "Rp " + parseInt(voucher.nilai)
+                                    .toLocaleString("id-ID");
+                            } else if (voucher.jenis === "persentase") {
+                                diskon_text = voucher.nilai + "%";
+                            }
 
+                            html += `
+                        <div class="voucher-card">
+                            <img src="${base_url}uploads/logo_1743996208.png" class="voucher-logo">
+                            <div class="voucher-info">
+                                <h5>${voucher.kode_voucher}</h5>
+                                <p>Diskon: ${diskon_text} | Min: Rp ${parseInt(voucher.min_pembelian).toLocaleString("id-ID")}</p>
+                                <p class="text-muted">Berlaku sampai: ${voucher.tanggal_berakhir}</p>
+                            </div>
+                            <button class="btn-use-voucher use-voucher" data-kode="${voucher.kode_voucher}">Gunakan</button>
+                        </div>
+                    `;
+                        });
                     }
 
                     $("#voucher-list-container").html(html);
                 }
             });
         }
+
 
         // Search real-time
         $("#searchVoucher").on("keyup", function() {
@@ -2830,11 +2843,23 @@
                 return;
             }
 
+            // ⏳ Tampilkan loading spinner
+            Swal.fire({
+                title: 'Memproses...',
+                text: 'Menyimpan data void, mohon tunggu.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
             $.post(base_url + "kasir/void_pilihan", {
                 transaksi_id: transaksi_id,
                 items: JSON.stringify(selected),
                 alasan: alasan
             }, function(res) {
+                Swal.close(); // ✅ Tutup spinner
+
                 if (res.status === 'success') {
                     $("#modalVoidPilihan").modal("hide");
 
@@ -2859,9 +2884,21 @@
         });
 
         function cetakVoidPilihan(void_ids) {
+            // ⏳ Spinner untuk proses cetak
+            Swal.fire({
+                title: 'Mencetak...',
+                text: 'Mengirim struk void ke printer...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
             $.post(base_url + "kasir/cetak_void_internal", {
                 void_ids: void_ids
             }, function(res) {
+                Swal.close(); // ✅ Tutup spinner
+
                 if (res.status === 'success') {
                     Swal.fire('Berhasil', res.message, 'success');
                 } else {
@@ -2869,6 +2906,18 @@
                 }
             }, "json");
         }
+
+        // function cetakVoidPilihan(void_ids) {
+        //     $.post(base_url + "kasir/cetak_void_internal", {
+        //         void_ids: void_ids
+        //     }, function(res) {
+        //         if (res.status === 'success') {
+        //             Swal.fire('Berhasil', res.message, 'success');
+        //         } else {
+        //             Swal.fire('Gagal', res.message, 'error');
+        //         }
+        //     }, "json");
+        // }
 
         // TUTUP SHIFT
 
