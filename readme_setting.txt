@@ -5,7 +5,7 @@ TABEL POS:
 pr_customer_poin : id, customer_id, transaksi_id, jumlah_poin, jenis, sumber, tanggal_kedaluwarsa, status, created_at, updated_at
 pr_detail_extra : id, detail_transaksi_id, pr_produk_extra_id, jumlah, harga, subtotal, sku, satuan, hpp, created_at, updated_at, status
 pr_detail_transaksi : id, pr_transaksi_id, pr_produk_id, detail_unit_id, jumlah, harga, catatan, is_printed, status, created_at, updated_at, is_checked
-pr_kasir_shift : id, kasir_id, modal_awal, waktu_mulai, total_penjualan, total_pending, modal_akhir, selisih, waktu_tutup, waktu_selesai, total_pendapatan, keterangan, status, created_at, updated_at, transaksi_selesai, transaksi_pending
+pr_kasir_shift : id, kasir_id, modal_awal, waktu_mulai, total_penjualan, total_pending, modal_akhir, selisih, waktu_tutup, total_pendapatan, keterangan, status, created_at, updated_at, transaksi_selesai, transaksi_pending
 pr_log_voucher : id, voucher_id, transaksi_id, detail_transaksi_id, customer_id, kode_voucher, jumlah_diskon, sisa_voucher, created_at, updated_at
 pr_voucher : id, kode_voucher, jenis, nilai, min_pembelian, produk_id, jumlah_gratis, max_diskon, maksimal_voucher, sisa_voucher, status, tanggal_mulai, tanggal_berakhir, created_at, updated_at
 pr_pembayaran : id, transaksi_id, metode_id, jumlah, waktu_bayar, keterangan, kasir_id, created_at, updated_at

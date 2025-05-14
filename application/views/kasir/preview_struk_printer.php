@@ -116,21 +116,38 @@
         </div>
 
         <?php
-            // Tampilkan extra
-            $this->db->where('detail_transaksi_id', $item['id']);
-            $extras = $this->db->get('pr_detail_extra')->result_array();
-            foreach ($extras as $ex):
-                $extra_produk = $this->db->get_where('pr_produk_extra', ['id' => $ex['pr_produk_extra_id']])->row_array();
-                $nama_extra = $extra_produk['nama_extra'] ?? 'Extra';
-                $harga_extra = $ex['harga'] * $ex['jumlah'];
-            ?>
+        // Ambil dan group extra by nama
+        $this->db->where('detail_transaksi_id', $item['id']);
+        $extras = $this->db->get('pr_detail_extra')->result_array();
+        $grouped_extras = [];
+        foreach ($extras as $ex) {
+            $extra_produk = $this->db->get_where('pr_produk_extra', ['id' => $ex['pr_produk_extra_id']])->row_array();
+            $nama_extra = $extra_produk['nama_extra'] ?? 'Extra';
+
+            if (!isset($grouped_extras[$nama_extra])) {
+                $grouped_extras[$nama_extra] = [
+                    'jumlah' => $ex['jumlah'] * $item['jumlah'], // ✅ tampilkan sesuai jumlah produk
+                    'harga' => $ex['harga'],
+                ];
+            } else {
+                $grouped_extras[$nama_extra]['jumlah'] += $ex['jumlah'] * $item['jumlah'];
+            }
+        }
+
+        foreach ($grouped_extras as $nama => $gex):
+            $harga_total = $gex['jumlah'] * $gex['harga'];
+        ?>
         <div style="display: flex; justify-content: space-between; margin-left: 10px;">
-            <span><?= $ex['jumlah'] ?>x <?= $nama_extra ?></span>
+            <span><?= $gex['jumlah'] ?>x <?= $nama ?></span>
             <?php if ($isKasir): ?>
-            <span>Rp <?= number_format($harga_extra, 0, ',', '.') ?></span>
+            <span>Rp <?= number_format($harga_total, 0, ',', '.') ?></span>
             <?php endif; ?>
         </div>
         <?php endforeach; ?>
+
+
+
+
 
         <?php if (!empty($item['catatan'])): ?>
         <div style="margin-left: 10px;"><em>Note: <?= $item['catatan'] ?></em></div>

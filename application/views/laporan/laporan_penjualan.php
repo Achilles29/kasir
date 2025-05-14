@@ -150,9 +150,7 @@ $(function() {
                     '<div class="text-center py-5 text-muted">Memuat data...</div>');
             },
             success: (res) => {
-                const data = JSON.parse(res);
-                $('#dataTransaksi').html(renderTable(data.transaksi));
-                renderPagination(data.total_data, data.page, data.per_page);
+                $('#dataTransaksi').html(res);
             }
         });
     }

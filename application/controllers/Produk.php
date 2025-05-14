@@ -285,12 +285,21 @@ public function ajax_search() {
     echo json_encode($output);
 }
 
+public function search_ajax()
+{
+    $keyword = $this->input->get('keyword');
+    $this->load->model('Produk_model');
+    $result = $this->Produk_model->search_produk($keyword);
+    echo json_encode($result);
+}
+
 
 public function get_by_id_stamp($id = null) {
     if (!$id) $id = $this->input->get('id');
     $data = $this->Produk_model->get_produk_by_id($id);
     echo json_encode($data);
 }
+
 
 //////
 

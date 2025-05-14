@@ -116,10 +116,6 @@
                             <a class="collapse-item" href="<?= site_url('/laporan/laporan_penjualan') ?>"><i
                                     class="far fa-id-card"></i>
                                 Detail Penjualan</a>
-                            <a class="collapse-item" href="<?= site_url('/kasir/daftar_refund') ?>"><i
-                                    class="far fa-id-card"></i>
-                                Laporan Refund</a>
-
                             <a class="collapse-item" href="<?= site_url('/laporan/laporan_refund') ?>"><i
                                     class="far fa-id-card"></i>
                                 Laporan Refund</a>
@@ -135,6 +131,9 @@
                                 Resep</a>
                             <a class="collapse-item" href="<?= site_url('/resep/input') ?>"><i
                                     class="far fa-id-card"></i> Input Resep</a>
+                            <a class="collapse-item" href="<?= site_url('/kasir/riwayat_shift') ?>"><i
+                                    class="far fa-id-card"></i> Riwayat Shift</a>
+
                         </div>
                     </div>
                 </li>
@@ -192,7 +191,8 @@
                     <div id="collapsePromo" class="collapse" aria-labelledby="headingPromo"
                         data-parent="#accordionSidebar">
                         <div class="bg-white py-2 collapse-inner rounded">
-                            <a class="collapse-item" href="<?= site_url('/promo') ?>"><i class="far fa-id-card"></i>
+                            <a class="collapse-item" href="<?= site_url('/Promo_voucher_auto') ?>"><i
+                                    class="far fa-id-card"></i>
                                 Promo</a>
                             <a class="collapse-item" href="<?= site_url('/stamp') ?>"><i class="far fa-id-card"></i>
                                 Stamp</a>

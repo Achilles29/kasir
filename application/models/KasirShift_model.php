@@ -62,6 +62,52 @@ public function get_shift_ke_berapa($kasir_id)
     return "SHIFT " . $next_shift;
 }
 
+public function get_last_shift($kasir_id)
+{
+    return $this->db
+        ->where('kasir_id', $kasir_id)
+        ->where('status', 'CLOSE')
+        ->order_by('waktu_tutup', 'DESC')
+        ->limit(1)
+        ->get('pr_kasir_shift')
+        ->row_array();
+}
+
+public function get_metode_pembayaran_shift($shift_id)
+{
+    return $this->db
+        ->select('m.metode_pembayaran, SUM(p.jumlah) as total')
+        ->from('pr_pembayaran p')
+        ->join('pr_metode_pembayaran m', 'm.id = p.metode_id')
+        ->where('p.shift_id', $shift_id)
+        ->group_by('p.metode_id')
+        ->get()->result_array();
+}
+
+public function get_refund_per_metode_shift($kasir_id, $start, $end)
+{
+    return $this->db->select('m.metode_pembayaran, SUM(rf.harga * rf.jumlah) as total')
+        ->from('pr_refund rf')
+        ->join('pr_metode_pembayaran m', 'm.id = rf.metode_pembayaran_id')
+        ->where('rf.refund_by', $kasir_id)
+        ->where('rf.waktu_refund >=', $start)
+        ->where('rf.waktu_refund <=', $end)
+        ->group_by('rf.metode_pembayaran_id')
+        ->get()->result_array();
+}
+
+public function get_rekening_penerimaan_shift($kasir_id, $start, $end)
+{
+    return $this->db->select('rk.nama_rekening, SUM(p.jumlah) as total')
+        ->from('pr_pembayaran p')
+        ->join('pr_metode_pembayaran m', 'm.id = p.metode_id')
+        ->join('bl_rekening rk', 'rk.id = m.bl_rekening_id')
+        ->where('p.kasir_id', $kasir_id)
+        ->where('p.waktu_bayar >=', $start)
+        ->where('p.waktu_bayar <=', $end)
+        ->group_by('rk.id')
+        ->get()->result_array();
+}
 
 }
 

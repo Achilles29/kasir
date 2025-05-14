@@ -29,7 +29,12 @@ public function laporan_penjualan()
   $data['tanggal_awal'] = $today;
   $data['tanggal_akhir'] = $today;
 
-  $data['transaksi'] = $this->Laporan_model->filter_transaksi('', $today, $today);
+  $data['page'] = 1;
+  $data['per_page'] = 10;
+  $data['total_data'] = $this->Laporan_model->count_filtered('', $today, $today);
+  $data['transaksi'] = $this->Laporan_model->filter_transaksi('', $today, $today, $data['per_page'], 0);
+  $data['transaksi_ringkasan'] = $this->Laporan_model->filter_transaksi('', $today, $today, 99999, 0); // Tambahkan ini!
+  
   $this->load->view('templates/header', $data);
   $this->load->view('laporan/laporan_penjualan', $data);
   $this->load->view('templates/footer');
@@ -46,16 +51,25 @@ public function filter()
     $page = (int) $this->input->get('page') ?: 1;
     $offset = ($page - 1) * $per_page;
 
+    $this->load->model('Laporan_model');
     $total_data = $this->Laporan_model->count_filtered($search, $tanggal_awal, $tanggal_akhir);
-    $transaksi = $this->Laporan_model->filter_transaksi($search, $tanggal_awal, $tanggal_akhir, $per_page, $offset);
 
-    echo json_encode([
-        'transaksi' => $transaksi,
-        'total_data' => $total_data,
-        'page' => $page,
-        'per_page' => $per_page,
-    ]);
+    // 1. Untuk Tabel Transaksi (terbatas per halaman)
+    $data['transaksi'] = $this->Laporan_model->filter_transaksi($search, $tanggal_awal, $tanggal_akhir, $per_page, $offset);
+
+    // 2. Untuk Ringkasan (semua data tanpa limit)
+    $data['transaksi_ringkasan'] = $this->Laporan_model->filter_transaksi($search, $tanggal_awal, $tanggal_akhir, 99999, 0);
+
+    $data['total_data'] = $total_data;
+    $data['page'] = $page;
+    $data['per_page'] = $per_page;
+
+
+
+    // Return partial HTML yang berisi ringkasan + tabel
+    $this->load->view('laporan/laporan_penjualan_tabel_transaksi', $data);
 }
+
 
 
 

@@ -1089,6 +1089,7 @@
     </div>
 
     <!-- Modal Tutup Shift -->
+    <!-- Modal Tutup Shift -->
     <div class="modal fade" id="modalTutupShift" tabindex="-1" role="dialog" aria-labelledby="modalTutupShiftLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
@@ -1101,30 +1102,48 @@
 
                     <div class="modal-body">
 
-                        <div class="mb-3 row">
-                            <div class="col-6">Kasir:</div>
-                            <div class="col-6 text-right" id="nama-kasir">-</div>
-                            <div class="col-6">Waktu Buka:</div>
+                        <div class="mb-3 row font-weight-bold">
+                            <div class="col-6">KASIR:</div>
+                            <div class="col-6 text-right text-uppercase" id="nama-kasir">-</div>
+                            <div class="col-6">WAKTU BUKA:</div>
                             <div class="col-6 text-right" id="waktu-buka">-</div>
-                            <div class="col-6">Waktu Tutup:</div>
+                            <div class="col-6">WAKTU TUTUP:</div>
                             <div class="col-6 text-right" id="waktu-tutup">-</div>
                         </div>
 
                         <hr>
 
-                        <div class="mb-3 row">
-                            <div class="col-6">Modal Awal:</div>
+                        <div class="mb-3 row font-weight-bold">
+                            <div class="col-6">MODAL AWAL:</div>
                             <div class="col-6 text-right" id="modal-awal">Rp 0</div>
                         </div>
 
                         <div class="mb-3">
-                            <h6 class="text-muted mb-2">Rincian Penjualan:</h6>
+                            <h6 class="font-weight-bold mb-2">Rincian Penjualan:</h6>
                             <div id="list-metode-pembayaran-shift" class="ml-3"></div>
+                            <div class="d-flex justify-content-between font-weight-bold mt-2">
+                                <span>Total Penjualan:</span>
+                                <span id="total-penjualan" class="text-right">Rp 0</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6 class="font-weight-bold mb-2">Rincian Refund:</h6>
+                            <div id="list-refund-shift" class="ml-3"></div>
+                            <div class="d-flex justify-content-between font-weight-bold text-danger mt-2">
+                                <span>Total Refund:</span>
+                                <span id="total-refund" class="text-right">- Rp 0</span>
+                            </div>
                         </div>
 
                         <div class="mb-3 row">
-                            <div class="col-6">Total Penerimaan Kasir:</div>
-                            <div class="col-6 text-right" id="total-penerimaan">Rp 0</div>
+                            <div class="col-6 font-weight-bold">Total Penerimaan Kasir:</div>
+                            <div class="col-6 text-right font-weight-bold" id="total-penerimaan">Rp 0</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6 class="text-muted mb-2">Penerimaan per Rekening:</h6>
+                            <div id="list-penerimaan-rekening" class="ml-3"></div>
                         </div>
 
                         <hr>
@@ -1147,7 +1166,6 @@
                             <div class="col-6">Nominal Belum Terbayar:</div>
                             <div class="col-6 text-right" id="total-pending">Rp 0</div>
                         </div>
-
 
                     </div>
 
@@ -1178,7 +1196,7 @@
         let pembayaranList = [];
         let tagihanTotal = 0;
         let totalPenjualanAwal = 0; // ⬅️ simpan total penjualan awal
-
+        let totalPenjualan = 0;
 
         <?php if ($show_modal_awal): ?>
         $(document).ready(function() {
@@ -1484,7 +1502,6 @@
 
         $("#simpan-extra").click(function() {
             let selected = [];
-            const jumlahProduk = parseInt($(`[data-uid="${currentUID}"]`).find(".qty").val()) || 1;
 
             $(".extra-check:checked").each(function() {
                 const id = $(this).data("id");
@@ -1501,24 +1518,28 @@
                     satuan,
                     harga,
                     hpp,
-                    jumlah: jumlahProduk // ✅ langsung ikut qty produk
+                    jumlah: 1 // ✅ SELALU 1
                 });
             });
 
             extraData[currentUID] = selected;
 
+            const jumlahProduk = parseInt($(`[data-uid="${currentUID}"]`).find(".qty").val()) || 1;
+
             const list = selected.map(e =>
                 `<li>
-            ➕ ${e.jumlah}x ${e.nama}
-            <span class="float-right">Rp ${(e.harga * e.jumlah).toLocaleString('id-ID')}</span>
-            <button class='btn btn-sm btn-outline-danger btn-hapus-extra ml-1'><i class='fas fa-times'></i></button>
-        </li>`
+                    ➕ ${jumlahProduk}x ${e.nama}
+                    <span class="float-end">Rp ${(e.harga * jumlahProduk).toLocaleString('id-ID')}</span>
+                    <button class='btn btn-sm btn-outline-danger btn-hapus-extra ml-1'><i class='fas fa-times'></i></button>
+                </li>`
             ).join("");
+
 
             $(`.list-extra[data-uid="${currentUID}"]`).html(list);
             updateTotal();
             $("#modalExtra").modal("hide");
         });
+
 
 
         // Fungsi untuk cek apakah keranjang masih ada isinya
@@ -2907,17 +2928,6 @@
             }, "json");
         }
 
-        // function cetakVoidPilihan(void_ids) {
-        //     $.post(base_url + "kasir/cetak_void_internal", {
-        //         void_ids: void_ids
-        //     }, function(res) {
-        //         if (res.status === 'success') {
-        //             Swal.fire('Berhasil', res.message, 'success');
-        //         } else {
-        //             Swal.fire('Gagal', res.message, 'error');
-        //         }
-        //     }, "json");
-        // }
 
         // TUTUP SHIFT
 
@@ -2939,10 +2949,10 @@
                         // Data uang
                         $("#modal-awal").text(formatRupiah(response.modal_awal || 0));
                         $("#modal-akhir").text(formatRupiah(response.modal_akhir || 0));
-                        $("#total-penerimaan").text(formatRupiah(response
-                            .total_penerimaan || 0));
-                        $("#total-penjualan").text(formatRupiah(response.total_penjualan ||
-                            0));
+                        // $("#total-penerimaan").text(formatRupiah(response
+                        //     .total_penerimaan || 0));
+                        // $("#total-penjualan").text(formatRupiah(response.total_penjualan ||
+                        //     0));
                         $("#total-pending").text(formatRupiah(response.total_pending || 0));
 
                         // Data transaksi
@@ -2958,18 +2968,79 @@
                         if (response.metode_pembayaran && response.metode_pembayaran
                             .length > 0) {
                             response.metode_pembayaran.forEach(function(item) {
+                                totalPenjualan += parseFloat(item.total);
                                 $("#list-metode-pembayaran-shift").append(`
-                                <div class="d-flex justify-content-between border-bottom py-1">
-                                    <span>${item.metode_pembayaran}</span>
-                                    <span>${formatRupiah(item.total)}</span>
-                                </div>
-                            `);
+                                    <div class="d-flex justify-content-between border-bottom py-1">
+                                        <span>${item.metode_pembayaran}</span>
+                                        <span>${formatRupiah(item.total)}</span>
+                                    </div>
+                                `);
                             });
                         } else {
-                            $("#list-metode-pembayaran-shift").append(`
-                        <div class="text-muted">Tidak ada rincian pembayaran.</div>
-                    `);
+                            $("#list-metode-pembayaran-shift").append(
+                                `<div class="text-muted">Tidak ada rincian pembayaran.</div>`
+                            );
                         }
+                        $("#total-penjualan").text(formatRupiah(totalPenjualan));
+
+                        // Rincian Refund
+                        $("#list-refund-shift").empty();
+                        if (response.refund_per_metode && response.refund_per_metode
+                            .length > 0) {
+                            response.refund_per_metode.forEach(function(item) {
+                                $("#list-refund-shift").append(`
+                                    <div class="d-flex justify-content-between border-bottom py-1 text-danger">
+                                        <span>${item.metode_pembayaran}</span>
+                                        <span>- ${formatRupiah(item.total)}</span>
+                                    </div>
+                                `);
+                            });
+                        } else {
+                            $("#list-refund-shift").append(
+                                `<div class="text-muted">Tidak ada refund.</div>`);
+                        }
+                        // Total Refund
+                        let totalRefund = 0;
+                        $("#list-refund-shift").empty();
+                        if (response.refund_per_metode && response.refund_per_metode
+                            .length > 0) {
+                            response.refund_per_metode.forEach(function(item) {
+                                totalRefund += parseFloat(item.total);
+                                $("#list-refund-shift").append(`
+                                    <div class="d-flex justify-content-between border-bottom py-1 text-danger">
+                                        <span>${item.metode_pembayaran}</span>
+                                        <span>- ${formatRupiah(item.total)}</span>
+                                    </div>
+                                `);
+                            });
+                        } else {
+                            $("#list-refund-shift").append(
+                                `<div class="text-muted">Tidak ada refund.</div>`);
+                        }
+                        $("#total-refund").text("- " + formatRupiah(totalRefund));
+
+                        // Rincian penerimaan per rekening
+                        $("#list-penerimaan-rekening").empty();
+                        if (response.penerimaan_per_rekening && response
+                            .penerimaan_per_rekening.length > 0) {
+                            response.penerimaan_per_rekening.forEach(function(item) {
+                                $("#list-penerimaan-rekening").append(`
+                                    <div class="d-flex justify-content-between border-bottom py-1 text-primary">
+                                        <span>${item.nama_rekening}</span>
+                                        <span>${formatRupiah(item.total)}</span>
+                                    </div>
+                                `);
+                            });
+                        }
+
+                        // Total Penerimaan = Penjualan - Refund
+                        const totalPenerimaan = totalPenjualan - totalRefund;
+                        $("#total-penerimaan").text(formatRupiah(totalPenerimaan));
+
+                        // Saldo Akhir = Modal + Total Penerimaan
+                        const modalAwal = parseFloat(response.modal_awal || 0);
+                        const saldoAkhir = modalAwal + totalPenerimaan;
+                        $("#modal-akhir").text(formatRupiah(saldoAkhir));
 
                         // ✅ Show modal
                         $("#modalTutupShift").modal('show');
@@ -3022,11 +3093,18 @@
                         dataType: "json",
                         success: function(res) {
                             if (res.status === 'success') {
-                                Swal.fire("Sukses", res.message, "success").then(
-                                    () => {
-                                        window.location.href = base_url +
-                                            "beranda";
-                                    });
+                                // ✅ Tutup modal
+                                $("#modalTutupShift").modal('hide');
+
+                                // ✅ Cetak laporan langsung
+                                window.open(base_url +
+                                    "kasir/cetak_laporan_shift/" + res.shift_id,
+                                    "_blank");
+
+                                // ✅ Refresh halaman
+                                setTimeout(() => {
+                                    location.reload();
+                                }, 1000);
                             } else {
                                 Swal.fire("Gagal", res.message, "error");
                             }
@@ -3035,6 +3113,18 @@
                 }
             });
         });
+
+
+        $("#btn-cetak-laporan-shift").click(function() {
+            if (shift_id_terakhir) {
+                window.open(base_url + "kasir/cetak_laporan_shift/" + shift_id_terakhir, "_blank");
+            } else {
+                Swal.fire("Shift belum ditutup", "Tidak ada data shift terakhir untuk dicetak.",
+                    "warning");
+            }
+        });
+
+
 
         // SYNC DATA VPS KE LOKAL //
         $("#btn-sync-data-umum").click(function() {
@@ -3079,6 +3169,15 @@
 
     });
     </script>
+
+    <script>
+    const shift_id_terakhir = <?= json_encode($shift_id_terakhir ?? null) ?>;
+    </script>
+
+
+</body>
+
+</html>
 
 </body>
 

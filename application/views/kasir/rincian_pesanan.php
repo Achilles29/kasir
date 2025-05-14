@@ -45,13 +45,12 @@ tbody tr {
                             <td>Rp <?= number_format($item->jumlah * $item->harga, 0, ',', '.') ?></td>
                             <td>
                                 <?php if (!empty($item->extra)): ?>
-                                <ul class="list-unstyled mb-0">
+                                <ul class="list-unstyled mb-0" data-produk-id="<?= $item->id ?>">
                                     <?php foreach ($item->extra as $ex): ?>
                                     <li>
                                         <i class="fas fa-plus text-success"></i>
-                                        <span class="extra-item" data-id="<?= $ex->pr_produk_extra_id ?? '' ?>">
-
-                                            <?= $ex->nama ?> (Rp <?= number_format($ex->harga, 0, ',', '.') ?>)
+                                        <span class="extra-item" data-id="<?= $ex->id ?>" data-nama="<?= $ex->nama ?>">
+                                            <?= $ex->jumlah ?>x <?= $ex->nama ?>
                                         </span>
                                     </li>
                                     <?php endforeach; ?>
@@ -213,11 +212,11 @@ tbody tr {
 </div>
 
 
+
 <?php if (!empty($kode_refund)): ?>
-<div class="alert alert-warning text-center">
-    <strong>REFUND berhasil!</strong>
-    <button class="btn btn-danger btn-sm ml-2" onclick="cetakRefundInternal('<?= $kode_refund ?>')">
-        <i class="fas fa-print"></i> Cetak Refund (Internal)
+<div class="text-center mt-3">
+    <button class="btn btn-danger" onclick="cetakRefundInternal('<?= $kode_refund ?>')">
+        <i class="fas fa-print"></i> Cetak Refund
     </button>
 </div>
 <?php endif; ?>
@@ -307,6 +306,9 @@ $(document).ready(function() {
 
                 // Ambil extra dari tag <ul> extra di kolom ke-5
                 const extraList = $(this).find("td").eq(4).find("li");
+                const parentUl = $(this).find("td").eq(4).find("ul");
+                const produkIdForExtra = parentUl.data("produk-id");
+
                 extraList.each(function() {
                     const span = $(this).find("span.extra-item");
                     if (span.length > 0) {
@@ -314,7 +316,7 @@ $(document).ready(function() {
                         const extraNama = span.text();
                         html.push(`
                         <div class="form-check ml-4 mb-2">
-                            <input class="form-check-input refund-check" type="checkbox" name="extra_id[]" value="${extraId}" id="extra-${extraId}">
+                            <input class="form-check-input refund-check extra-of-${produkIdForExtra}" type="checkbox" name="extra_id[]" value="${extraId}" id="extra-${extraId}">
                             <label class="form-check-label text-muted" for="extra-${extraId}">
                                 <i class="fas fa-plus text-success"></i> ${extraNama}
                             </label>
@@ -328,6 +330,13 @@ $(document).ready(function() {
         $("#listProdukVoid").html(html.join(""));
     });
 
+    $(document).on('change', "input[name='produk_id[]']", function() {
+        const produkId = $(this).val();
+        const checked = $(this).is(":checked");
+
+        // Auto-check semua extra yang berkaitan (by class `extra-of-<produk_id>`)
+        $(`.extra-of-${produkId}`).prop('checked', checked);
+    });
 
 
     $("#formRefundPilihan").submit(function(e) {
@@ -377,6 +386,10 @@ $(document).ready(function() {
             }
         }, "json");
     }
+
+    <?php if (!empty($kode_refund)): ?>
+    cetakRefundInternal('<?= $kode_refund ?>');
+    <?php endif; ?>
 
 
 });

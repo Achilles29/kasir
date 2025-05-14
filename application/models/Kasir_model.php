@@ -530,12 +530,19 @@ public function generate_struk_full_by_setting($transaksi, $printer, $struk_data
                 ? "{$v['nilai']}%"
                 : "Rp " . number_format($v['nilai'], 0, ',', '.');
 
-            $out .= "Kode: {$v['kode_voucher']}\n";
-            $out .= "Nilai: $nilai_label\n";
+            $out .= $this->wrap_text("Selamat anda mendapatkan Voucher senilai $nilai_label", $width) . "\n";
+            $out .= $this->wrap_text("untuk transaksi berikutnya dengan Kode Voucher: {$v['kode_voucher']}", $width) . "\n";
+
+            if (empty($transaksi['customer_id'])) {
+                $out .= $this->wrap_text("Cukup dengan daftarkan diri anda sebagai member namuacoffee", $width) . "\n";
+            }
+
+            $out .= $this->wrap_text("Gunakan sebelum tanggal " . date('d M Y', strtotime($v['tanggal_berakhir'])), $width) . "\n";
             $out .= "*S&K Berlaku\n";
             $out .= str_repeat("-", $width) . "\n";
         }
     }
+
 
 
     return $out;
@@ -959,6 +966,7 @@ public function generate_refund_struk($transaksi, $produk_refund, $printer, $str
     }
 
     $no_transaksi = $transaksi['no_transaksi'] ?? '-';
+    $kode_refund = $transaksi['kode_refund'] ?? '-';
     $customer = $transaksi['customer'] ?? '-';
     $nomor_meja = $transaksi['nomor_meja'] ?? '-';
     $kasir_order = $transaksi['kasir_order'] ?? '-';
@@ -970,6 +978,7 @@ public function generate_refund_struk($transaksi, $produk_refund, $printer, $str
     $out .= $this->center_text("[ $lokasi REFUND ]", $width) . "\n";
     $out .= str_repeat("-", $width) . "\n";
     $out .= "No: " . $no_transaksi . "\n";
+    $out .= "Kode: " . $kode_refund . "\n";
     $out .= "Order: " . $kasir_order . "\n";
     $out .= "Customer: " . $customer . "\n";
     $out .= "Meja: " . $nomor_meja . "\n";

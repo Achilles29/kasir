@@ -84,6 +84,8 @@ public function count_filtered($search = '', $tanggal_awal = '', $tanggal_akhir 
 
     return $this->db->count_all_results();
 }
+
+
 public function get_extra_by_detail_id($detail_id)
 {
     return $this->db->select('pe.nama_extra, de.jumlah as qty')

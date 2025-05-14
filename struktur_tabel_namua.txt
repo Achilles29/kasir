@@ -60,7 +60,7 @@ pr_detail_transaksi : id, pr_transaksi_id, pr_produk_id, detail_unit_id, jumlah,
 pr_divisi : id, nama_divisi, urutan_tampilan, created_at, updated_at
 pr_extra : id, nama_extra, sku, satuan, hpp, harga_jual, created_at, updated_at
 pr_jenis_order : id, jenis_order, created_at, updated_at
-pr_kasir_shift : id, kasir_id, modal_awal, waktu_mulai, total_penjualan, total_pending, modal_akhir, selisih, waktu_tutup, waktu_selesai, total_pendapatan, keterangan, status, created_at, updated_at, transaksi_selesai, transaksi_pending
+pr_kasir_shift : id, kasir_id, modal_awal, waktu_mulai, total_penjualan, total_pending, modal_akhir, selisih, waktu_tutup, total_pendapatan, keterangan, status, created_at, updated_at, transaksi_selesai, transaksi_pending
 pr_kategori : id, nama_kategori, pr_divisi_id, urutan, status, created_at, updated_at
 pr_log_stok_bahan_baku : id, bahan_id, divisi_id, jenis_transaksi, jumlah, hpp, tanggal, keterangan, created_at, updated_at
 pr_log_voucher : id, voucher_id, transaksi_id, detail_transaksi_id, customer_id, kode_voucher, jumlah_diskon, sisa_voucher, created_at, updated_at
@@ -92,17 +92,5 @@ pr_voucher : id, kode_voucher, jenis, nilai, min_pembelian, produk_id, jumlah_gr
 schedule : id, group_id, message, send_time, status, created_at, updated_at
 users : id, username, password, created_at, updated_at
 
-CREATE TABLE pr_promo_voucher_auto (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nama_promo VARCHAR(100),
-    jenis ENUM('nominal', 'persentase') NOT NULL,
-    nilai INT NOT NULL,
-    min_pembelian INT DEFAULT 0,
-    produk_id INT DEFAULT NULL,
-    kode_voucher VARCHAR(50),
-    masa_berlaku INT DEFAULT 30,
-    max_diskon INT DEFAULT 0,
-    maksimal_voucher INT DEFAULT 1,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
+pr_promo_voucher_auto: id 	nama_promo 	tipe_trigger 	nilai 	produk_ids 	masa_berlaku 	jenis 	nilai_voucher 	min_pembelian 	produk_id 	max_diskon 	aktif 	maksimal_voucher 	created_at 	updated_at 	
+

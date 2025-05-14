@@ -189,8 +189,18 @@ public function search_produk($keyword) {
     return $this->db->get()->result_array();
 }
 
-
-
+public function get_id_nama_map()
+{
+    $result = $this->db->select('id, nama_produk')->get('pr_produk')->result();
+    $map = [];
+    foreach ($result as $row) {
+        $map[$row->id] = $row->nama_produk;
+    }
+    return $map;
+}
+public function get_by_id($id)
+{
+    return $this->db->get_where('pr_produk', ['id' => $id])->row_array();
 }
 
-
+}

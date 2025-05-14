@@ -287,26 +287,27 @@ v kode void
 v tambahkan nomor meja di pending order
 v refund pilihan tidak muncul Ekstra
 v update database local ke vps tertentu
+v tampilan struk kasir judul
 
+v export sql awalan pr_
 
 
 produk paket
 halaman pending order => nomor meja, total penjualan bukan total bayar, tanggal
 tampilan struk kasir subtotal
-tampilan struk kasir judul
 
-v export sql awalan pr_
 
-- Laporan penjualan
+v Laporan penjualan
 - Ringkasan penjualan
-Laporan Void 
+v Laporan Void 
 - Laporan produk
 
 Penjualan produk 
 Penjualan departemen 
 Penjualan kategori 
 Penjualan ekstras 
-- Laporan kasir
+
+Laporan kasir
 Laporan tutup kasir
 
 
@@ -363,7 +364,7 @@ pr_produk: id, nama_produk, sku, deskripsi, kategori_id, satuan, hpp, harga_jual
 
 rekap kasbon
 log kasbon
-
+tutup kasir jangan lupa refund dihitung
 
 
 
@@ -402,6 +403,7 @@ PRODUK
 
 cront status pr_voucher
 
+riwayat transaksi pelanggan yang sudah paymen saja jangan semua
 
 mysqldump -u root namua pr_base pr_customer pr_customer_poin pr_detail_extra pr_detail_transaksi pr_divisi pr_extra pr_jenis_order pr_kasir_shift pr_kategori pr_log_stok_bahan_baku pr_log_voucher pr_lokasi_printer pr_meja pr_meja_pembatas pr_metode_pembayaran pr_pembayaran pr_pengaturan pr_poin pr_printer pr_printer_setting pr_produk pr_produksi_base pr_produk_extra pr_refund pr_resep_base pr_resep_produk pr_reservasi pr_reservasi_detail pr_reservasi_meja pr_stok_bahan_baku pr_stok_base pr_struk pr_struk_tampilan pr_transaksi pr_void pr_voucher > pr_tables_dump.sql
 
@@ -409,3 +411,5 @@ mysqldump -u root namua pr_base pr_customer pr_customer_poin pr_detail_extra pr_
 
 ALTER TABLE pr_customer_poin ADD COLUMN created_at DATETIME DEFAULT CURRENT_TIMESTAMP;
 ALTER TABLE pr_stamp_log ADD COLUMN updated_at_at DATETIME DEFAULT CURRENT_TIMESTAMP;
+
+ALTER TABLE `pr_kasir_shift`  DROP COLUMN `waktu_selesai`,
