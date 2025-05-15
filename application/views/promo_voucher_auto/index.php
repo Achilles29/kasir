@@ -32,22 +32,16 @@
                 <td class="text-center"><?= ucfirst($row->tipe_trigger) ?></td>
                 <td class="text-center"><?= $row->nilai ?? '-' ?></td>
                 <td>
-                    <?php if (!empty($row->produk_ids)): ?>
-                    <?php 
-                        $ids = json_decode($row->produk_ids ?? '[]');
-                        $ids = is_array($ids) ? $ids : [];
-                        if (!empty($ids)) {
-                            $produk = $this->db->where_in('id', $ids)->get('pr_produk')->result();
-                            echo implode(', ', array_column($produk, 'nama_produk'));
-                        } else {
-                            echo '-';
-                        }
-                        ?>
-
+                    <?php if (!empty($row->produk_trigger)): ?>
+                    <?php
+                        $produk = $this->db->get_where('pr_produk', ['id' => $row->produk_trigger])->row();
+                        echo $produk ? $produk->nama_produk : '-';
+                    ?>
                     <?php else: ?>
                     -
                     <?php endif; ?>
                 </td>
+
 
                 <td class="text-center"><?= ucfirst($row->jenis) ?></td>
                 <td class="text-right">
@@ -108,14 +102,15 @@
                 <div class="form-group">
                     <label>Tipe Trigger</label>
                     <select name="tipe_trigger" class="form-control" required>
-                        <option value="minimal_transaksi">Minimal Transaksi</option>
-                        <option value="produk_tertentu">Produk Tertentu</option>
+                        <option value="nominal">Minimal Transaksi</option>
+                        <option value="produk">Produk Tertentu</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label>Nilai</label>
                     <input type="number" name="nilai" class="form-control" required>
                 </div>
+
                 <div class="form-group position-relative">
                     <label for="search_produk">Produk Trigger</label>
                     <input type="text" id="search_produk" class="form-control" placeholder="🔍 Ketik nama produk...">
@@ -133,7 +128,7 @@
                     <label>Jenis Voucher</label>
                     <select name="jenis" class="form-control" required>
                         <option value="nominal">Nominal</option>
-                        <option value="persen">Persen</option>
+                        <option value="persentase">Persen</option>
                     </select>
                 </div>
                 <div class="form-group position-relative">
@@ -178,7 +173,6 @@
 
 <script>
 $(document).ready(function() {
-    let selectedProdukIds = [];
 
     $('#search_produk').on('keyup', function() {
         const keyword = $(this).val().trim();
@@ -211,16 +205,19 @@ $(document).ready(function() {
         const nama = $(this).data('nama');
 
         $('#search_produk').val(nama);
-        // simpan ke hidden field sebagai string biasa (tanpa array)
-        $('input[name="produk_ids"]').remove();
+
+        // Remove old input
+        $('input[name="produk_trigger"]').remove();
         $('<input>').attr({
             type: 'hidden',
-            name: 'produk_ids',
+            name: 'produk_trigger',
             value: id
-        }).appendTo('form.modal-content');
+        }).appendTo('#modalPromo form');
+
 
         $('#produk-list').hide();
     });
+
 
     // Hapus produk dari daftar pilihan
     $(document).on('click', '.remove-produk', function(e) {
@@ -230,15 +227,6 @@ $(document).ready(function() {
         $(this).parent().remove();
         updateHiddenProdukIds();
     });
-
-    function updateHiddenProdukIds() {
-        $('input[name="produk_ids"]').remove(); // Pastikan tidak menumpuk
-        $('<input>').attr({
-            type: 'hidden',
-            name: 'produk_ids',
-            value: selectedProdukIds.join(',') // Simpan sebagai "1,2,3"
-        }).appendTo('form.modal-content');
-    }
 
     // Sembunyikan list saat klik luar
     $(document).on("click", function(e) {
@@ -285,8 +273,11 @@ $(document).ready(function() {
     $('#modalPromo form').submit(function(e) {
         e.preventDefault();
 
-        // pastikan produk_ids tersimpan
-        updateHiddenProdukIds();
+        // Pastikan input produk_trigger sudah ada
+        // if (!$('input[name="produk_trigger"]').length || !$('input[name="produk_trigger"]').val()) {
+        //     Swal.fire('Perhatian', 'Silakan pilih Produk Trigger terlebih dahulu.', 'warning');
+        //     return;
+        // }
 
         $.post($(this).attr('action'), $(this).serialize(), function(response) {
             if (response.status === 'ok') {
@@ -299,8 +290,6 @@ $(document).ready(function() {
             }
         }, 'json');
     });
-
-
 
 
 
@@ -321,28 +310,27 @@ $(document).ready(function() {
             $('[name="aktif"]').val(data.aktif);
             $('#produk_id').val(data.produk_id);
 
-            // cari nama produk_id
+            // ✅ Tampilkan produk_id (syarat penggunaan voucher)
             $.get("<?= site_url('produk/get_by_id_ajax/') ?>" + data.produk_id, function(res) {
                 $('#produk_id_input').val(res.nama_produk);
             }, 'json');
 
-            // tampilkan produk_ids yang multiple
-            selectedProdukIds = data.produk_ids ? data.produk_ids.split(',') : [];
-            $('#selected-produk').html('');
-            selectedProdukIds.forEach(id => {
-                $.get("<?= site_url('produk/get_by_id_ajax/') ?>" + id, function(res) {
-                    $('#selected-produk').append(`
-                    <span class="badge badge-primary mr-1 mb-1">
-                        ${res.nama_produk}
-                        <a href="#" class="text-white ml-1 remove-produk" data-id="${res.id}">&times;</a>
-                    </span>
-                `);
-                }, 'json');
-            });
+            // ✅ Tampilkan produk_trigger
+            $.get("<?= site_url('produk/get_by_id_ajax/') ?>" + data.produk_trigger, function(
+                res) {
+                $('#search_produk').val(res.nama_produk);
+                $('input[name="produk_trigger"]').remove();
+                $('<input>').attr({
+                    type: 'hidden',
+                    name: 'produk_trigger',
+                    value: res.id
+                }).appendTo('#modalPromo form');
+            }, 'json');
 
             $('#modalPromo').modal('show');
         }, 'json');
     });
+
 
     // ✅ FIX: DELETE
     $(document).on('click', '.btn-delete', function() {

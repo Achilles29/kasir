@@ -348,12 +348,21 @@ public function tutup_shift()
 public function riwayat_shift()
 {
     $this->load->model('KasirShift_model');
+
+    $tanggal_awal = $this->input->get('tanggal_awal') ?? date('Y-m-01');
+    $tanggal_akhir = $this->input->get('tanggal_akhir') ?? date('Y-m-t');
+
     $data['title'] = "Riwayat Shift Kasir";
+    $data['tanggal_awal'] = $tanggal_awal;
+    $data['tanggal_akhir'] = $tanggal_akhir;
+
     $data['shifts'] = $this->db
         ->select('s.*, p.nama as nama_kasir')
         ->from('pr_kasir_shift s')
         ->join('abs_pegawai p', 'p.id = s.kasir_id', 'left')
         ->where('s.status', 'CLOSE')
+        ->where('DATE(s.waktu_tutup) >=', $tanggal_awal)
+        ->where('DATE(s.waktu_tutup) <=', $tanggal_akhir)
         ->order_by('s.waktu_tutup', 'DESC')
         ->get()->result_array();
 
@@ -361,6 +370,7 @@ public function riwayat_shift()
     $this->load->view('kasir/riwayat_shift', $data);
     $this->load->view('templates/footer');
 }
+
 
 
 public function cetak_laporan_shift($shift_id)

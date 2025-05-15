@@ -116,6 +116,9 @@
                             <a class="collapse-item" href="<?= site_url('/laporan/laporan_penjualan') ?>"><i
                                     class="far fa-id-card"></i>
                                 Detail Penjualan</a>
+                            <a class="collapse-item" href="<?= site_url('/laporan/laporan_produk') ?>"><i
+                                    class="far fa-id-card"></i>
+                                Laporan Produk</a>
                             <a class="collapse-item" href="<?= site_url('/laporan/laporan_refund') ?>"><i
                                     class="far fa-id-card"></i>
                                 Laporan Refund</a>

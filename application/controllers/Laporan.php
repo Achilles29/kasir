@@ -298,6 +298,51 @@ public function laporan_metode_pembayaran($tanggal_awal, $tanggal_akhir)
     return $this->db->get()->result();
 }
 
+public function laporan_produk()
+{
+    $this->load->model('Laporan_model');
+    $this->load->model('Kategori_model');
+    $this->load->model('Divisi_model');
+
+    $tanggal_awal = $this->input->get('tanggal_awal') ?? date('Y-m-d');
+    $tanggal_akhir = $this->input->get('tanggal_akhir') ?? date('Y-m-d');
+    $kategori_id = $this->input->get('kategori_id');
+    $divisi_id = $this->input->get('divisi_id');
+    $search = $this->input->get('search');
+
+    $page = (int) ($this->input->get('page') ?? 1);
+    $limit = (int) ($this->input->get('limit') ?? 10);
+    $offset = ($page - 1) * $limit;
+    if ($limit === 9999) {
+        $offset = 0;
+        $page = 1;
+    }
+
+    $ringkasan = $this->Laporan_model->get_total_ringkasan($tanggal_awal, $tanggal_akhir, $kategori_id, $divisi_id, $search);
+    $produk = $this->Laporan_model->get_laporan_produk($tanggal_awal, $tanggal_akhir, $kategori_id, $divisi_id, $search, $limit, $offset);
+    $total = $this->Laporan_model->count_laporan_produk($tanggal_awal, $tanggal_akhir, $kategori_id, $divisi_id, $search);
+
+    $data = [
+        'title' => 'Laporan Penjualan Produk',
+        'produk' => $produk,
+        'total' => $total,
+        'page' => $page,
+        'limit' => $limit,
+        'tanggal_awal' => $tanggal_awal,
+        'tanggal_akhir' => $tanggal_akhir,
+        'kategori' => $this->Kategori_model->get_all_kategori(),
+        'divisi' => $this->Divisi_model->get_all(),
+        'kategori_id' => $kategori_id,
+        'divisi_id' => $divisi_id,
+        'search' => $search,
+        'ringkasan' => $ringkasan
+    ];
+
+    $this->load->view('templates/header', $data);
+    $this->load->view('laporan/laporan_produk', $data);
+    $this->load->view('templates/footer');
+}
+
 
 
 

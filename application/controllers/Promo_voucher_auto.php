@@ -26,13 +26,14 @@ class Promo_voucher_auto extends CI_Controller
         $result = $this->Promo_voucher_model->get_all();
         echo json_encode($result);
     }
-
+    
     public function simpan()
     {
         $data = $this->input->post();
         $res = $this->Promo_voucher_model->simpan($data);
         echo json_encode($res);
     }
+    
 
     public function get_by_id($id)
     {

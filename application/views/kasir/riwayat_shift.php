@@ -1,4 +1,11 @@
-<h4 class="mb-4"><i class="fas fa-clock text-primary"></i> Riwayat Shift Kasir</h4>
+<h4 class="mb-3"><i class="fas fa-clock text-primary"></i> Riwayat Shift Kasir</h4>
+
+<form method="get" class="form-inline mb-4">
+    <label class="mr-2">Filter Tanggal:</label>
+    <input type="date" name="tanggal_awal" class="form-control form-control-sm mr-2" value="<?= $tanggal_awal ?>">
+    <input type="date" name="tanggal_akhir" class="form-control form-control-sm mr-2" value="<?= $tanggal_akhir ?>">
+    <button type="submit" class="btn btn-sm btn-primary">Tampilkan</button>
+</form>
 
 <div class="table-responsive">
     <table class="table table-bordered table-striped text-center align-middle shadow-sm">
@@ -13,6 +20,11 @@
             </tr>
         </thead>
         <tbody>
+            <?php if (empty($shifts)): ?>
+            <tr>
+                <td colspan="6" class="text-muted">Tidak ada data shift pada rentang ini.</td>
+            </tr>
+            <?php else: ?>
             <?php foreach ($shifts as $s): ?>
             <tr>
                 <td><span class="badge badge-info text-uppercase px-2 py-1"><?= $s['nama_kasir'] ?></span></td>
@@ -29,6 +41,7 @@
                 </td>
             </tr>
             <?php endforeach; ?>
+            <?php endif; ?>
         </tbody>
     </table>
 </div>

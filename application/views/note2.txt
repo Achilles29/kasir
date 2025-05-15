@@ -288,6 +288,11 @@ v tambahkan nomor meja di pending order
 v refund pilihan tidak muncul Ekstra
 v update database local ke vps tertentu
 v tampilan struk kasir judul
+v cetak per divisi belum grouped
+v print cetak void manual
+v print cetak refund manual
+
+
 
 v export sql awalan pr_
 
@@ -300,15 +305,15 @@ tampilan struk kasir subtotal
 v Laporan penjualan
 - Ringkasan penjualan
 v Laporan Void 
-- Laporan produk
+v Laporan produk
 
 Penjualan produk 
 Penjualan departemen 
 Penjualan kategori 
 Penjualan ekstras 
 
-Laporan kasir
-Laporan tutup kasir
+v Laporan kasir
+v Laporan tutup kasir
 
 
 LOG PENGGUNAAN jumlah_poin
@@ -325,15 +330,6 @@ fungsi DP
 
 
 
-cetak per divisi belum grouped
-
-
-
-loadpending order, data refund tampil
-default filter POS bukan hari ini
-
-print cetak void manual
-print cetak refund manual
 
 
 hapus pesanan kosong ( pesanan yang void semua isinya jangan ditampikan)
@@ -364,7 +360,7 @@ pr_produk: id, nama_produk, sku, deskripsi, kategori_id, satuan, hpp, harga_jual
 
 rekap kasbon
 log kasbon
-tutup kasir jangan lupa refund dihitung
+
 
 
 

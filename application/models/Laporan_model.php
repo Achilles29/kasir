@@ -229,4 +229,104 @@ public function get_void_by_kode($kode_void)
 }
 
 
+public function get_laporan_produk($awal, $akhir, $kategori_id = null, $divisi_id = null, $search = null, $limit = 20, $offset = 0)
+{
+    $this->db->select('
+        p.id, p.nama_produk, p.sku, k.nama_kategori, d.nama_divisi,
+        SUM(dt.jumlah) as total_jumlah,
+        SUM(dt.harga * dt.jumlah) as total_penjualan
+    ');
+    $this->db->from('pr_detail_transaksi dt');
+    $this->db->join('pr_transaksi t', 't.id = dt.pr_transaksi_id');
+    $this->db->join('pr_produk p', 'p.id = dt.pr_produk_id');
+    $this->db->join('pr_kategori k', 'k.id = p.kategori_id');
+    $this->db->join('pr_divisi d', 'd.id = k.pr_divisi_id');
+    $this->db->where('DATE(t.waktu_order) >=', $awal);
+    $this->db->where('DATE(t.waktu_order) <=', $akhir);
+    $this->db->where('t.status_pembayaran', 'LUNAS');
+
+    if ($kategori_id) {
+        $this->db->where('k.id', $kategori_id);
+    }
+
+    if ($divisi_id) {
+        $this->db->where('d.id', $divisi_id);
+    }
+
+    if ($search) {
+        $this->db->group_start()
+            ->like('p.nama_produk', $search)
+            ->or_like('p.sku', $search)
+            ->group_end();
+    }
+
+    $this->db->group_by('p.id');
+    $this->db->order_by('total_penjualan', 'DESC');
+    $this->db->limit($limit, $offset);
+    return $this->db->get()->result_array();
+}
+
+public function count_laporan_produk($awal, $akhir, $kategori_id = null, $divisi_id = null, $search = null)
+{
+    $this->db->select('COUNT(DISTINCT p.id) as total');
+    $this->db->from('pr_detail_transaksi dt');
+    $this->db->join('pr_transaksi t', 't.id = dt.pr_transaksi_id');
+    $this->db->join('pr_produk p', 'p.id = dt.pr_produk_id');
+    $this->db->join('pr_kategori k', 'k.id = p.kategori_id');
+    $this->db->join('pr_divisi d', 'd.id = k.pr_divisi_id');
+    $this->db->where('DATE(t.waktu_order) >=', $awal);
+    $this->db->where('DATE(t.waktu_order) <=', $akhir);
+    $this->db->where('t.status_pembayaran', 'LUNAS');
+
+    if ($kategori_id) {
+        $this->db->where('k.id', $kategori_id);
+    }
+
+    if ($divisi_id) {
+        $this->db->where('d.id', $divisi_id);
+    }
+
+    if ($search) {
+        $this->db->group_start()
+            ->like('p.nama_produk', $search)
+            ->or_like('p.sku', $search)
+            ->group_end();
+    }
+
+    $query = $this->db->get()->row();
+    return $query->total ?? 0;
+}
+public function get_total_ringkasan($awal, $akhir, $kategori_id = null, $divisi_id = null, $search = null)
+{
+    $this->db->select('
+        SUM(dt.jumlah) as total_jumlah,
+        SUM(dt.harga * dt.jumlah) as total_penjualan
+    ');
+    $this->db->from('pr_detail_transaksi dt');
+    $this->db->join('pr_transaksi t', 't.id = dt.pr_transaksi_id');
+    $this->db->join('pr_produk p', 'p.id = dt.pr_produk_id');
+    $this->db->join('pr_kategori k', 'k.id = p.kategori_id');
+    $this->db->join('pr_divisi d', 'd.id = k.pr_divisi_id');
+    $this->db->where('DATE(t.waktu_order) >=', $awal);
+    $this->db->where('DATE(t.waktu_order) <=', $akhir);
+    $this->db->where('t.status_pembayaran', 'LUNAS');
+
+    if ($kategori_id) {
+        $this->db->where('k.id', $kategori_id);
+    }
+
+    if ($divisi_id) {
+        $this->db->where('d.id', $divisi_id);
+    }
+
+    if ($search) {
+        $this->db->group_start()
+            ->like('p.nama_produk', $search)
+            ->or_like('p.sku', $search)
+            ->group_end();
+    }
+
+    return $this->db->get()->row_array();
+}
+
 }
