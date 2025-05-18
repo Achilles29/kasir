@@ -31,6 +31,7 @@ public function simpan_transaksi($data_transaksi, $items) {
             ]);
 
             $detail_id = $this->db->insert_id();
+            
 
             if (!empty($item['extra'])) {
                 $this->simpan_detail_extra($detail_id, $item['extra']);
@@ -41,6 +42,8 @@ public function simpan_transaksi($data_transaksi, $items) {
     $this->db->trans_commit();
     return $transaksi_id;
 }
+
+
 
 public function get_username_by_id($pegawai_id) {
     $pegawai = $this->db->get_where('abs_pegawai', ['id' => $pegawai_id])->row();
@@ -1069,6 +1072,18 @@ public function get_kategori_produk()
 public function get_list_printer()
 {
     return $this->db->order_by('lokasi_printer', 'ASC')->get('pr_printer')->result_array();
+}
+
+/// PAKET
+public function insert_detail_paket($transaksi_id, $detail_id, $paket_id)
+{
+    $this->db->insert('pr_detail_transaksi_paket', [
+        'pr_transaksi_id' => $transaksi_id,
+        'pr_detail_transaksi_id' => $detail_id,
+        'pr_produk_paket_id' => $paket_id,
+        'created_at' => date('Y-m-d H:i:s'),
+        'updated_at' => date('Y-m-d H:i:s'),
+    ]);
 }
 
 

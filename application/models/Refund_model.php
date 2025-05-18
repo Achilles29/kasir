@@ -47,28 +47,33 @@ class Refund_model extends CI_Model {
         return $this->db->delete('bl_refund', ['id' => $id]);
     }
 
-public function get_by_kode($kode_refund)
-{
-    return $this->db
-        ->select('
-            r.*, 
-            p.nama_produk, 
-            pe.nama_extra, 
-            t.customer, 
-            t.nomor_meja, 
-            m.metode_pembayaran
-        ')
-        ->from('pr_refund r')
-        ->join('pr_detail_transaksi d', 'r.pr_detail_transaksi_id = d.id', 'left')
-        ->join('pr_produk p', 'd.pr_produk_id = p.id', 'left')
-        ->join('pr_detail_extra e', 'r.detail_extra_id = e.id', 'left')
-        ->join('pr_produk_extra pe', 'e.pr_produk_extra_id = pe.id', 'left')
-        ->join('pr_transaksi t', 'r.pr_transaksi_id = t.id', 'left')
-        ->join('pr_metode_pembayaran m', 'r.metode_pembayaran_id = m.id', 'left')
-        ->where('r.kode_refund', $kode_refund)
-        ->get()
-        ->result();
-}
-
+    public function get_by_kode($kode_refund)
+    {
+        return $this->db
+            ->select('
+                r.*, 
+                r.alasan AS alasan_refund,
+                ap.username AS refund_by_username,
+                p.nama_produk, 
+                pe.nama_extra, 
+                t.customer, 
+                t.nomor_meja, 
+                m.metode_pembayaran
+            ')
+            ->from('pr_refund r')
+            ->join('pr_detail_transaksi d', 'r.pr_detail_transaksi_id = d.id', 'left')
+            ->join('pr_produk p', 'd.pr_produk_id = p.id', 'left')
+            ->join('pr_detail_extra e', 'r.detail_extra_id = e.id', 'left')
+            ->join('pr_produk_extra pe', 'e.pr_produk_extra_id = pe.id', 'left')
+            ->join('pr_transaksi t', 'r.pr_transaksi_id = t.id', 'left')
+            ->join('pr_metode_pembayaran m', 'r.metode_pembayaran_id = m.id', 'left')
+            ->join('abs_pegawai ap', 'ap.id = r.refund_by', 'left')  // ✅ perbaikan join di sini
+            ->where('r.kode_refund', $kode_refund)
+            ->order_by('r.id', 'asc')
+            ->get()
+            ->result();
+    }
+    
+    
 
 }

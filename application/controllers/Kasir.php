@@ -492,37 +492,90 @@ public function get_printer_list() {
 
 
     // Load Produk AJAX untuk pencarian & kategori
+// public function load_produk() {
+//     $divisi = $this->input->get('divisi');
+//     $search = $this->input->get('search');
+
+//     $this->db->select('
+//         pr_produk.id,
+//         pr_produk.nama_produk,
+//         FLOOR(pr_produk.harga_jual) AS harga_jual,
+//         pr_produk.foto,
+//         pr_kategori.urutan AS urutan_kategori,
+//         pr_kategori.pr_divisi_id
+//     ');
+//     $this->db->from('pr_produk');
+//     $this->db->join('pr_kategori', 'pr_produk.kategori_id = pr_kategori.id', 'left');
+//     $this->db->where('pr_produk.tampil', 1); // hanya produk yang ditampilkan
+
+//     // ✅ Filter berdasarkan divisi (dari pr_kategori.pr_divisi_id)
+//     if (!empty($divisi)) {
+//         $this->db->where('pr_kategori.pr_divisi_id', $divisi);
+//     }
+
+//     // ✅ Filter pencarian nama produk
+//     if (!empty($search)) {
+//         $this->db->like('pr_produk.nama_produk', $search);
+//     }
+
+//     $this->db->order_by('pr_kategori.urutan', 'ASC');
+//     $this->db->order_by('pr_produk.id', 'ASC');
+
+//     $query = $this->db->get();
+//     echo json_encode($query->result_array());
+// }
+
 public function load_produk() {
     $divisi = $this->input->get('divisi');
     $search = $this->input->get('search');
 
-    $this->db->select('
-        pr_produk.id,
-        pr_produk.nama_produk,
-        FLOOR(pr_produk.harga_jual) AS harga_jual,
-        pr_produk.foto,
-        pr_kategori.urutan AS urutan_kategori,
-        pr_kategori.pr_divisi_id
-    ');
-    $this->db->from('pr_produk');
-    $this->db->join('pr_kategori', 'pr_produk.kategori_id = pr_kategori.id', 'left');
-    $this->db->where('pr_produk.tampil', 1); // hanya produk yang ditampilkan
+    // Jika divisi adalah 4 (PAKET)
+    if ($divisi == 4) {
+        $this->db->select("
+            pr_produk_paket.id,
+            pr_produk_paket.nama_paket AS nama_produk,
+            FLOOR(pr_produk_paket.harga_paket) AS harga_jual,
+            'default.png' AS foto,
+            999 AS urutan_kategori,
+            4 AS pr_divisi_id
+        ");
+        $this->db->from('pr_produk_paket');
+        $this->db->where('pr_produk_paket.status', 1);
 
-    // ✅ Filter berdasarkan divisi (dari pr_kategori.pr_divisi_id)
-    if (!empty($divisi)) {
-        $this->db->where('pr_kategori.pr_divisi_id', $divisi);
+        if (!empty($search)) {
+            $this->db->like('pr_produk_paket.nama_paket', $search);
+        }
+
+        $this->db->order_by('pr_produk_paket.id', 'ASC');
+        $result = $this->db->get()->result_array();
+    } else {
+        // Default: produk biasa
+        $this->db->select('
+            pr_produk.id,
+            pr_produk.nama_produk,
+            FLOOR(pr_produk.harga_jual) AS harga_jual,
+            pr_produk.foto,
+            pr_kategori.urutan AS urutan_kategori,
+            pr_kategori.pr_divisi_id
+        ');
+        $this->db->from('pr_produk');
+        $this->db->join('pr_kategori', 'pr_produk.kategori_id = pr_kategori.id', 'left');
+        $this->db->where('pr_produk.tampil', 1);
+
+        if (!empty($divisi)) {
+            $this->db->where('pr_kategori.pr_divisi_id', $divisi);
+        }
+
+        if (!empty($search)) {
+            $this->db->like('pr_produk.nama_produk', $search);
+        }
+
+        $this->db->order_by('pr_kategori.urutan', 'ASC');
+        $this->db->order_by('pr_produk.id', 'ASC');
+        $result = $this->db->get()->result_array();
     }
 
-    // ✅ Filter pencarian nama produk
-    if (!empty($search)) {
-        $this->db->like('pr_produk.nama_produk', $search);
-    }
-
-    $this->db->order_by('pr_kategori.urutan', 'ASC');
-    $this->db->order_by('pr_produk.id', 'ASC');
-
-    $query = $this->db->get();
-    echo json_encode($query->result_array());
+    echo json_encode($result);
 }
 
 

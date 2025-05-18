@@ -1337,6 +1337,39 @@
             $("#customer-list").hide();
         });
 
+        // function loadProduk(divisi = "", search = "") {
+        //     $.ajax({
+        //         url: base_url + "kasir/load_produk",
+        //         type: "GET",
+        //         dataType: "json",
+        //         data: {
+        //             divisi,
+        //             search
+        //         },
+        //         success: function(response) {
+
+        //             let produkHtml = "";
+        //             $.each(response, function(index, produk) {
+        //                 produkHtml += `
+        //             <div class="col-md-4">
+        //                 <div class="card text-center p-2">
+        //                     <img src="${base_url}uploads/produk/${produk.foto}" class="img-fluid">
+        //                     <h5>${produk.nama_produk}</h5>
+        //                     <p>${formatRupiah(produk.harga_jual)}</p>
+        //                     <button class="btn btn-primary add-to-cart"
+        //                         data-id="${produk.id}"
+        //                         data-nama="${produk.nama_produk}"
+        //                         data-harga="${produk.harga_jual}">
+        //                         Tambah
+        //                     </button>
+        //                 </div>
+        //             </div>`;
+        //             });
+        //             $("#produk-list").html(produkHtml);
+        //         }
+        //     });
+        // }
+
         function loadProduk(divisi = "", search = "") {
             $.ajax({
                 url: base_url + "kasir/load_produk",
@@ -1347,29 +1380,27 @@
                     search
                 },
                 success: function(response) {
-
                     let produkHtml = "";
                     $.each(response, function(index, produk) {
                         produkHtml += `
-                    <div class="col-md-4">
-                        <div class="card text-center p-2">
-                            <img src="${base_url}uploads/produk/${produk.foto}" class="img-fluid">
-                            <h5>${produk.nama_produk}</h5>
-                            <p>${formatRupiah(produk.harga_jual)}</p>
-                            <button class="btn btn-primary add-to-cart"
-                                data-id="${produk.id}"
-                                data-nama="${produk.nama_produk}"
-                                data-harga="${produk.harga_jual}">
-                                Tambah
-                            </button>
-                        </div>
-                    </div>`;
+                <div class="col-md-4">
+                    <div class="card text-center p-2">
+                        <img src="${base_url}uploads/produk/${produk.foto}" class="img-fluid">
+                        <h5>${produk.nama_produk}</h5>
+                        <p>${formatRupiah(produk.harga_jual)}</p>
+                        <button class="btn btn-primary add-to-cart"
+                            data-id="${produk.id}"
+                            data-nama="${produk.nama_produk}"
+                            data-harga="${produk.harga_jual}">
+                            Tambah
+                        </button>
+                    </div>
+                </div>`;
                     });
                     $("#produk-list").html(produkHtml);
                 }
             });
         }
-
 
         // Tampilkan tombol X saat ada ketikan
         $('#search').on('input', function() {

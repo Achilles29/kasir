@@ -1,11 +1,11 @@
-
-<div class="container-fluid mt-4"> <!-- Menggunakan container-fluid agar tabel lebih lebar -->
+<div class="container-fluid mt-4">
+    <!-- Menggunakan container-fluid agar tabel lebih lebar -->
     <div class="card p-3">
         <div class="d-flex justify-content-between align-items-center">
             <h3 class="font-weight-bold">Daftar Voucher</h3>
             <button class="btn btn-primary" data-toggle="modal" data-target="#modalVoucher">Tambah Voucher</button>
         </div>
-        
+
         <div class="row mt-3">
             <div class="col-lg-4 col-md-6">
                 <input type="text" id="search-voucher" class="form-control" placeholder="Cari kode voucher...">
@@ -23,11 +23,14 @@
                         <th>Jumlah Gratis</th>
                         <th>Min. Pembelian</th>
                         <th>Maks. Diskon</th>
+                        <th>Maks. Voucher</th> <!-- ✅ Tambahan -->
+                        <th>Sisa Voucher</th> <!-- ✅ Tambahan -->
                         <th>Status</th>
                         <th>Masa Berlaku</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
+
                 <tbody id="voucher-list">
                     <!-- Data voucher dimuat via AJAX -->
                 </tbody>
@@ -54,7 +57,7 @@
             <div class="modal-body">
                 <form id="voucher-form">
                     <input type="hidden" id="voucher-id">
-                    
+
                     <div class="form-group">
                         <label>Kode Voucher</label>
                         <input type="text" id="kode-voucher" class="form-control" required>
@@ -99,6 +102,16 @@
                     </div>
 
                     <div class="form-group">
+                        <label>Maksimal Voucher</label>
+                        <input type="number" id="maksimal-voucher" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Sisa Voucher</label>
+                        <input type="number" id="sisa-voucher" class="form-control">
+                    </div>
+
+                    <div class="form-group">
                         <label>Status</label>
                         <select id="status-voucher" class="form-control">
                             <option value="aktif">Aktif</option>
@@ -124,47 +137,56 @@
 </div>
 
 <style>
-    .card {
-        background: white;
-        border-radius: 10px;
-        padding: 20px;
-        box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
-    }
+.card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+}
 
-    .table th, .table td {
-        text-align: center;
-        vertical-align: middle;
-        font-size: 14px;
-        white-space: nowrap; /* Mencegah wrap */
-    }
+.table th,
+.table td {
+    text-align: center;
+    vertical-align: middle;
+    font-size: 14px;
+    white-space: nowrap;
+    /* Mencegah wrap */
+}
 
-    .table-hover tbody tr:hover {
-        background-color: #f9f9f9;
-    }
+.table-hover tbody tr:hover {
+    background-color: #f9f9f9;
+}
 
-    .badge {
-        font-size: 12px;
-        padding: 5px 10px;
-        border-radius: 5px;
-    }
+.badge {
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
 
-    .badge-aktif { background: #28a745; color: white; }
-    .badge-nonaktif { background: #dc3545; color: white; }
+.badge-aktif {
+    background: #28a745;
+    color: white;
+}
 
-    .pagination .page-item.active .page-link {
-        background-color: #28a745;
-        border-color: #28a745;
-        color: white;
-    }
+.badge-nonaktif {
+    background: #dc3545;
+    color: white;
+}
 
-    .pagination .page-item .page-link {
-        color: #333;
-    }
+.pagination .page-item.active .page-link {
+    background-color: #28a745;
+    border-color: #28a745;
+    color: white;
+}
+
+.pagination .page-item .page-link {
+    color: #333;
+}
 </style>
 
 
 <script>
-$(document).ready(function () {
+$(document).ready(function() {
     loadVoucher();
 
     function formatRupiah(angka) {
@@ -180,16 +202,21 @@ $(document).ready(function () {
             url: "<?= site_url('voucher/get_all'); ?>",
             type: "GET",
             dataType: "json",
-            data: { search: search, status: status, date_range: dateRange },
-            success: function (response) {
+            data: {
+                search: search,
+                status: status,
+                date_range: dateRange
+            },
+            success: function(response) {
                 let html = "";
                 if (response.length === 0) {
-                    html = "<tr><td colspan='10' class='text-center'>Tidak ada voucher tersedia</td></tr>";
+                    html =
+                        "<tr><td colspan='10' class='text-center'>Tidak ada voucher tersedia</td></tr>";
                 } else {
-                    $.each(response, function (index, voucher) {
-                        let statusBadge = voucher.status === "aktif"
-                            ? `<span class="badge badge-aktif">Aktif</span>`
-                            : `<span class="badge badge-nonaktif">Nonaktif</span>`;
+                    $.each(response, function(index, voucher) {
+                        let statusBadge = voucher.status === "aktif" ?
+                            `<span class="badge badge-aktif">Aktif</span>` :
+                            `<span class="badge badge-nonaktif">Nonaktif</span>`;
 
                         html += `
                             <tr>
@@ -200,6 +227,8 @@ $(document).ready(function () {
                                 <td>${formatRupiah(voucher.jumlah_gratis) || '-'}</td>
                                 <td>${formatRupiah(voucher.min_pembelian)}</td>
                                 <td>${formatRupiah(voucher.max_diskon) || '-'}</td>
+                                <td>${voucher.maksimal_voucher || '-'}</td>
+                                <td>${voucher.sisa_voucher || '-'}</td>
                                 <td>${statusBadge}</td>
                                 <td>${voucher.tanggal_mulai} - ${voucher.tanggal_berakhir}</td>
                                 <td>
@@ -215,43 +244,49 @@ $(document).ready(function () {
     }
 
     // 🔍 Live Search AJAX
-    $("#search-voucher").on("input", function () {
+    $("#search-voucher").on("input", function() {
         loadVoucher();
     });
 
 
     // 🔍 Live Search AJAX
-    $("#search-voucher").on("input", function () {
+    $("#search-voucher").on("input", function() {
         loadVoucher();
     });
 
     // Fungsi Hapus Voucher
-    $(document).on("click", ".delete-voucher", function () {
+    $(document).on("click", ".delete-voucher", function() {
         let id = $(this).data("id");
         if (confirm("Hapus voucher ini?")) {
-            $.post("<?= site_url('voucher/hapus'); ?>", { id: id }, function (response) {
+            $.post("<?= site_url('voucher/hapus'); ?>", {
+                id: id
+            }, function(response) {
                 alert(response.message);
                 loadVoucher();
             }, "json");
         }
     });
     // AJAX Pencarian Produk dengan Preview
-    $("#search-produk").on("keyup", function () {
+    $("#search-produk").on("keyup", function() {
         let keyword = $(this).val().trim();
         if (keyword.length > 1) {
             $.ajax({
                 url: "<?= site_url('voucher/search_produk'); ?>",
                 type: "GET",
                 dataType: "json",
-                data: { keyword: keyword },
-                success: function (response) {
+                data: {
+                    keyword: keyword
+                },
+                success: function(response) {
                     let produkHtml = "";
                     if (response.length > 0) {
-                        $.each(response, function (index, produk) {
-                            produkHtml += `<li class="list-group-item select-produk" data-id="${produk.id}" data-nama="${produk.nama_produk}">${produk.nama_produk}</li>`;
+                        $.each(response, function(index, produk) {
+                            produkHtml +=
+                                `<li class="list-group-item select-produk" data-id="${produk.id}" data-nama="${produk.nama_produk}">${produk.nama_produk}</li>`;
                         });
                     } else {
-                        produkHtml = `<li class="list-group-item text-muted">Produk tidak ditemukan</li>`;
+                        produkHtml =
+                            `<li class="list-group-item text-muted">Produk tidak ditemukan</li>`;
                     }
                     $("#produk-list").html(produkHtml).show();
                 }
@@ -262,21 +297,21 @@ $(document).ready(function () {
     });
 
     // Pilih produk dari hasil pencarian
-    $(document).on("click", ".select-produk", function () {
+    $(document).on("click", ".select-produk", function() {
         $("#produk-id").val($(this).data("id"));
         $("#search-produk").val($(this).data("nama"));
         $("#produk-list").hide();
     });
 
     // Sembunyikan dropdown saat klik di luar
-    $(document).click(function (e) {
+    $(document).click(function(e) {
         if (!$(e.target).closest("#search-produk, #produk-list").length) {
             $("#produk-list").hide();
         }
     });
 
     // Fungsi Tambah/Edit Voucher
-    $("#voucher-form").on("submit", function (e) {
+    $("#voucher-form").on("submit", function(e) {
         e.preventDefault();
 
         let formData = {
@@ -288,12 +323,14 @@ $(document).ready(function () {
             jumlah_gratis: $("#jumlah-gratis").val(),
             max_diskon: $("#max-diskon").val(),
             min_pembelian: $("#min-pembelian").val(),
+            maksimal_voucher: $("#maksimal-voucher").val(),
+            sisa_voucher: $("#sisa-voucher").val(),
             status: $("#status-voucher").val(),
             tanggal_mulai: $("#tanggal-mulai").val(),
             tanggal_berakhir: $("#tanggal-berakhir").val()
         };
 
-        $.post("<?= site_url('voucher/simpan'); ?>", formData, function (response) {
+        $.post("<?= site_url('voucher/simpan'); ?>", formData, function(response) {
             alert(response.message);
 
             if (response.status === "success") {
@@ -303,10 +340,12 @@ $(document).ready(function () {
         }, "json");
     });
 
-    $(document).on("click", ".edit-voucher", function () {
+    $(document).on("click", ".edit-voucher", function() {
         let id = $(this).data("id");
 
-        $.get("<?= site_url('voucher/get'); ?>", { id: id }, function (voucher) {
+        $.get("<?= site_url('voucher/get'); ?>", {
+            id: id
+        }, function(voucher) {
             $("#voucher-id").val(voucher.id);
             $("#kode-voucher").val(voucher.kode_voucher);
             $("#jenis-voucher").val(voucher.jenis);
@@ -315,6 +354,8 @@ $(document).ready(function () {
             $("#jumlah-gratis").val(voucher.jumlah_gratis);
             $("#max-diskon").val(voucher.max_diskon);
             $("#min-pembelian").val(voucher.min_pembelian);
+            $("#maksimal-voucher").val(voucher.maksimal_voucher);
+            $("#sisa-voucher").val(voucher.sisa_voucher);
             $("#status-voucher").val(voucher.status);
             $("#tanggal-mulai").val(voucher.tanggal_mulai);
             $("#tanggal-berakhir").val(voucher.tanggal_berakhir);
@@ -325,10 +366,12 @@ $(document).ready(function () {
     });
 
     // Fungsi Hapus Voucher
-    $(document).on("click", ".delete-voucher", function () {
+    $(document).on("click", ".delete-voucher", function() {
         let id = $(this).data("id");
         if (confirm("Hapus voucher ini?")) {
-            $.post("<?= site_url('voucher/hapus'); ?>", { id: id }, function (response) {
+            $.post("<?= site_url('voucher/hapus'); ?>", {
+                id: id
+            }, function(response) {
                 alert(response.message);
                 loadVoucher();
             }, "json");
@@ -336,7 +379,7 @@ $(document).ready(function () {
     });
 
     // Reset modal saat ditutup untuk menghindari overlay hitam
-    $("#modalVoucher").on("hidden.bs.modal", function () {
+    $("#modalVoucher").on("hidden.bs.modal", function() {
         $("body").removeClass("modal-open");
         $(".modal-backdrop").remove();
         $("#voucher-form")[0].reset();
@@ -345,8 +388,6 @@ $(document).ready(function () {
     });
 
 
-    
+
 });
-
 </script>
-

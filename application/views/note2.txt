@@ -291,48 +291,36 @@ v tampilan struk kasir judul
 v cetak per divisi belum grouped
 v print cetak void manual
 v print cetak refund manual
-
-
-
-v export sql awalan pr_
-
-
-produk paket
-halaman pending order => nomor meja, total penjualan bukan total bayar, tanggal
-tampilan struk kasir subtotal
-
-
+v perbaiki halaman voucher
 v Laporan penjualan
-- Ringkasan penjualan
 v Laporan Void 
 v Laporan produk
 
-Penjualan produk 
-Penjualan departemen 
-Penjualan kategori 
-Penjualan ekstras 
-
+v Penjualan produk 
+v Penjualan departemen 
+v Penjualan kategori 
+v Penjualan ekstra 
 v Laporan kasir
 v Laporan tutup kasir
 
+v export sql awalan pr_
 
+perbaiki tampilan kas
+perbaiki tampilan mutasi kas
+perbaiki tampilan laporan penjualan produk (tambah kolom refund seperti majoo)
+laporan brankas baru
+laporan metode penjualan baru
+laporan rekap rekening baru
+
+Ringkasan penjualan
+produk paket
+halaman pending order => nomor meja, total penjualan bukan total bayar, tanggal
+tampilan struk kasir subtotal
 LOG PENGGUNAAN jumlah_poin
-
 OPSI print struk kasir CR CODE
-
 simpan pembayaran => print kasir => buka laci
-
-perbaiki halaman voucher
-
 halaman antrian checker dan kitchen
-
 fungsi DP
-
-
-
-
-
-hapus pesanan kosong ( pesanan yang void semua isinya jangan ditampikan)
 
 cetak divisi => pesanan baru (date create terbaru ) dan semua pesanan
 
@@ -367,35 +355,35 @@ log kasbon
 LAPORAN
     LAPORAN PENJUALAN
         Ringkasa penjualan
-        detail penjualan
+v        detail penjualan
         Laporan per periode
         Laporan Jenis Bayar
         Laporan Jenis Order
-        Laporan void
-        Laporan refund
+v        Laporan void
+v        Laporan refund
 
     Laporan Dapur
         Laporan Proses Order
         Laporan Proses Produk
     Laporan Produk
-        Penjualan Produk
-        Penjualan divisi
-        Penjualan kategori_id
-        Penjualan Ekstra
+v        Penjualan Produk
+v        Penjualan divisi
+v        Penjualan kategori_id
+v        Penjualan Ekstra
     Laporan Promo & Loyalti
-        Laporan Promo
-        Laporan Poin
-        Laporan Voucher
-        Laporan Komplimen
+v        Laporan Promo
+v        Laporan Poin
+v        Laporan Voucher
+v        Laporan Komplimen
 
 PRODUK
     Buku Menu
-    Daftar Divisi
-    Daftar kategori
-    Daftar Produk
-    Produk Ekstra
+v    Daftar Divisi
+v    Daftar kategori
+v    Daftar Produk
+v    Produk Ekstra
     Produk Paket (gabungan)
-    Master resep
+v    Master resep
 
 cront status pr_voucher
 

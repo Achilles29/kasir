@@ -35,3 +35,21 @@
   background-color: var(--primary);
   color: var(--text-light);
 }
+
+.sidebar .nav-link {
+  white-space: normal !important;
+  word-break: break-word;
+  line-height: 1.2;
+  font-size: 14px;
+}
+/* Agar item submenu wrap dan tidak memanjang */
+.collapse-inner .collapse-item {
+  white-space: normal !important;
+  word-break: break-word;
+  line-height: 1.3;
+  font-size: 14px;
+}
+.sidebar .collapse-item span {
+  display: inline-block;
+  white-space: normal;
+}

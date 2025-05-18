@@ -267,6 +267,7 @@ public function laporan_refund_modal_detail()
     $kode = $this->input->get('kode_refund');
     $this->load->model('Refund_model');
     $data['refund'] = $this->Refund_model->get_by_kode($kode);
+    
 
     if (!$data['refund']) {
         echo '<div class="text-danger">Data refund tidak ditemukan.</div>';
@@ -275,7 +276,6 @@ public function laporan_refund_modal_detail()
 
     $this->load->view('laporan/laporan_refund_modal_detail', $data);
 }
-
 
 
 // LAPORAN METODE

@@ -65,7 +65,10 @@
       <p><strong>Customer:</strong> <?= $refund[0]->customer ?></p>
       <p><strong>Meja:</strong> <?= $refund[0]->nomor_meja ?></p>
       <p><strong>Waktu:</strong> <?= date('d/m/Y H:i', strtotime($refund[0]->waktu_refund)) ?></p>
+      <p><strong>Alasan:</strong> <?= $refund[0]->alasan_refund ?: '-' ?></p>
+      <p><strong>Refund By:</strong> <?= $refund[0]->refund_by_username ?: '-' ?></p>
   </div>
+
 
   <h5 class="fw-bold text-maroon mb-3"><i class="fas fa-box-open"></i> Detail Produk</h5>
   <table class="table table-bordered table-refund">

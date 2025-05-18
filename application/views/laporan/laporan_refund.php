@@ -178,7 +178,7 @@ $(document).ready(function() {
         $('#detailBody').html('<div class="text-center">Memuat data...</div>');
 
         $.ajax({
-            url: base_url + 'kasir/get_detail_refund',
+            url: base_url + 'laporan/laporan_refund_modal_detail',
             method: 'GET',
             data: {
                 kode_refund: kode
