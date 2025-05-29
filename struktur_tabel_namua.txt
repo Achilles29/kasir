@@ -88,9 +88,14 @@ pr_struk : id, nama_outlet, alamat, email, no_telepon, custom_header, custom_foo
 pr_struk_tampilan : id, printer_id, show_logo, show_outlet, show_alamat, show_no_telepon, show_custom_header, show_invoice, show_kasir_order, show_kasir_bayar, show_no_transaksi, show_customer, show_nomor_meja, show_waktu_order, show_waktu_bayar, show_custom_footer, created_at, updated_at
 pr_transaksi : id, customer_id, tanggal, no_transaksi, waktu_order, waktu_bayar, jenis_order_id, customer, nomor_meja, total_penjualan, kasir_order, kasir_bayar, kode_voucher, diskon, total_pembayaran, sisa_pembayaran, status_pembayaran, created_at, updated_at
 pr_void : id, kode_void, pr_transaksi_id, no_transaksi, detail_transaksi_id, pr_produk_id, nama_produk, detail_extra_id, produk_extra_id, nama_extra, jumlah, harga, catatan, alasan, void_by, waktu, created_at, updated_at, is_printed
-pr_voucher : id, kode_voucher, jenis, nilai, min_pembelian, produk_id, jumlah_gratis, max_diskon, maksimal_voucher, sisa_voucher, status, tanggal_mulai, tanggal_berakhir, created_at, updated_at
+pr_voucher : id, kode_voucher, jenis, nilai, min_pembelian, produk_id, jumlah_gratis, max_diskon, maksimal_voucher, sisa_voucher, status, tanggal_mulai, tanggal_berakhir, created_at, updated_at, pr_transaksi_id, customer_id
 schedule : id, group_id, message, send_time, status, created_at, updated_at
 users : id, username, password, created_at, updated_at
 
 pr_promo_voucher_auto: id 	nama_promo 	tipe_trigger 	nilai 	produk_ids 	masa_berlaku 	jenis 	nilai_voucher 	min_pembelian 	produk_id 	max_diskon 	aktif 	maksimal_voucher 	created_at 	updated_at 	
 
+pr_redeem_log: id, customer_id, redeem_setting_id, jenis, jumlah_digunakan, voucher_id, created_at, updated_at
+
+pr_produk_paket :	id 	nama_paket 	harga_paket 	keterangan 	status 	divisi_id 	created_at 	updated_at 
+pr_produk_paket_detail:	id 	pr_produk_paket_id 	pr_produk_id 	qty 	created_at 	updated_at
+pr_detail_transaksi_paket : id 	pr_transaksi_id 	pr_detail_transaksi_id 	pr_produk_paket_id 	harga 	jumlah 	catatan 	created_at 	updated_at 	

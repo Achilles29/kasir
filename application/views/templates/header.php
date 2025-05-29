@@ -113,12 +113,12 @@
                     <div id="collapseLaporan" class="collapse" aria-labelledby="headingLaporan"
                         data-parent="#accordionSidebar">
                         <div class="bg-white py-2 collapse-inner rounded">
-                            <a class="collapse-item" href="<?= site_url('/laporan/laporan_penjualan') ?>"><i
+                            <a class="collapse-item" href="<?= site_url('/kasir/transaksi_pending') ?>"><i
                                     class="far fa-id-card"></i>
-                                Detail Penjualan</a>
-                            <a class="collapse-item" href="<?= site_url('/laporan/laporan_produk') ?>"><i
+                                Transaksi Pending</a>
+                            <a class="collapse-item" href="<?= site_url('/kasir/pesanan_terbayar') ?>"><i
                                     class="far fa-id-card"></i>
-                                Laporan Produk</a>
+                                Pesanan Terbayar</a>
                             <a class="collapse-item" href="<?= site_url('/laporan/laporan_refund') ?>"><i
                                     class="far fa-id-card"></i>
                                 Laporan Refund</a>
@@ -140,7 +140,7 @@
                         </div>
                     </div>
                 </li>
-
+                <!-- 
                 <li class="nav-item">
 
                     <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePelanggan"
@@ -155,10 +155,10 @@
                                 Daftar Pelanggan</a>
                         </div>
                     </div>
-                </li>
+                </li> -->
 
 
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseProduk"
                         aria-expanded="true" aria-controls="collapseProduk">
                         <i class="fas fa-fw fa-cog"></i>
@@ -184,8 +184,8 @@
                                 Master Resep</a>
                         </div>
                     </div>
-                </li>
-                <li class="nav-item">
+                </li> -->
+                <!-- <li class="nav-item">
                     <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePromo"
                         aria-expanded="true" aria-controls="collapsePromo">
                         <i class="fas fa-fw fa-cog"></i>
@@ -205,7 +205,7 @@
                                 Daftar Poin</a>
                         </div>
                     </div>
-                </li>
+                </li> -->
 
                 <li class="nav-item">
                     <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseSeven"
@@ -238,12 +238,12 @@
                     </div>
                 </li>
 
-                <!-- Nav Item -->
                 <li class="nav-item">
-                    <a class="nav-link" href="/profil">
+                    <a class="nav-link" href="/sync_data/ambil_semua">
                         <i class="fas fa-fw fa-chart-area"></i>
-                        <span>Profil</span></a>
+                        <span>Sinkronisasi Server</span></a>
                 </li>
+
                 <li class="nav-item">
                     <a class="nav-link" href="/retry_sync">
                         <i class="fas fa-fw fa-chart-area"></i>

@@ -57,12 +57,15 @@ public function save() {
         redirect('stamp');
     }
 
-public function kadaluarsa_stamp()
-{
-    $this->db->where('status', 'aktif')
-             ->where('masa_berlaku <', date('Y-m-d'))
-             ->update('pr_customer_stamp', ['status' => 'kadaluarsa']);
-}
-
-
+    public function kadaluarsa_stamp()
+    {
+        // Subquery untuk mendapatkan promo_stamp_id yang tidak aktif
+        $this->db->where('status', 'aktif');
+        $this->db->where('masa_berlaku <', date('Y-m-d'));
+        $this->db->where_in('promo_stamp_id', function($builder) {
+            $builder->select('id')->from('pr_promo_stamp')->where('aktif', 0);
+        });
+        $this->db->update('pr_customer_stamp', ['status' => 'kadaluarsa']);
+    }
+    
 }

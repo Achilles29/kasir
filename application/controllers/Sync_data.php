@@ -27,6 +27,9 @@ class Sync_data extends CI_Controller {
             'pr_divisi',
             'pr_promo_stamp',
             'pr_promo_voucher_auto',
+            'pr_produk_paket',
+            'pr_produk_paket_detail',
+
             'pr_customer'
         ];
 

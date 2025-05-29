@@ -495,6 +495,17 @@
     #input-cepat-dinamis .btn {
         margin: 0 5px 5px 0;
     }
+
+    .btn-extra[disabled] {
+        background-color: #6c757d !important;
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    #kosongkan-keranjang {
+        background-color: #f0ad4e;
+        border: none;
+    }
     </style>
 </head>
 
@@ -530,16 +541,16 @@
                 <i class="fas fa-chart-line"></i> Pesanan Terbayar
             </a>
         </div>
-        <div class="nav-item">
+        <!-- <div class="nav-item">
             <a href="<?= base_url('laporan') ?>" target="_blank" class="nav-link small font-weight-bold px-3 py-2">
                 <i class="fas fa-chart-line"></i> Laporan
             </a>
-        </div>
-        <div class="nav-item">
+        </div> -->
+        <!-- <div class="nav-item">
             <a href="<?= base_url('stok') ?>" target="_blank" class="nav-link small font-weight-bold px-3 py-2">
                 <i class="fas fa-boxes"></i> Stok
             </a>
-        </div>
+        </div> -->
         <div class="nav-item">
             <a href="<?= base_url('customer') ?>" target="_blank" class="nav-link small font-weight-bold px-3 py-2">
                 <i class="fas fa-users"></i> Member
@@ -571,6 +582,10 @@
             <div id="menu-actions">
                 <button id="ubah-pesanan" class="btn btn-secondary btn-block">Ubah Pesanan</button>
                 <button id="rincian-pesanan" class="btn btn-success btn-block">Lihat Rincian/Bayar</button>
+                <button id="kosongkan-keranjang" class="btn btn-warning btn-block">
+                    <i class="fas fa-trash"></i> Kosongkan Keranjang
+                </button>
+
                 <button id="btnVoidPilihanModal" class="btn btn-danger btn-block">
                     <i class="fas fa-times-circle"></i> Void Pesanan
                 </button>
@@ -1337,6 +1352,7 @@
             $("#customer-list").hide();
         });
 
+        //DI KOMEN UNTUK TES PRODUK PAKET
         // function loadProduk(divisi = "", search = "") {
         //     $.ajax({
         //         url: base_url + "kasir/load_produk",
@@ -1382,23 +1398,28 @@
                 success: function(response) {
                     let produkHtml = "";
                     $.each(response, function(index, produk) {
+                        // Deteksi apakah produk ini adalah paket
+                        const isPaket = produk.pr_divisi_id == 4; // divisi 4 = Paket
+
                         produkHtml += `
-                <div class="col-md-4">
-                    <div class="card text-center p-2">
-                        <img src="${base_url}uploads/produk/${produk.foto}" class="img-fluid">
-                        <h5>${produk.nama_produk}</h5>
-                        <p>${formatRupiah(produk.harga_jual)}</p>
-                        <button class="btn btn-primary add-to-cart"
-                            data-id="${produk.id}"
-                            data-nama="${produk.nama_produk}"
-                            data-harga="${produk.harga_jual}">
-                            Tambah
-                        </button>
-                    </div>
-                </div>`;
+                            <div class="col-md-4">
+                                <div class="card text-center p-2">
+                                    <img src="${base_url}uploads/produk/${produk.foto}" class="img-fluid">
+                                    <h5>${produk.nama_produk}</h5>
+                                    <p>${formatRupiah(produk.harga_jual)}</p>
+                                    <button class="btn btn-primary add-to-cart"
+                                        data-id="${produk.id}"
+                                        data-nama="${produk.nama_produk}"
+                                        data-harga="${produk.harga_jual}"
+                                        ${isPaket ? 'data-is-paket="1" data-paket-id="' + produk.id + '"' : ''}>
+                                        Tambah
+                                    </button>
+                                </div>
+                            </div>`;
                     });
                     $("#produk-list").html(produkHtml);
                 }
+
             });
         }
 
@@ -1435,40 +1456,70 @@
 
         loadProduk();
 
+
+        // DI KOMEN UNTUK TES PRODUK PAKET
+        // $(document).on("click", ".add-to-cart", function() {
+        //     const id = $(this).data("id");
+        //     const nama = $(this).data("nama");
+        //     const harga = parseInt($(this).data("harga"));
+        //     const uid = Date.now(); // unique row id for extra reference
+
+        //     // ✅ Siapkan data extra kosong agar tidak error saat trigger input
+        //     if (!extraData[uid]) extraData[uid] = [];
+
+        //     const row = $(`
+        //     <tr data-id="${id}" data-uid="${uid}">
+        //         <td>${nama}</td>
+        //         <td>${formatRupiah(harga)}</td>
+        //         <td><input type="number" class="form-control qty" value="1" min="1" data-harga="${harga}"></td>
+        //         <td class="total"></td> <!-- Kosongkan dulu -->
+        //         <td>
+        //             <button class="btn btn-sm btn-secondary btn-extra" data-id="${id}" data-uid="${uid}">Tambah Extra</button>
+        //         </td>
+        //         <td><input type="text" class="form-control catatan" placeholder="Tambahkan catatan (opsional)"></td>
+        //         <td><button class="btn btn-danger btn-sm delete-item"><i class="fas fa-trash-alt"></i></button></td>
+        //     </tr>`);
+
+
         $(document).on("click", ".add-to-cart", function() {
             const id = $(this).data("id");
             const nama = $(this).data("nama");
             const harga = parseInt($(this).data("harga"));
-            const uid = Date.now(); // unique row id for extra reference
+            const isPaket = $(this).data("is-paket") || 0;
+            const paketId = $(this).data("paket-id") || null;
+            const uid = Date.now();
 
-            // ✅ Siapkan data extra kosong agar tidak error saat trigger input
             if (!extraData[uid]) extraData[uid] = [];
 
             const row = $(`
-            <tr data-id="${id}" data-uid="${uid}">
-                <td>${nama}</td>
-                <td>${formatRupiah(harga)}</td>
-                <td><input type="number" class="form-control qty" value="1" min="1" data-harga="${harga}"></td>
-                <td class="total"></td> <!-- Kosongkan dulu -->
-                <td>
-                    <button class="btn btn-sm btn-secondary btn-extra" data-id="${id}" data-uid="${uid}">Tambah Extra</button>
-                </td>
-                <td><input type="text" class="form-control catatan" placeholder="Tambahkan catatan (opsional)"></td>
-                <td><button class="btn btn-danger btn-sm delete-item"><i class="fas fa-trash-alt"></i></button></td>
-            </tr>`);
+        <tr data-id="${id}" data-uid="${uid}" data-is-paket="${isPaket}" data-paket-id="${paketId}">
+            <td>${nama}</td>
+            <td>${formatRupiah(harga)}</td>
+            <td><input type="number" class="form-control qty" value="1" min="1" data-harga="${harga}"></td>
+            <td class="total"></td>
+            <td>
+                <button class="btn btn-sm btn-primary btn-extra"
+                    data-id="${id}"
+                    data-uid="${uid}"
+                    ${isPaket ? 'disabled title="Extra tidak tersedia untuk produk paket"' : ''}>
+                    Tambah Extra
+                </button>
+
+            </td>
+            <td><input type="text" class="form-control catatan" placeholder="Tambahkan catatan (opsional)"></td>
+            <td><button class="btn btn-danger btn-sm delete-item"><i class="fas fa-trash-alt"></i></button></td>
+        </tr>`);
 
             const extraRow = $(`
-            <tr class="extra-row" data-parent="${uid}">
-                <td colspan="7">
-                    <ul class="list-extra pl-4 mb-0 text-muted small" data-uid="${uid}"></ul>
-                </td>
-            </tr>`);
+        <tr class="extra-row" data-parent="${uid}">
+            <td colspan="7">
+                <ul class="list-extra pl-4 mb-0 text-muted small" data-uid="${uid}"></ul>
+            </td>
+        </tr>`);
 
-            // Masukkan row utama dan row extra ke DOM
             $("#order-list").prepend(extraRow.hide().fadeIn());
             $("#order-list").prepend(row.hide().fadeIn());
 
-            // ✅ Panggil trigger input setelah masuk DOM agar total terhitung
             setTimeout(() => {
                 row.find(".qty").trigger("input");
             }, 0);
@@ -1588,6 +1639,20 @@
             }
         });
         // Fungsi bantu untuk mengambil data transaksi
+        // function getOrderData() {
+        //     return {
+        //         transaksi_id: $("#transaksi-id").val(),
+        //         jenis_order_id: $("#jenis-order").val(),
+        //         customer_type: $("#customer-type").val(),
+        //         customer_id: $("#customer-id").val(),
+        //         customer: $("#search-customer").val() || $("#walkin-customer-name").val(),
+        //         nomor_meja: $("#nomor-meja").val(),
+        //         // kode_voucher: $("#kode-voucher").val(),
+        //         // diskon: $("#nominal-diskon").text().replace("Rp ", "").replace(/\./g, ""),
+        //         items: []
+        //     };
+        // }
+
         function getOrderData() {
             return {
                 transaksi_id: $("#transaksi-id").val(),
@@ -1596,8 +1661,6 @@
                 customer_id: $("#customer-id").val(),
                 customer: $("#search-customer").val() || $("#walkin-customer-name").val(),
                 nomor_meja: $("#nomor-meja").val(),
-                // kode_voucher: $("#kode-voucher").val(),
-                // diskon: $("#nominal-diskon").text().replace("Rp ", "").replace(/\./g, ""),
                 items: []
             };
         }
@@ -1610,18 +1673,69 @@
             $("#order-list tr[data-id]").each(function() {
                 const uid = $(this).data("uid");
 
-                orderData.items.push({
-                    pr_produk_id: $(this).data("id"),
-                    detail_id: $(this).data("detail-id") ?? null,
-                    jumlah: $(this).find(".qty").val(),
-                    harga: $(this).find(".qty").data("harga"),
-                    subtotal: $(this).find(".total").text().replace("Rp ", "").replace(
-                        /\./g, ""),
-                    catatan: $(this).find(".catatan").val(),
-                    extra: extraData[$(this).data("uid")] || [],
-                    is_printed: $(this).data("printed") || 0
-                });
+                let isPaket = $(this).data("is-paket") == 1;
+                if (isPaket) {
+                    orderData.items.push({
+                        pr_produk_id: $(this).data("id"),
+                        jumlah: $(this).find(".qty").val(),
+                        harga: $(this).find(".qty").data("harga"),
+                        is_paket: 1,
+                        pr_produk_paket_id: $(this).data("paket-id"),
+                        paket_items: $(this).data("paket-items")
+                    });
+                } else {
+                    orderData.items.push({
+                        pr_produk_id: $(this).data("id"),
+                        detail_id: $(this).data("detail-id") ?? null,
+                        jumlah: $(this).find(".qty").val(),
+                        harga: $(this).find(".qty").data("harga"),
+                        subtotal: $(this).find(".total").text().replace("Rp ", "")
+                            .replace(/\./g, ""),
+                        catatan: $(this).find(".catatan").val(),
+                        extra: extraData[uid] || [],
+                        is_printed: $(this).data("printed") || 0,
+                        is_paket: 0
+                    });
+                }
             });
+
+            // $("#order-list tr[data-id]").each(function() {
+            //     const uid = $(this).data("uid");
+
+            //     orderData.items.push({
+            //         pr_produk_id: $(this).data("id"),
+            //         detail_id: $(this).data("detail-id") ?? null,
+            //         jumlah: $(this).find(".qty").val(),
+            //         harga: $(this).find(".qty").data("harga"),
+            //         subtotal: $(this).find(".total").text().replace("Rp ", "").replace(
+            //             /\./g, ""),
+            //         catatan: $(this).find(".catatan").val(),
+            //         extra: extraData[uid] || [],
+            //         is_printed: $(this).data("printed") || 0,
+            //         is_paket: $(this).data("is-paket") || 0,
+            //         pr_produk_paket_id: $(this).data("paket-id") || null
+            //     });
+            // });
+
+
+            //DI KOMEN UNTUK TES PRODUK PAKET
+
+            // $("#order-list tr[data-id]").each(function() {
+            //     const uid = $(this).data("uid");
+
+            //     orderData.items.push({
+            //         pr_produk_id: $(this).data("id"),
+            //         detail_id: $(this).data("detail-id") ?? null,
+            //         jumlah: $(this).find(".qty").val(),
+            //         harga: $(this).find(".qty").data("harga"),
+            //         subtotal: $(this).find(".total").text().replace("Rp ", "").replace(
+            //             /\./g, ""),
+            //         catatan: $(this).find(".catatan").val(),
+            //         extra: extraData[$(this).data("uid")] || [],
+            //         is_printed: $(this).data("printed") || 0
+            //     });
+            // });
+
 
             // 🔥 Deteksi tombol yang ditekan
             const isEdit = $(this).attr("id") === "simpan-perubahan";
@@ -1656,6 +1770,116 @@
                 }
             });
         });
+
+
+        // $("#simpan-transaksi, #simpan-perubahan").on("click", function() {
+        //     let orderData = getOrderData();
+        //     orderData.transaksi_id = $("#transaksi-id").val();
+
+        //     $("#order-list tr[data-id]").each(function() {
+        //         const $row = $(this);
+        //         const uid = $row.data("uid");
+        //         const isPaket = $row.data("is-paket") == 1;
+
+        //         if (isPaket) {
+        //             const paketItems = $row.data("paket-items");
+        //             if (!paketItems || paketItems.length == 0) return; // ⛔ skip jika kosong
+
+        //             orderData.items.push({
+        //                 is_paket: 1,
+        //                 pr_produk_id: $row.data("id"),
+        //                 pr_produk_paket_id: $row.data("paket-id"),
+        //                 harga: $row.find(".qty").data("harga"),
+        //                 jumlah: $row.find(".qty").val(),
+        //                 paket_items: paketItems
+        //             });
+        //         } else {
+        //             orderData.items.push({
+        //                 is_paket: 0,
+        //                 pr_produk_id: $row.data("id"),
+        //                 detail_id: $row.data("detail-id") ?? null,
+        //                 jumlah: $row.find(".qty").val(),
+        //                 harga: $row.find(".qty").data("harga"),
+        //                 catatan: $row.find(".catatan").val(),
+        //                 extra: extraData[uid] || [],
+        //                 is_printed: $row.data("printed") || 0
+        //             });
+        //         }
+        //     });
+
+        //     // $("#order-list tr[data-id]").each(function() {
+        //     //     const uid = $(this).data("uid");
+
+        //     //     orderData.items.push({
+        //     //         pr_produk_id: $(this).data("id"),
+        //     //         detail_id: $(this).data("detail-id") ?? null,
+        //     //         jumlah: $(this).find(".qty").val(),
+        //     //         harga: $(this).find(".qty").data("harga"),
+        //     //         subtotal: $(this).find(".total").text().replace("Rp ", "").replace(
+        //     //             /\./g, ""),
+        //     //         catatan: $(this).find(".catatan").val(),
+        //     //         extra: extraData[uid] || [],
+        //     //         is_printed: $(this).data("printed") || 0,
+        //     //         is_paket: $(this).data("is-paket") || 0,
+        //     //         pr_produk_paket_id: $(this).data("paket-id") || null
+        //     //     });
+        //     // });
+
+
+        //     //DI KOMEN UNTUK TES PRODUK PAKET
+
+        //     // $("#order-list tr[data-id]").each(function() {
+        //     //     const uid = $(this).data("uid");
+
+        //     //     orderData.items.push({
+        //     //         pr_produk_id: $(this).data("id"),
+        //     //         detail_id: $(this).data("detail-id") ?? null,
+        //     //         jumlah: $(this).find(".qty").val(),
+        //     //         harga: $(this).find(".qty").data("harga"),
+        //     //         subtotal: $(this).find(".total").text().replace("Rp ", "").replace(
+        //     //             /\./g, ""),
+        //     //         catatan: $(this).find(".catatan").val(),
+        //     //         extra: extraData[$(this).data("uid")] || [],
+        //     //         is_printed: $(this).data("printed") || 0
+        //     //     });
+        //     // });
+
+
+        //     // 🔥 Deteksi tombol yang ditekan
+        //     const isEdit = $(this).attr("id") === "simpan-perubahan";
+        //     const spinnerId = isEdit ? "#spinner-perubahan" : "#spinner-transaksi";
+        //     const textId = isEdit ? "#text-perubahan" : "#text-transaksi";
+
+        //     // 🔃 Tampilkan loading
+        //     $("#simpan-transaksi, #simpan-perubahan").prop("disabled", true);
+        //     $(spinnerId).removeClass("d-none");
+        //     $(textId).text("Menyimpan...");
+
+        //     $.ajax({
+        //         url: base_url + "kasir/simpan_transaksi",
+        //         type: "POST",
+        //         dataType: "json",
+        //         data: {
+        //             order_data: JSON.stringify(orderData)
+        //         },
+        //         success: function(response) {
+        //             // ✅ Kembalikan tampilan tombol
+        //             $("#simpan-transaksi, #simpan-perubahan").prop("disabled", false);
+        //             $(spinnerId).addClass("d-none");
+        //             $(textId).text(isEdit ? "Simpan Perubahan" : "Simpan Pesanan");
+
+        //             alert((response.status === "success" ? "✅" : "❌") + " " + response
+        //                 .message);
+        //             if (response.status === "success") {
+        //                 kosongkanKeranjang();
+        //                 resetFormToBaru();
+        //                 loadPendingOrders();
+        //             }
+        //         }
+        //     });
+        // });
+
+
 
         function resetFormToBaru() {
             $("#transaksi-id").val("");
@@ -1763,6 +1987,14 @@
             extraData = {};
         }
 
+
+        $("#kosongkan-keranjang").click(function() {
+            if (confirm("Yakin ingin mengosongkan keranjang?")) {
+                kosongkanKeranjang();
+            }
+        });
+
+
         function loadPendingOrders(keyword = "") {
             $.get(base_url + "kasir/load_pending_orders", {
                 search: keyword
@@ -1836,7 +2068,6 @@
                     $("#simpan-perubahan").show();
 
                     // 1. Group by detail_unit_id
-                    // 1. Group by detail_unit_id
                     const grouped = {};
 
                     // 🔥 Tambahkan filter hanya item aktif (status null atau kosong)
@@ -1845,6 +2076,9 @@
 
 
                     activeItems.forEach((item) => {
+                        if (item.pr_detail_transaksi_paket_id)
+                            return; // ❗ lewati isi paket
+
                         if (!grouped[item.detail_unit_id]) {
                             grouped[item.detail_unit_id] = {
                                 produk_id: item.pr_produk_id,
@@ -1865,6 +2099,67 @@
                             grouped[item.detail_unit_id].extras = item.extra;
                         }
                     });
+
+                    const paketMap = {};
+
+                    activeItems.forEach((item) => {
+                        const isPaketItem = item.pr_detail_transaksi_paket_id;
+
+                        if (isPaketItem) {
+                            if (!paketMap[isPaketItem]) {
+                                paketMap[isPaketItem] = {
+                                    nama_paket: item.nama_paket,
+                                    pr_produk_id: item.pr_produk_paket_id,
+                                    harga: item.harga_paket,
+                                    jumlah: item.jumlah_paket,
+                                    paket_items: []
+                                };
+                            }
+
+                            paketMap[isPaketItem].paket_items.push({
+                                pr_produk_id: item.pr_produk_id,
+                                nama_produk: item.nama_produk,
+                                jumlah: item.jumlah,
+                                extra: item.extra || []
+                            });
+                        }
+                    });
+
+
+                    // 🔁 Render produk paket terlebih dahulu
+                    Object.entries(paketMap).forEach(([paketId, paket], i) => {
+                        const uid = Date.now() + "_p_" + i;
+                        extraData[uid] = []; // Paket tidak bisa di-extra manual
+
+                        let row = `
+                        <tr data-id="${paket.pr_produk_id}" data-uid="${uid}" data-is-paket="1" 
+                            data-paket-id="${paketId}" data-paket-items='${JSON.stringify(paket.paket_items)}'>
+                            <td>${paket.nama_paket}</td>
+                            <td>${formatRupiah(paket.harga)}</td>
+                            <td>
+                                <input type="number" class="form-control qty" value="${paket.jumlah}" 
+                                    data-harga="${paket.harga}" readonly>
+                            </td>
+                            <td class="total">${formatRupiah(paket.jumlah * paket.harga)}</td>
+                            <td><button class="btn btn-secondary btn-sm" disabled>Extra Nonaktif</button></td>
+                            <td><input type="text" class="form-control" readonly value="Paket"></td>
+                            <td></td>
+                        </tr>
+                        <tr class="extra-row" data-parent="${uid}">
+                            <td colspan="7">
+                                <ul class="list-extra pl-4 mb-0 text-muted small">
+                                    ${
+                                        paket.paket_items.map(prod =>
+                                            `<li class="text-muted small">↳ ${prod.nama_produk} (${prod.jumlah})</li>`
+                                        ).join('')
+                                    }
+                                </ul>
+                            </td>
+                        </tr>
+                    `;
+                        $("#order-list").append(row);
+                    });
+
 
                     // 2. Render satu baris per grup
                     Object.entries(grouped).forEach(([unitId, item], i) => {
@@ -2047,62 +2342,156 @@
                 // ⬅️ Tambahkan ini di SINI
                 rinciOrderItems = res.items;
 
-                // Grouping berdasarkan detail_unit_id
+
+                let itemHtml = '';
                 const grouped = {};
 
                 res.items.forEach(item => {
-                    if (!grouped[item.detail_unit_id]) {
-                        grouped[item.detail_unit_id] = {
-                            nama_produk: item.nama_produk,
-                            harga: parseInt(item.harga),
+                    const groupKey = item.pr_detail_transaksi_paket_id || item
+                        .detail_unit_id || item.id;
+
+                    if (!grouped[groupKey]) {
+                        grouped[groupKey] = {
+                            nama_produk: item.nama_paket || item.nama_produk,
+                            harga: item.nama_paket ? parseInt(item.harga_paket) :
+                                parseInt(item.harga),
                             jumlah: 0,
                             extra: {},
+                            is_paket: !!item.nama_paket,
+                            items: []
                         };
                     }
-                    grouped[item.detail_unit_id].jumlah += parseInt(item.jumlah);
 
-                    // Gabungkan extra
+                    if (item.nama_paket) {
+                        // ✅ Hanya set jumlah sekali (ambil dari paket)
+                        if (grouped[groupKey].jumlah === 0) {
+                            grouped[groupKey].jumlah = parseInt(item.jumlah);
+                        }
+
+                        // ✅ Tambah produk isi paket
+                        grouped[groupKey].items.push({
+                            nama_produk: item.nama_produk,
+                            jumlah: item.jumlah
+                        });
+                    } else {
+                        grouped[groupKey].jumlah += parseInt(item.jumlah);
+                    }
+
+                    // ✅ Handle extra
                     if (item.extra?.length) {
                         item.extra.forEach(extra => {
-                            const key = extra.nama; // berdasarkan nama
-                            if (!grouped[item.detail_unit_id].extra[key]) {
-                                grouped[item.detail_unit_id].extra[key] = {
+                            const key = extra.nama;
+                            if (!grouped[groupKey].extra[key]) {
+                                grouped[groupKey].extra[key] = {
                                     nama: extra.nama,
                                     harga: parseInt(extra.harga),
                                     jumlah: 0
                                 };
                             }
-                            grouped[item.detail_unit_id].extra[key].jumlah +=
-                                parseInt(extra.jumlah);
+                            grouped[groupKey].extra[key].jumlah += parseInt(
+                                extra.jumlah);
                         });
                     }
                 });
 
 
-                let itemHtml = '';
+                // 🔁 RENDER KE TABEL
                 Object.values(grouped).forEach(item => {
                     itemHtml += `
-        <tr>
-            <td>${item.nama_produk}</td>
-            <td class="text-center">Rp ${item.harga.toLocaleString('id-ID')}</td>
-            <td class="text-center">${item.jumlah}</td>
-            <td class="text-right">Rp ${(item.harga * item.jumlah).toLocaleString('id-ID')}</td>
-        </tr>`;
+<tr>
+    <td>${item.nama_produk}</td>
+    <td class="text-center">Rp ${item.harga.toLocaleString('id-ID')}</td>
+    <td class="text-center">${item.jumlah}</td>
+    <td class="text-right">Rp ${(item.harga * item.jumlah).toLocaleString('id-ID')}</td>
+</tr>`;
 
-                    // Loop extra
+                    // Detail isi paket
+                    if (item.is_paket && item.items) {
+                        item.items.forEach(sub => {
+                            itemHtml += `
+<tr class="text-muted small">
+    <td class="pl-4">↳ ${sub.nama_produk}</td>
+    <td class="text-center">Rp 0</td>
+    <td class="text-center">${sub.jumlah}</td>
+    <td class="text-right">Rp 0</td>
+</tr>`;
+                        });
+                    }
+
+                    // Extra
                     if (item.extra) {
                         Object.values(item.extra).forEach(extra => {
                             itemHtml += `
-                <tr class="text-muted small">
-                    <td class="pl-4">➕ ${extra.nama}</td>
-                    <td class="text-center">Rp ${extra.harga.toLocaleString('id-ID')}</td>
-                    <td class="text-center">${extra.jumlah}</td>
-                    <td class="text-right">Rp ${(extra.harga * extra.jumlah).toLocaleString('id-ID')}</td>
-                </tr>`;
+<tr class="text-muted small">
+    <td class="pl-4">➕ ${extra.nama}</td>
+    <td class="text-center">Rp ${extra.harga.toLocaleString('id-ID')}</td>
+    <td class="text-center">${extra.jumlah}</td>
+    <td class="text-right">Rp ${(extra.harga * extra.jumlah).toLocaleString('id-ID')}</td>
+</tr>`;
                         });
                     }
                 });
+
                 $("#rinci-item-list").html(itemHtml);
+
+
+
+                // // Grouping berdasarkan detail_unit_id
+                // const grouped = {};
+
+                // res.items.forEach(item => {
+                //     if (!grouped[item.detail_unit_id]) {
+                //         grouped[item.detail_unit_id] = {
+                //             nama_produk: item.nama_produk,
+                //             harga: parseInt(item.harga),
+                //             jumlah: 0,
+                //             extra: {},
+                //         };
+                //     }
+                //     grouped[item.detail_unit_id].jumlah += parseInt(item.jumlah);
+
+                //     // Gabungkan extra
+                //     if (item.extra?.length) {
+                //         item.extra.forEach(extra => {
+                //             const key = extra.nama; // berdasarkan nama
+                //             if (!grouped[item.detail_unit_id].extra[key]) {
+                //                 grouped[item.detail_unit_id].extra[key] = {
+                //                     nama: extra.nama,
+                //                     harga: parseInt(extra.harga),
+                //                     jumlah: 0
+                //                 };
+                //             }
+                //             grouped[item.detail_unit_id].extra[key].jumlah +=
+                //                 parseInt(extra.jumlah);
+                //         });
+                //     }
+                // });
+
+
+                // let itemHtml = '';
+                // Object.values(grouped).forEach(item => {
+                //     itemHtml += `
+                //     <tr>
+                //         <td>${item.nama_produk}</td>
+                //         <td class="text-center">Rp ${item.harga.toLocaleString('id-ID')}</td>
+                //         <td class="text-center">${item.jumlah}</td>
+                //         <td class="text-right">Rp ${(item.harga * item.jumlah).toLocaleString('id-ID')}</td>
+                //     </tr>`;
+
+                //     // Loop extra
+                //     if (item.extra) {
+                //         Object.values(item.extra).forEach(extra => {
+                //             itemHtml += `
+                // <tr class="text-muted small">
+                //     <td class="pl-4">➕ ${extra.nama}</td>
+                //     <td class="text-center">Rp ${extra.harga.toLocaleString('id-ID')}</td>
+                //     <td class="text-center">${extra.jumlah}</td>
+                //     <td class="text-right">Rp ${(extra.harga * extra.jumlah).toLocaleString('id-ID')}</td>
+                // </tr>`;
+                //         });
+                //     }
+                // });
+                // $("#rinci-item-list").html(itemHtml);
 
 
                 // pastikan total bayar tampil benar juga

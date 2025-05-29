@@ -87,6 +87,34 @@ public function kirim_data($table, $data, $log_enabled = true) {
         return json_decode($response, true);
     }
     
+    public function insert_log_sync($table, $data, $success = true, $error_msg = null)
+    {
+        if (isset($data[0]) && is_array($data[0])) {
+            foreach ($data as $row) {
+                $this->db->insert('pr_sync_log', [
+                    'table_name' => $table,
+                    'id_table' => $row['id'] ?? null,
+                    'data' => json_encode($row),
+                    'status' => $success ? 'SENT' : 'FAILED',
+                    'error_msg' => $success ? null : $error_msg,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'sent_at' => $success ? date('Y-m-d H:i:s') : null
+                ]);
+            }
+        } else {
+            $this->db->insert('pr_sync_log', [
+                'table_name' => $table,
+                'id_table' => $data['id'] ?? null,
+                'data' => json_encode($data),
+                'status' => $success ? 'SENT' : 'FAILED',
+                'error_msg' => $success ? null : $error_msg,
+                'created_at' => date('Y-m-d H:i:s'),
+                'sent_at' => $success ? date('Y-m-d H:i:s') : null
+            ]);
+        }
+    }
+    
+
 public function ambil_data($table) {
     $url = $this->api_url . 'ambil?table=' . urlencode($table);
     $response = @file_get_contents($url);
