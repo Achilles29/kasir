@@ -853,130 +853,9 @@ public function cetak_pesanan_baru() {
     ]);
 }
 
-// private function cetak_pesanan_baru_internal($transaksi_id)
-// {
-//     $this->load->model('Setting_model');
-//     $transaksi = $this->Kasir_model->get_transaksi_by_id($transaksi_id);
-//     if (!$transaksi) {
-//         log_message('error', "Cetak pesanan baru: Transaksi ID $transaksi_id tidak ditemukan.");
-//         return;
-//     }
-
-//     $struk_data = $this->Setting_model->get_data_struk();
-//     $printers = $this->Printer_model->get_all();
-
-//     $produk = $this->Kasir_model->get_detail_transaksi($transaksi_id);
-    
-
-//     $produk_belum_print = array_filter($produk, function($p) {
-//         return (empty($p['is_printed']) && (is_null($p['status']) || strtolower($p['status']) == 'null'));
-//     });
-
-//     if (empty($produk_belum_print)) {
-//         log_message('info', "ℹ️ Tidak ada produk baru untuk dicetak.");
-//         return;
-//     }
-
-//     // ✅ Group produk
-//     $produk_grouped = $this->Kasir_model->group_items($produk_belum_print);
-
-//     // Ambil extra dari database
-//     $extra_grouped = $this->Kasir_model->get_detail_extra_grouped($transaksi_id);
-
-//     // Mapping ulang extra ke produk_grouped
-//     foreach ($produk_grouped as &$p) {
-//         $p['extra'] = [];
-
-//         foreach ($extra_grouped as $ex) {
-//             if (isset($p['detail_unit_id']) && $ex['detail_unit_id'] == $p['detail_unit_id']) {
-//                 $p['extra'][] = [
-//                     'id' => $ex['pr_produk_extra_id'],
-//                     'harga' => $ex['harga'],
-//                     'satuan' => $ex['satuan'],
-//                     'jumlah' => $ex['jumlah_extra'],
-//                     'nama_extra' => $ex['nama_extra'] ?? 'Extra' // <-- tambahkan ini
-//                 ];
-//             }
-//         }
-//     }
-
-//     unset($p); // penting!
-
-
-    
-
-//     // ✅ Cetak ke printer masing-masing
-//     foreach ($printers as $printer) {
-//         $lokasi = strtoupper($printer['lokasi_printer']);
-
-//         if (!in_array($lokasi, ['BAR', 'KITCHEN', 'CHECKER'])) {
-//             continue;
-//         }
-
-//         $tampilan = $this->Setting_model->get_tampilan_struk($printer['id']);
-
-//         $produk_cetak = [];
-
-//         foreach ($produk_grouped as $item) {
-//             $produk = $this->db
-//                 ->select('k.pr_divisi_id')
-//                 ->from('pr_produk p')
-//                 ->join('pr_kategori k', 'p.kategori_id = k.id', 'left')
-//                 ->where('p.id', $item['pr_produk_id'])
-//                 ->get()
-//                 ->row_array();
-
-//             if ($lokasi == 'CHECKER' || empty($printer['divisi']) || ($produk && $produk['pr_divisi_id'] == $printer['divisi'])) {
-//                 $produk_cetak[] = $item;
-//             }
-//         }
-
-//         if (empty($produk_cetak)) {
-//             log_message('info', "ℹ️ Tidak ada produk baru untuk printer $lokasi, dilewati.");
-//             continue;
-//         }
-
-//         $transaksi_cetak = $transaksi;
-//         $transaksi_cetak['items'] = $produk_cetak;
-
-//         $struk = $this->Kasir_model->generate_struk_full_by_setting($transaksi_cetak, $printer, $struk_data, $tampilan);
-
-//         if (trim($struk) === '' || strlen(trim($struk)) < 5) {
-//             log_message('info', "ℹ️ Struk kosong untuk printer $lokasi, dilewati.");
-//             continue;
-//         }
-
-//         $res = $this->send_to_python_service($lokasi, $struk);
-
-//         if ($res === true) {
-//             log_message('info', "✅ Pesanan baru dicetak ke $lokasi.");
-//         } else {
-//             log_message('error', "❌ Gagal cetak pesanan baru ke $lokasi: " . print_r($res, true));
-//         }
-//     }
-
-//     // ✅ Update is_printed
-//     $this->db->where('pr_transaksi_id', $transaksi_id);
-//     $this->db->where('(is_printed = 0 OR is_printed IS NULL)', null, false);
-//     $this->db->update('pr_detail_transaksi', ['is_printed' => 1]);
-//     // 🔄 Kirim data is_printed ke VPS
-//     $this->load->model('Api_model');
-//     $updated_detail = $this->db
-//         ->select('id, is_printed')
-//         ->where('pr_transaksi_id', $transaksi_id)
-//         ->get('pr_detail_transaksi')
-//         ->result_array();
-
-//     if (!empty($updated_detail)) {
-//         $this->Api_model->kirim_data('pr_detail_transaksi', $updated_detail);
-//     }
-// }
-
-
 private function cetak_pesanan_baru_internal($transaksi_id)
 {
-    $this->load->model(['Setting_model', 'Api_model']);
-
+    $this->load->model('Setting_model');
     $transaksi = $this->Kasir_model->get_transaksi_by_id($transaksi_id);
     if (!$transaksi) {
         log_message('error', "Cetak pesanan baru: Transaksi ID $transaksi_id tidak ditemukan.");
@@ -987,6 +866,8 @@ private function cetak_pesanan_baru_internal($transaksi_id)
     $printers = $this->Printer_model->get_all();
 
     $produk = $this->Kasir_model->get_detail_transaksi($transaksi_id);
+    
+
     $produk_belum_print = array_filter($produk, function($p) {
         return (empty($p['is_printed']) && (is_null($p['status']) || strtolower($p['status']) == 'null'));
     });
@@ -1005,6 +886,7 @@ private function cetak_pesanan_baru_internal($transaksi_id)
     // Mapping ulang extra ke produk_grouped
     foreach ($produk_grouped as &$p) {
         $p['extra'] = [];
+
         foreach ($extra_grouped as $ex) {
             if (isset($p['detail_unit_id']) && $ex['detail_unit_id'] == $p['detail_unit_id']) {
                 $p['extra'][] = [
@@ -1012,20 +894,27 @@ private function cetak_pesanan_baru_internal($transaksi_id)
                     'harga' => $ex['harga'],
                     'satuan' => $ex['satuan'],
                     'jumlah' => $ex['jumlah_extra'],
-                    'nama_extra' => $ex['nama_extra'] ?? 'Extra'
+                    'nama_extra' => $ex['nama_extra'] ?? 'Extra' // <-- tambahkan ini
                 ];
             }
         }
     }
-    unset($p);
 
-    $paket_ids_tercetak = []; // Untuk update terakhir (union semua printer)
+    unset($p); // penting!
 
+
+    
+
+    // ✅ Cetak ke printer masing-masing
     foreach ($printers as $printer) {
         $lokasi = strtoupper($printer['lokasi_printer']);
-        if (!in_array($lokasi, ['BAR', 'KITCHEN', 'CHECKER'])) continue;
+
+        if (!in_array($lokasi, ['BAR', 'KITCHEN', 'CHECKER'])) {
+            continue;
+        }
 
         $tampilan = $this->Setting_model->get_tampilan_struk($printer['id']);
+
         $produk_cetak = [];
 
         foreach ($produk_grouped as $item) {
@@ -1050,11 +939,7 @@ private function cetak_pesanan_baru_internal($transaksi_id)
         $transaksi_cetak = $transaksi;
         $transaksi_cetak['items'] = $produk_cetak;
 
-        // Reset per printer
-        $paket_printed = [];
-        $paket_ids = [];
-
-        $struk = $this->Kasir_model->generate_struk_full_by_setting($transaksi_cetak, $printer, $struk_data, $tampilan, $paket_printed, $paket_ids);
+        $struk = $this->Kasir_model->generate_struk_full_by_setting($transaksi_cetak, $printer, $struk_data, $tampilan);
 
         if (trim($struk) === '' || strlen(trim($struk)) < 5) {
             log_message('info', "ℹ️ Struk kosong untuk printer $lokasi, dilewati.");
@@ -1068,30 +953,145 @@ private function cetak_pesanan_baru_internal($transaksi_id)
         } else {
             log_message('error', "❌ Gagal cetak pesanan baru ke $lokasi: " . print_r($res, true));
         }
-
-        $paket_ids_tercetak = array_merge($paket_ids_tercetak, $paket_ids);
     }
 
-    // ✅ Update is_printed produk reguler
+    // ✅ Update is_printed
     $this->db->where('pr_transaksi_id', $transaksi_id);
     $this->db->where('(is_printed = 0 OR is_printed IS NULL)', null, false);
     $this->db->update('pr_detail_transaksi', ['is_printed' => 1]);
+    // 🔄 Kirim data is_printed ke VPS
+    $this->load->model('Api_model');
+    $updated_detail = $this->db
+        ->select('id, is_printed')
+        ->where('pr_transaksi_id', $transaksi_id)
+        ->get('pr_detail_transaksi')
+        ->result_array();
 
-    // 🔄 Sync pr_detail_transaksi
-    $updated_detail = $this->db->select('id, is_printed')->where('pr_transaksi_id', $transaksi_id)->get('pr_detail_transaksi')->result_array();
     if (!empty($updated_detail)) {
         $this->Api_model->kirim_data('pr_detail_transaksi', $updated_detail);
     }
-
-    // ✅ Update is_printed paket
-    $paket_ids_tercetak = array_unique($paket_ids_tercetak);
-    if (!empty($paket_ids_tercetak)) {
-        $this->db->where_in('id', $paket_ids_tercetak)->update('pr_detail_transaksi_paket', ['is_printed' => 1]);
-        $this->Api_model->kirim_data('pr_detail_transaksi_paket', array_map(function($id) {
-            return ['id' => $id, 'is_printed' => 1];
-        }, $paket_ids_tercetak));
-    }
 }
+
+
+// private function cetak_pesanan_baru_internal($transaksi_id)
+// {
+//     $this->load->model(['Setting_model', 'Api_model']);
+
+//     $transaksi = $this->Kasir_model->get_transaksi_by_id($transaksi_id);
+//     if (!$transaksi) {
+//         log_message('error', "Cetak pesanan baru: Transaksi ID $transaksi_id tidak ditemukan.");
+//         return;
+//     }
+
+//     $struk_data = $this->Setting_model->get_data_struk();
+//     $printers = $this->Printer_model->get_all();
+
+//     $produk = $this->Kasir_model->get_detail_transaksi($transaksi_id);
+//     $produk_belum_print = array_filter($produk, function($p) {
+//         return (empty($p['is_printed']) && (is_null($p['status']) || strtolower($p['status']) == 'null'));
+//     });
+
+//     if (empty($produk_belum_print)) {
+//         log_message('info', "ℹ️ Tidak ada produk baru untuk dicetak.");
+//         return;
+//     }
+
+//     // ✅ Group produk
+//     $produk_grouped = $this->Kasir_model->group_items($produk_belum_print);
+
+//     // Ambil extra dari database
+//     $extra_grouped = $this->Kasir_model->get_detail_extra_grouped($transaksi_id);
+
+//     // Mapping ulang extra ke produk_grouped
+//     foreach ($produk_grouped as &$p) {
+//         $p['extra'] = [];
+//         foreach ($extra_grouped as $ex) {
+//             if (isset($p['detail_unit_id']) && $ex['detail_unit_id'] == $p['detail_unit_id']) {
+//                 $p['extra'][] = [
+//                     'id' => $ex['pr_produk_extra_id'],
+//                     'harga' => $ex['harga'],
+//                     'satuan' => $ex['satuan'],
+//                     'jumlah' => $ex['jumlah_extra'],
+//                     'nama_extra' => $ex['nama_extra'] ?? 'Extra'
+//                 ];
+//             }
+//         }
+//     }
+//     unset($p);
+
+//     $paket_ids_tercetak = []; // Untuk update terakhir (union semua printer)
+
+//     foreach ($printers as $printer) {
+//         $lokasi = strtoupper($printer['lokasi_printer']);
+//         if (!in_array($lokasi, ['BAR', 'KITCHEN', 'CHECKER'])) continue;
+
+//         $tampilan = $this->Setting_model->get_tampilan_struk($printer['id']);
+//         $produk_cetak = [];
+
+//         foreach ($produk_grouped as $item) {
+//             $produk = $this->db
+//                 ->select('k.pr_divisi_id')
+//                 ->from('pr_produk p')
+//                 ->join('pr_kategori k', 'p.kategori_id = k.id', 'left')
+//                 ->where('p.id', $item['pr_produk_id'])
+//                 ->get()
+//                 ->row_array();
+
+//             if ($lokasi == 'CHECKER' || empty($printer['divisi']) || ($produk && $produk['pr_divisi_id'] == $printer['divisi'])) {
+//                 $produk_cetak[] = $item;
+//             }
+//         }
+
+//         if (empty($produk_cetak)) {
+//             log_message('info', "ℹ️ Tidak ada produk baru untuk printer $lokasi, dilewati.");
+//             continue;
+//         }
+
+//         $transaksi_cetak = $transaksi;
+//         $transaksi_cetak['items'] = $produk_cetak;
+
+//         // Reset per printer
+//         $paket_printed = [];
+//         $paket_ids = [];
+
+//         $struk = $this->Kasir_model->generate_struk_full_by_setting($transaksi_cetak, $printer, $struk_data, $tampilan, $paket_printed, $paket_ids);
+
+//         if (trim($struk) === '' || strlen(trim($struk)) < 5) {
+//             log_message('info', "ℹ️ Struk kosong untuk printer $lokasi, dilewati.");
+//             continue;
+//         }
+
+//         $res = $this->send_to_python_service($lokasi, $struk);
+
+//         if ($res === true) {
+//             log_message('info', "✅ Pesanan baru dicetak ke $lokasi.");
+//         } else {
+//             log_message('error', "❌ Gagal cetak pesanan baru ke $lokasi: " . print_r($res, true));
+//         }
+
+//         $paket_ids_tercetak = array_merge($paket_ids_tercetak, $paket_ids);
+//     }
+
+//     // ✅ Update is_printed produk reguler
+//     $this->db->where('pr_transaksi_id', $transaksi_id);
+//     $this->db->where('(is_printed = 0 OR is_printed IS NULL)', null, false);
+//     $this->db->update('pr_detail_transaksi', ['is_printed' => 1]);
+
+//     // 🔄 Sync pr_detail_transaksi
+//     $updated_detail = $this->db->select('id, is_printed')->where('pr_transaksi_id', $transaksi_id)->get('pr_detail_transaksi')->result_array();
+//     if (!empty($updated_detail)) {
+//         $this->Api_model->kirim_data('pr_detail_transaksi', $updated_detail);
+//     }
+
+//     // ✅ Update is_printed paket
+//     $paket_ids_tercetak = array_unique($paket_ids_tercetak);
+//     if (!empty($paket_ids_tercetak)) {
+//         $this->db->where_in('id', $paket_ids_tercetak)->update('pr_detail_transaksi_paket', ['is_printed' => 1]);
+//         $this->Api_model->kirim_data('pr_detail_transaksi_paket', array_map(function($id) {
+//             return ['id' => $id, 'is_printed' => 1];
+//         }, $paket_ids_tercetak));
+//     }
+// }
 
 
 
