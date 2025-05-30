@@ -1986,6 +1986,8 @@
             // $("#voucher-message").text("");
             $("#customer-id").val("");
             extraData = {};
+            // Tambahkan ini untuk refresh halaman
+            location.reload();
         }
 
 

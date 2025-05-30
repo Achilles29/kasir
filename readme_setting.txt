@@ -33,6 +33,8 @@ Tambahkan sinkronisasi terjadwal?
 sync_log berkala:
 http://localhost/kasir/retry_sync
 
+http://localhost/kasir/sync_data/ambil_semua
+
 buat di cron
 */5 * * * * /usr/bin/php /path/to/index.php retry_sync
 
@@ -46,6 +48,9 @@ cron status stamp di local dan vps
 
 http://localhost/kasir/stamp/kadaluarsa_stamp => belum berfungsi
 
+
 https://dashboard.namuacoffee.com/stamp/kadaluarsa_stamp => online
 
 https://dashboard.namuacoffee.com/voucher/voucher_nonaktif
+
+https://dashboard.namuacoffee.com/customer/update_poin_status

@@ -96,42 +96,6 @@ buatkan laporan :
 
 format database yang ada dan digunakan adalah:
 
-pr_transaksi : 	id 	customer_id 	tanggal 	no_transaksi 	waktu_order 	waktu_bayar 	jenis_order_id 	customer 	nomor_meja 	total_penjualan 	kasir_order 	kasir_bayar 	kode_voucher 	diskon 	total_pembayaran 	sisa_pembayaran 	status_pembayaran 	created_at 	updated_at
-
-pr_detail_transaksi :	id 	pr_transaksi_id 	pr_produk_id 	jumlah 	harga 	subtotal 	catatan 	is_printed 	status 	created_at 	updated_at 
-
-pr_pembayaran (metode pembayaran ):  id 	transaksi_id 	metode_id 	jumlah 	waktu_bayar 	keterangan 	kasir_id
-
-pr_metode_pembayaran :	id 	metode_pembayaran 	bl_rekening_id 	created_at 	updated_at
-
-pr_produk :	id 	nama_produk 	sku 	deskripsi 	kategori_id 	satuan 	hpp 	harga_jual 	monitor_persediaan 	tampil 	foto 	created_at 	updated_at
-
-pr_kategori :	id 	nama_kategori 	created_at 	updated_at
-
-pr_costumer : id 	nama 	kode_pelanggan 	jenis_kelamin 	tanggal_lahir 	alamat 	telepon 	email 	foto 	created_at 	updated_at 	level 	
-
-pr_costumer_poin : 	id 	customer_id 	transaksi_id 	jumlah_poin 	jenis 	sumber 	tanggal_kedaluwarsa 	status 	created_at 	updated_at
-
-pr_void:	id 	pr_transaksi_id 	no_transaksi 	detail_transaksi_id 	pr_produk_id 	nama_produk 	jumlah 	harga 	subtotal 	catatan 	alasan 	void_by 	waktu 	created_at 	updated_at 	
-
-pr_refund:	id 	pr_transaksi_id 	pr_detail_transaksi_id 	no_transaksi 	nama_produk 	jumlah 	harga 	subtotal 	catatan 	alasan 	refund_by 	waktu_refund 	created_at 	updated_at 	
-
-pr_divisi : id 	nama_divisi 	urutan_tampilan 	created_at 	updated_at
-
-
-
-bl_db_belanja:	id 	nama_barang 	nama_bahan_baku 	id_kategori 	id_tipe_produksi 	is_gudang 	tanggal_update 	created_at 	updated_at 	
-
-bl_db_purchase:	id 	bl_db_belanja_id 	merk 	keterangan 	ukuran 	unit 	pack 	harga_satuan 	hpp 	tanggal 	created_at 	updated_at 	
-
-bl_jenis_pengeluaran:	id 	nama_jenis_pengeluaran 	created_at 	updated_at 	
-
-bl_divisi: id 	nama_divisi 	created_at 	updated_at
-bl_kategori: id 	nama_kategori 	created_at 	updated_at 	
-bl_purchase: id 	tanggal 	jenis_pengeluaran 	bl_db_belanja_id 	bl_db_purchase_id 	kuantitas 	total_unit 	total_harga 	hpp 	status 	pengusul 	metode_pembayaran 	created_at 	updated_at 	
-bl_store_request: 	id 	tanggal 	jenis_pengeluaran 	bl_db_purchase_id 	kuantitas 	created_at 	updated_at
-buatkan halamannya secara jelas. termukan relasi antar tabelnya. jika ada yang kurang jelas tanyakan
-
 
 sekarang, saya ingin membuat halaman resep produk, yang nantinya akan dihubungkan dengan penjualan sehingga dapat menghitung sisa stok.
 ketentuan resepn n dari produk saya adalah:
@@ -172,82 +136,6 @@ pr_void : 	id 	pr_transaksi_id 	no_transaksi 	detail_transaksi_id 	pr_produk_id 
 saya void pr_detail_extra id 4, detail_transaksi_id 5, pr_produk_extra_id 2
 
 yang terinput di pr_void : detail_transaksi_id 4 (seharusnya 5), pr_produk_id 50 (seharusnya 51 sesuai detail_transaksi_id), detail_extra_id 2 (seharusnya 4), produk_extra_id 1 (seharusnya 2)
-
-
-SET FOREIGN_KEY_CHECKS = 0;
-TRUNCATE TABLE pr_detail_extra;
-TRUNCATE TABLE pr_detail_transaksi;
-TRUNCATE TABLE pr_transaksi;
-TRUNCATE TABLE pr_refund;
-TRUNCATE TABLE pr_void;
-TRUNCATE TABLE pr_kasir_shift;
-TRUNCATE TABLE pr_customer_poin;
-TRUNCATE TABLE pr_log_voucher;
-TRUNCATE TABLE pr_pembayaran;
-TRUNCATE TABLE pr_poin;
-TRUNCATE TABLE pr_voucher;
-
-SET FOREIGN_KEY_CHECKS = 1;
-
-SET FOREIGN_KEY_CHECKS = 0;
-
--- Hapus dari tabel paling bawah relasinya (anak)
-DELETE FROM pr_detail_extra;
-DELETE FROM pr_detail_transaksi;
-DELETE FROM pr_pembayaran;
-DELETE FROM pr_refund;
-DELETE FROM pr_void;
-DELETE FROM pr_kasir_shift;
-DELETE FROM pr_customer_poin;
-DELETE FROM pr_log_voucher;
-DELETE FROM pr_poin;
-DELETE FROM pr_voucher;
-
--- Baru induk
-DELETE FROM pr_transaksi;
-
--- Reset AUTO_INCREMENT semuanya
-ALTER TABLE pr_detail_extra AUTO_INCREMENT = 1;
-ALTER TABLE pr_detail_transaksi AUTO_INCREMENT = 1;
-ALTER TABLE pr_pembayaran AUTO_INCREMENT = 1;
-ALTER TABLE pr_refund AUTO_INCREMENT = 1;
-ALTER TABLE pr_void AUTO_INCREMENT = 1;
-ALTER TABLE pr_kasir_shift AUTO_INCREMENT = 1;
-ALTER TABLE pr_customer_poin AUTO_INCREMENT = 1;
-ALTER TABLE pr_log_voucher AUTO_INCREMENT = 1;
-ALTER TABLE pr_poin AUTO_INCREMENT = 1;
-ALTER TABLE pr_voucher AUTO_INCREMENT = 1;
-ALTER TABLE pr_transaksi AUTO_INCREMENT = 1;
-
-SET FOREIGN_KEY_CHECKS = 1;
-
-
-
-SET FOREIGN_KEY_CHECKS = 0;
-
--- Hapus dari tabel paling bawah relasinya (anak)
-DELETE FROM pr_detail_extra;
-DELETE FROM pr_detail_transaksi;
-DELETE FROM pr_detail_transaksi_paket;
-DELETE FROM pr_pembayaran;
-DELETE FROM pr_refund;
-DELETE FROM pr_void;
-
--- Baru induk
-DELETE FROM pr_transaksi;
-
--- Reset AUTO_INCREMENT semuanya
-ALTER TABLE pr_detail_extra AUTO_INCREMENT = 1;
-ALTER TABLE pr_detail_transaksi AUTO_INCREMENT = 1;
-ALTER TABLE pr_detail_transaksi_paket AUTO_INCREMENT = 1;
-ALTER TABLE pr_pembayaran AUTO_INCREMENT = 1;
-ALTER TABLE pr_refund AUTO_INCREMENT = 1;
-ALTER TABLE pr_void AUTO_INCREMENT = 1;
-ALTER TABLE pr_transaksi AUTO_INCREMENT = 1;
-
-SET FOREIGN_KEY_CHECKS = 1;
-
-
 
 
 
@@ -329,12 +217,13 @@ v halaman produk paket
 insert vps
 v void paket
 refund paket
-laporan
+laporan paket
 kosongkan keranjang lalu refresh
 revisi cetak faktur dan tanda terima untuk paket
 
 void paket belum berdiri sendiri sendiri
 cetak void paket
+
 
 
 halaman pending order => nomor meja, total penjualan bukan total bayar, tanggal

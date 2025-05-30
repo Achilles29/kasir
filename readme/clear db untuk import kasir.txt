@@ -53,3 +53,35 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 
 mysqldump -h 89.116.171.157 -u root -p --no-data namua > namua_struktur.sql
+
+
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- Hapus dari tabel paling bawah relasinya (anak)
+DELETE FROM aset_data;
+DELETE FROM aset_divisi;
+DELETE FROM aset_kategori;
+DELETE FROM aset_lampiran;
+DELETE FROM aset_penghapusan;
+DELETE FROM aset_riwayat;
+
+DELETE FROM pr_voucher;
+
+-- Baru induk
+DELETE FROM pr_transaksi;
+
+-- Reset AUTO_INCREMENT semuanya
+
+ALTER TABLE aset_data AUTO_INCREMENT = 1;
+ALTER TABLE aset_divisi AUTO_INCREMENT = 1;
+ALTER TABLE aset_kategori AUTO_INCREMENT = 1;
+ALTER TABLE aset_lampiran AUTO_INCREMENT = 1;
+ALTER TABLE aset_penghapusan AUTO_INCREMENT = 1;
+ALTER TABLE aset_riwayat AUTO_INCREMENT = 1;
+
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+
+mysqldump -h 89.116.171.157 -u root -p --no-data namua > namua_struktur.sql
