@@ -81,6 +81,9 @@ class Sync_data extends CI_Controller {
     public function ambil_semua() {
         $tables = [
 
+            'abs_divisi',
+            'abs_jabatan',
+            'abs_rekening_bank',
             'abs_pegawai',
             'pr_customer',
             'pr_divisi',
