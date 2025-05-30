@@ -46,6 +46,106 @@ class Kasir_model extends CI_Model {
 //     return $transaksi_id;
 // }
 
+// public function simpan_transaksi($data_transaksi, $items)
+// {
+//     $this->db->trans_begin();
+
+//     $this->db->insert('pr_transaksi', $data_transaksi);
+//     $transaksi_id = $this->db->insert_id();
+//     if (!$transaksi_id) {
+//         $this->db->trans_rollback();
+//         return false;
+//     }
+
+//     foreach ($items as $item) {
+//         if (!empty($item['is_paket']) && $item['is_paket'] == 1) {
+//             $detail_unit_paket_id = uniqid();
+
+//             // 1. Simpan ke tabel paket
+//             $this->db->insert('pr_detail_transaksi_paket', [
+//                 'pr_transaksi_id'       => $transaksi_id,
+//                 'pr_produk_paket_id'    => $item['pr_produk_paket_id'],
+//                 'detail_unit_paket_id'  => $detail_unit_paket_id,
+//                 'harga'                 => $item['harga'],
+//                 'jumlah'                => $item['jumlah'],
+//                 'catatan'               => $item['catatan'] ?? null,
+//                 'is_printed'            => 0,
+//                 'created_at'            => date('Y-m-d H:i:s'),
+//                 'updated_at'            => date('Y-m-d H:i:s')
+//             ]);
+//             $paket_id = $this->db->insert_id();
+
+//             // 2. Ambil isi produk dari paket
+//             $produk_paket = $this->db
+//                 ->get_where('pr_produk_paket_detail', ['pr_produk_paket_id' => $item['pr_produk_id']])
+//                 ->result();
+
+//             // 3. Ambil nama paket
+//             $nama_paket = $this->db->select('nama_paket')
+//                 ->where('id', $item['pr_produk_id'])
+//                 ->get('pr_produk_paket')->row('nama_paket');
+
+//             // 4. Simpan ke detail transaksi
+//             foreach ($produk_paket as $paket_item) {
+//                 $detail_unit_id = uniqid(); // Tetap satu grup
+            
+//                 $total_jumlah = $paket_item->qty * $item['jumlah'];
+            
+//                 $this->db->insert('pr_detail_transaksi', [
+//                     'pr_transaksi_id'               => $transaksi_id,
+//                     'pr_produk_id'                  => $paket_item->pr_produk_id,
+//                     'jumlah'                        => $total_jumlah, // ✅ dikalikan jumlah paket
+//                     'harga'                         => 0,
+//                     'catatan'                       => 'Paket: ' . $nama_paket,
+//                     'status'                        => null,
+//                     'is_printed'                    => 0,
+//                     'detail_unit_id'                => $detail_unit_id,
+//                     'pr_detail_transaksi_paket_id'  => $paket_id,
+//                     'created_at'                    => date('Y-m-d H:i:s'),
+//                 ]);
+            
+//                 $detail_id = $this->db->insert_id();
+            
+//                 // Simpan extra
+//                 if (!empty($item['paket_items'])) {
+//                     foreach ($item['paket_items'] as $paket_input) {
+//                         if ($paket_input['pr_produk_id'] == $paket_item->pr_produk_id && !empty($paket_input['extra'])) {
+//                             $this->simpan_detail_extra($detail_id, $paket_input['extra'], $item['jumlah']); 
+//                             // ✅ Kirim jumlah paket juga jika extra perlu dikalikan
+//                         }
+//                     }
+//                 }
+//             }
+            
+//         } else {
+//             // Produk biasa
+//             $detail_unit_id = uniqid();
+//             for ($i = 0; $i < $item['jumlah']; $i++) {
+//                 $this->db->insert('pr_detail_transaksi', [
+//                     'pr_transaksi_id'    => $transaksi_id,
+//                     'pr_produk_id'       => $item['pr_produk_id'],
+//                     'jumlah'             => 1,
+//                     'harga'              => $item['harga'],
+//                     'catatan'            => $item['catatan'] ?? null,
+//                     'status'             => null,
+//                     'is_printed'         => 0,
+//                     'detail_unit_id'     => $detail_unit_id,
+//                     'created_at'         => date('Y-m-d H:i:s'),
+//                 ]);
+//                 $detail_id = $this->db->insert_id();
+
+//                 if (!empty($item['extra'])) {
+//                     $this->simpan_detail_extra($detail_id, $item['extra']);
+//                 }
+//             }
+//         }
+//     }
+
+//     $this->db->trans_complete();
+//     return $transaksi_id;
+// }
+
+
 public function simpan_transaksi($data_transaksi, $items)
 {
     $this->db->trans_begin();
@@ -59,33 +159,33 @@ public function simpan_transaksi($data_transaksi, $items)
 
     foreach ($items as $item) {
         if (!empty($item['is_paket']) && $item['is_paket'] == 1) {
-            // 1. Simpan ke tabel paket
-            $this->db->insert('pr_detail_transaksi_paket', [
-                'pr_transaksi_id'       => $transaksi_id,
-                'pr_produk_paket_id'    => $item['pr_produk_paket_id'],
-                'harga'                 => $item['harga'],
-                'jumlah'                => $item['jumlah'],
-                'catatan'               => $item['catatan'] ?? null,
-                'created_at'            => date('Y-m-d H:i:s'),
-                'updated_at'            => date('Y-m-d H:i:s')
-            ]);
-            $paket_id = $this->db->insert_id();
+            $detail_unit_paket_id = uniqid();
 
-            // 2. Ambil isi produk dari paket
-            $produk_paket = $this->db
-                ->get_where('pr_produk_paket_detail', ['pr_produk_paket_id' => $item['pr_produk_id']])
-                ->result();
+            for ($i = 0; $i < $item['jumlah']; $i++) {
+                $this->db->insert('pr_detail_transaksi_paket', [
+                    'pr_transaksi_id'       => $transaksi_id,
+                    'pr_produk_paket_id'    => $item['pr_produk_paket_id'],
+                    'detail_unit_paket_id'  => $detail_unit_paket_id,
+                    'harga'                 => $item['harga'],
+                    'jumlah'                => 1,
+                    'catatan'               => $item['catatan'] ?? null,
+                    'is_printed'            => 0,
+                    'created_at'            => date('Y-m-d H:i:s'),
+                    'updated_at'            => date('Y-m-d H:i:s')
+                ]);
+                $paket_id = $this->db->insert_id();
 
-            // 3. Ambil nama paket
-            $nama_paket = $this->db->select('nama_paket')
-                ->where('id', $item['pr_produk_id'])
-                ->get('pr_produk_paket')->row('nama_paket');
+                $produk_paket = $this->db
+                    ->get_where('pr_produk_paket_detail', ['pr_produk_paket_id' => $item['pr_produk_id']])
+                    ->result();
 
-            // 4. Simpan ke detail transaksi
-            foreach ($produk_paket as $paket_item) {
-                for ($i = 0; $i < $item['jumlah']; $i++) {
-                    $detail_unit_id = uniqid(); // ✅ tetap ada
-            
+                $nama_paket = $this->db->select('nama_paket')
+                    ->where('id', $item['pr_produk_id'])
+                    ->get('pr_produk_paket')->row('nama_paket');
+
+                foreach ($produk_paket as $paket_item) {
+                    $detail_unit_id = uniqid();
+
                     $this->db->insert('pr_detail_transaksi', [
                         'pr_transaksi_id'               => $transaksi_id,
                         'pr_produk_id'                  => $paket_item->pr_produk_id,
@@ -94,26 +194,23 @@ public function simpan_transaksi($data_transaksi, $items)
                         'catatan'                       => 'Paket: ' . $nama_paket,
                         'status'                        => null,
                         'is_printed'                    => 0,
-                        'detail_unit_id'                => $detail_unit_id, // ✅ tetap ada
-                        'pr_detail_transaksi_paket_id'  => $paket_id,        // ✅ koneksi ke paket
+                        'detail_unit_id'                => $detail_unit_id,
+                        'pr_detail_transaksi_paket_id'  => $paket_id,
                         'created_at'                    => date('Y-m-d H:i:s'),
                     ]);
-            
+
                     $detail_id = $this->db->insert_id();
-            
-                    // Extra khusus isi paket
+
                     if (!empty($item['paket_items'])) {
                         foreach ($item['paket_items'] as $paket_input) {
                             if ($paket_input['pr_produk_id'] == $paket_item->pr_produk_id && !empty($paket_input['extra'])) {
-                                $this->simpan_detail_extra($detail_id, $paket_input['extra']);
+                                $this->simpan_detail_extra($detail_id, $paket_input['extra'], 1);
                             }
                         }
                     }
                 }
             }
-            
         } else {
-            // Produk biasa
             $detail_unit_id = uniqid();
             for ($i = 0; $i < $item['jumlah']; $i++) {
                 $this->db->insert('pr_detail_transaksi', [
@@ -139,7 +236,6 @@ public function simpan_transaksi($data_transaksi, $items)
     $this->db->trans_complete();
     return $transaksi_id;
 }
-
 
 public function get_username_by_id($pegawai_id) {
     $pegawai = $this->db->get_where('abs_pegawai', ['id' => $pegawai_id])->row();
@@ -322,91 +418,196 @@ public function get_detail_transaksi($transaksi_id, $status = null) {
 
 // }
 
+
+// public function update_detail_transaksi($transaksi_id, $items, $transaksi)
+// {
+//     foreach ($items as $item) {
+        
+//         // Hanya proses item baru (bukan hasil edit)
+//         if (empty($item['detail_id'])) {
+
+//             // Deteksi apakah item adalah paket valid
+//             $is_paket = isset($item['is_paket']) && $item['is_paket'] == 1;
+//             $is_valid_paket = $is_paket && !empty($item['pr_produk_id']) && intval($item['pr_produk_id']) > 0;
+
+    
+//             if ($is_valid_paket) {
+//                 $detail_unit_paket_id = uniqid();
+//                 // Simpan ke pr_detail_transaksi_paket
+//                 $this->db->insert('pr_detail_transaksi_paket', [
+//                     'pr_transaksi_id' => $transaksi_id,
+//                     'pr_produk_paket_id' => $item['pr_produk_id'],
+//                     'detail_unit_paket_id'  => $detail_unit_paket_id,
+//                     'jumlah' => $item['jumlah'],
+//                     'harga' => $item['harga'],
+//                     'catatan' => $item['catatan'] ?? null,
+//                     'is_printed' => 0,
+//                     'created_at' => date('Y-m-d H:i:s'),
+//                 ]);
+//                 $paket_insert_id = $this->db->insert_id();
+
+//                 // Ambil nama paket
+//                 $paket_nama = '(Paket Tidak Dikenal)';
+//                 $paket_row = $this->db->select('pp.nama_paket')
+//                     ->from('pr_detail_transaksi_paket dtp')
+//                     ->join('pr_produk_paket pp', 'pp.id = dtp.pr_produk_paket_id')
+//                     ->where('dtp.id', $paket_insert_id)
+//                     ->get()->row();
+//                 if ($paket_row) {
+//                     $paket_nama = $paket_row->nama_paket;
+//                 }
+
+//                 // Ambil isi paket dari JS atau fallback DB
+//                 $paket_items = [];
+
+//                 if (!empty($item['paket_items']) && is_array($item['paket_items'])) {
+//                     $paket_items = $item['paket_items'];
+//                 } else {
+//                     $paket_items_db = $this->db
+//                         ->select('d.pr_produk_id, d.qty')
+//                         ->from('pr_produk_paket_detail d')
+//                         ->join('pr_produk p', 'p.id = d.pr_produk_id', 'inner')
+//                         ->where('d.pr_produk_paket_id', $item['pr_produk_id'])
+//                         ->get()->result();
+
+//                     foreach ($paket_items_db as $row) {
+//                         $paket_items[] = [
+//                             'pr_produk_id' => $row->pr_produk_id,
+//                             'jumlah' => $row->qty,
+//                             'extra' => []
+//                         ];
+//                     }
+//                 }
+
+//                 // Simpan produk isi paket ke pr_detail_transaksi
+//                 foreach ($paket_items as $paketItem) {
+//                     if (empty($paketItem['pr_produk_id']) || intval($paketItem['pr_produk_id']) <= 0) {
+//                         log_message('error', '❌ pr_produk_id isi paket tidak valid: ' . json_encode($paketItem));
+//                         continue;
+//                     }
+
+//                     $total_qty = $paketItem['jumlah'] * $item['jumlah'];
+//                     for ($i = 0; $i < $total_qty; $i++) {
+                    
+//                     // for ($i = 0; $i  i++) {
+//                         $this->db->insert('pr_detail_transaksi', [
+//                             'pr_transaksi_id' => $transaksi_id,
+//                             'pr_produk_id' => $paketItem['pr_produk_id'],
+//                             'jumlah' => 1,
+//                             'harga' => 0,
+//                             'catatan' => 'Paket: ' . $paket_nama,
+//                             'status' => null,
+//                             'is_printed' => 0,
+//                             'detail_unit_id' => uniqid(),
+//                             'pr_detail_transaksi_paket_id' => $paket_insert_id,
+//                             'created_at' => date('Y-m-d H:i:s')
+//                         ]);
+
+                        
+//                         $detail_id = $this->db->insert_id();
+
+//                         // Simpan extra jika ada
+//                         if (!empty($paketItem['extra'])) {
+//                             $this->simpan_detail_extra($detail_id, $paketItem['extra']);
+//                         }
+//                     }
+//                 }
+
+//             } elseif (!empty($item['pr_produk_id']) && intval($item['pr_produk_id']) > 0) {
+//                 // Produk biasa
+//                 $detail_unit_id = uniqid();
+//                 for ($i = 0; $i < $item['jumlah']; $i++) {
+//                     $this->db->insert('pr_detail_transaksi', [
+//                         'pr_transaksi_id' => $transaksi_id,
+//                         'pr_produk_id' => $item['pr_produk_id'],
+//                         'jumlah' => 1,
+//                         'harga' => $item['harga'],
+//                         'catatan' => $item['catatan'] ?? null,
+//                         'status' => null,
+//                         'is_printed' => 0,
+//                         'detail_unit_id' => $detail_unit_id,
+//                         'created_at' => date('Y-m-d H:i:s'),
+//                     ]);
+//                     $detail_id = $this->db->insert_id();
+
+//                     if (!empty($item['extra'])) {
+//                         $this->simpan_detail_extra($detail_id, $item['extra']);
+//                     }
+//                 }
+//             } else {
+//                 // Jangan log jika is_paket dan pr_produk_id = undefined → abaikan saja
+//                 if (!(isset($item['is_paket']) && $item['is_paket'] == 1 && ($item['pr_produk_id'] === 'undefined' || empty($item['pr_produk_id'])))) {
+//                     log_message('error', '❌ Produk tidak valid saat update transaksi: ' . json_encode($item));
+//                 }
+//             }
+            
+//         }
+//     }
+// }
+
 public function update_detail_transaksi($transaksi_id, $items, $transaksi)
 {
     foreach ($items as $item) {
-        // Hanya proses item baru (bukan hasil edit)
         if (empty($item['detail_id'])) {
-
-            // Deteksi apakah item adalah paket valid
             $is_paket = isset($item['is_paket']) && $item['is_paket'] == 1;
             $is_valid_paket = $is_paket && !empty($item['pr_produk_id']) && intval($item['pr_produk_id']) > 0;
 
             if ($is_valid_paket) {
-                // Simpan ke pr_detail_transaksi_paket
-                $this->db->insert('pr_detail_transaksi_paket', [
-                    'pr_transaksi_id' => $transaksi_id,
-                    'pr_produk_paket_id' => $item['pr_produk_id'],
-                    'jumlah' => $item['jumlah'],
-                    'harga' => $item['harga'],
-                    'created_at' => date('Y-m-d H:i:s'),
-                ]);
-                $paket_insert_id = $this->db->insert_id();
+                $detail_unit_paket_id = uniqid();
+                for ($i = 0; $i < $item['jumlah']; $i++) {
+                    $this->db->insert('pr_detail_transaksi_paket', [
+                        'pr_transaksi_id' => $transaksi_id,
+                        'pr_produk_paket_id' => $item['pr_produk_id'],
+                        'detail_unit_paket_id' => $detail_unit_paket_id,
+                        'jumlah' => 1,
+                        'harga' => $item['harga'],
+                        'catatan' => $item['catatan'] ?? null,
+                        'is_printed' => 0,
+                        'created_at' => date('Y-m-d H:i:s'),
+                    ]);
+                    $paket_id = $this->db->insert_id();
 
-                // Ambil nama paket
-                $paket_nama = '(Paket Tidak Dikenal)';
-                $paket_row = $this->db->select('pp.nama_paket')
-                    ->from('pr_detail_transaksi_paket dtp')
-                    ->join('pr_produk_paket pp', 'pp.id = dtp.pr_produk_paket_id')
-                    ->where('dtp.id', $paket_insert_id)
-                    ->get()->row();
-                if ($paket_row) {
-                    $paket_nama = $paket_row->nama_paket;
-                }
+                    $paket_nama = $this->db->select('nama_paket')->get_where('pr_produk_paket', ['id' => $item['pr_produk_id']])->row('nama_paket') ?? '(Paket Tidak Dikenal)';
 
-                // Ambil isi paket dari JS atau fallback DB
-                $paket_items = [];
+                    $paket_items = !empty($item['paket_items']) && is_array($item['paket_items']) ? $item['paket_items'] : [];
+                    if (empty($paket_items)) {
+                        $paket_items_db = $this->db
+                            ->select('pr_produk_id, qty')
+                            ->get_where('pr_produk_paket_detail', ['pr_produk_paket_id' => $item['pr_produk_id']])
+                            ->result();
 
-                if (!empty($item['paket_items']) && is_array($item['paket_items'])) {
-                    $paket_items = $item['paket_items'];
-                } else {
-                    $paket_items_db = $this->db
-                        ->select('d.pr_produk_id, d.qty')
-                        ->from('pr_produk_paket_detail d')
-                        ->join('pr_produk p', 'p.id = d.pr_produk_id', 'inner')
-                        ->where('d.pr_produk_paket_id', $item['pr_produk_id'])
-                        ->get()->result();
-
-                    foreach ($paket_items_db as $row) {
-                        $paket_items[] = [
-                            'pr_produk_id' => $row->pr_produk_id,
-                            'jumlah' => $row->qty,
-                            'extra' => []
-                        ];
-                    }
-                }
-
-                // Simpan produk isi paket ke pr_detail_transaksi
-                foreach ($paket_items as $paketItem) {
-                    if (empty($paketItem['pr_produk_id']) || intval($paketItem['pr_produk_id']) <= 0) {
-                        log_message('error', '❌ pr_produk_id isi paket tidak valid: ' . json_encode($paketItem));
-                        continue;
+                        foreach ($paket_items_db as $row) {
+                            $paket_items[] = [
+                                'pr_produk_id' => $row->pr_produk_id,
+                                'jumlah' => $row->qty,
+                                'extra' => []
+                            ];
+                        }
                     }
 
-                    for ($i = 0; $i < $paketItem['jumlah']; $i++) {
-                        $this->db->insert('pr_detail_transaksi', [
-                            'pr_transaksi_id' => $transaksi_id,
-                            'pr_produk_id' => $paketItem['pr_produk_id'],
-                            'jumlah' => 1,
-                            'harga' => 0,
-                            'catatan' => 'Paket: ' . $paket_nama,
-                            'status' => null,
-                            'is_printed' => 0,
-                            'detail_unit_id' => uniqid(),
-                            'pr_detail_transaksi_paket_id' => $paket_insert_id,
-                            'created_at' => date('Y-m-d H:i:s')
-                        ]);
-                        $detail_id = $this->db->insert_id();
+                    foreach ($paket_items as $paketItem) {
+                        for ($j = 0; $j < $paketItem['jumlah']; $j++) {
+                            $this->db->insert('pr_detail_transaksi', [
+                                'pr_transaksi_id' => $transaksi_id,
+                                'pr_produk_id' => $paketItem['pr_produk_id'],
+                                'jumlah' => 1,
+                                'harga' => 0,
+                                'catatan' => 'Paket: ' . $paket_nama,
+                                'status' => null,
+                                'is_printed' => 0,
+                                'detail_unit_id' => uniqid(),
+                                'pr_detail_transaksi_paket_id' => $paket_id,
+                                'created_at' => date('Y-m-d H:i:s')
+                            ]);
+                            $detail_id = $this->db->insert_id();
 
-                        // Simpan extra jika ada
-                        if (!empty($paketItem['extra'])) {
-                            $this->simpan_detail_extra($detail_id, $paketItem['extra']);
+                            if (!empty($paketItem['extra'])) {
+                                $this->simpan_detail_extra($detail_id, $paketItem['extra']);
+                            }
                         }
                     }
                 }
-
             } elseif (!empty($item['pr_produk_id']) && intval($item['pr_produk_id']) > 0) {
-                // Produk biasa
                 $detail_unit_id = uniqid();
                 for ($i = 0; $i < $item['jumlah']; $i++) {
                     $this->db->insert('pr_detail_transaksi', [
@@ -426,13 +627,10 @@ public function update_detail_transaksi($transaksi_id, $items, $transaksi)
                         $this->simpan_detail_extra($detail_id, $item['extra']);
                     }
                 }
-            } else {
-                log_message('error', '❌ Produk tidak valid saat update transaksi: ' . json_encode($item));
             }
         }
     }
 }
-
 
 
 // public function update_total_transaksi($transaksi_id)
@@ -512,6 +710,7 @@ public function update_total_transaksi($transaksi_id)
     $this->db->select('SUM(harga * jumlah) AS total_paket');
     $this->db->from('pr_detail_transaksi_paket');
     $this->db->where('pr_transaksi_id', $transaksi_id);
+    $this->db->where('(status IS NULL OR status = "")', null, false);
     $paket = $this->db->get()->row();
     $total_paket = $paket->total_paket ?? 0;
 
@@ -718,13 +917,15 @@ public function generate_struk_full_by_setting($transaksi, $printer, $struk_data
 
     $out .= str_repeat("-", $width) . "\n";
 
-    $divisi_id = $printer['divisi'];
-    $isKasir = strtoupper($printer['lokasi_printer']) === 'KASIR';
+    // $divisi_id = $printer['divisi'];
+    // $isKasir = strtoupper($printer['lokasi_printer']) === 'KASIR';
+
+    // ================= CETAK PRODUK ====================
+    $paket_printed = [];
+    $paket_ids_to_update = [];
 
     foreach ($transaksi['items'] as $item) {
-        if (!is_null($item['status']) && strtolower($item['status']) == 'batal') {
-            continue;
-        }
+        if (!is_null($item['status']) && strtolower($item['status']) == 'batal') continue;
 
         $produk = $this->db->select('k.pr_divisi_id')->from('pr_produk p')
             ->join('pr_kategori k', 'p.kategori_id = k.id', 'left')
@@ -732,35 +933,52 @@ public function generate_struk_full_by_setting($transaksi, $printer, $struk_data
 
         if ($divisi_id && $produk['pr_divisi_id'] != $divisi_id) continue;
 
-        $line_left = "{$item['jumlah']}x {$item['nama_produk']}";
+        $paket_id = $item['pr_detail_transaksi_paket_id'] ?? null;
+
+        if ($paket_id && !isset($paket_printed[$paket_id])) {
+            $paket = $this->db
+                ->select('pp.nama_paket, dtp.catatan, dtp.is_printed')
+                ->from('pr_detail_transaksi_paket dtp')
+                ->join('pr_produk_paket pp', 'pp.id = dtp.pr_produk_paket_id')
+                ->where('dtp.id', $paket_id)
+                ->get()->row_array();
+
+            if (!$paket || $paket['is_printed'] == 1) continue;
+
+            // Cetak Nama Paket + catatan ke kanan
+            $nama_paket = $paket['nama_paket'];
+            $catatan = $paket['catatan'] ? " *" . $paket['catatan'] : '';
+            $out .= $this->format_struk_line("** $nama_paket", $catatan, $width) . "\n";
+
+            $paket_printed[$paket_id] = true;
+            $paket_ids_to_update[] = $paket_id;
+        }
+
+        $prefix = $paket_id ? '  > ' : '';
+        $line_left = "{$prefix}{$item['jumlah']}x {$item['nama_produk']}";
         $line_right = $isKasir ? number_format($item['harga'] * $item['jumlah'], 0, ',', '.') : '';
         $out .= $this->format_struk_line($line_left, $line_right, $width) . "\n";
 
-        // Extra langsung dari $item['extra'], BUKAN query database lagi!
         if (!empty($item['extra'])) {
             foreach ($item['extra'] as $ex) {
-        //        $nama_extra = $ex['nama_extra'] ?? $ex['nama'] ?? 'Extra';
                 $nama_extra = $ex['nama_extra'] ?? 'Extra';
-                $line_left = "  > {$ex['jumlah']}x {$nama_extra}";
+                $line_left = "     > {$ex['jumlah']}x {$nama_extra}";
                 $line_right = $isKasir ? number_format($ex['harga'] * $ex['jumlah'], 0, ',', '.') : '';
                 $out .= $this->format_struk_line($line_left, $line_right, $width) . "\n";
             }
-
         }
 
-        // Note
-        if (!empty($item['catatan'])) {
-            $note_lines = explode("\n", wordwrap("- " . $item['catatan'], $width - 2));
-            foreach ($note_lines as $line) {
+        if (!empty($item['catatan']) && !$paket_id) {
+            foreach (explode("\n", wordwrap("- " . $item['catatan'], $width - 2)) as $line) {
                 $out .= "  $line\n";
             }
         }
     }
 
-
-
     $out .= str_repeat("-", $width) . "\n";
 
+    
+    // === RINGKASAN PEMBAYARAN ===
     if ($isKasir) {
         // $out .= str_repeat("-", $width) . "\n";
 
@@ -812,9 +1030,6 @@ public function generate_struk_full_by_setting($transaksi, $printer, $struk_data
             $out .= str_repeat("-", $width) . "\n";
         }
     }
-
-
-
     return $out;
 }
 
@@ -921,6 +1136,10 @@ public function void_batch($items, $alasan)
     $transaksi_id_terakhir = null;
 
     foreach ($items as $item) {
+        if (!isset($item['type'])) {
+            continue;
+        }
+
         if ($item['type'] === 'produk') {
             $produk = $this->db->get_where('pr_detail_transaksi', ['id' => $item['id']])->row();
             if ($produk) {
@@ -991,6 +1210,80 @@ public function void_batch($items, $alasan)
                 $new_void_ids[] = $this->db->insert_id();
             }
         }
+
+        elseif ($item['type'] === 'paket') {
+            $paket = $this->db->get_where('pr_detail_transaksi_paket', ['id' => $item['id']])->row();
+            if ($paket) {
+                $transaksi_id_terakhir = $paket->pr_transaksi_id;
+                $transaksi = $this->db->get_where('pr_transaksi', ['id' => $transaksi_id_terakhir])->row();
+        
+                // Update status pr_detail_transaksi_paket
+                $this->db->where('id', $item['id'])->update('pr_detail_transaksi_paket', ['status' => 'BATAL']);
+        
+                // Update total penjualan dan sisa pembayaran
+                $this->db->set('total_penjualan', 'total_penjualan - ' . ($paket->harga * $paket->jumlah), false);
+                $this->db->set('sisa_pembayaran', 'GREATEST(0, sisa_pembayaran - ' . ($paket->harga * $paket->jumlah) . ')', false);
+                $this->db->where('id', $transaksi_id_terakhir)->update('pr_transaksi');
+        
+                // Ambil nama paket
+                $master_paket = $this->db->get_where('pr_produk', ['id' => $paket->pr_produk_paket_id])->row();
+        
+                // === Baris 1: Paket sebagai header ===
+                $this->db->insert('pr_void', [
+                    'pr_transaksi_id'              => $transaksi_id_terakhir,
+                    'kode_void'                    => $kode_void,
+                    'no_transaksi'                 => $transaksi->no_transaksi,
+                    'detail_transaksi_id'          => null,
+                    'detail_transaksi_paket_id'    => $paket->id,
+                    'nama_produk'                  => null,
+                    'pr_produk_id'                 => null,
+                    'jumlah'                       => $paket->jumlah,
+                    'harga'                        => $paket->harga,
+                    'catatan'                      => $paket->catatan ?? 'Paket',
+                    'alasan'                       => $alasan,
+                    'void_by'                      => $user_id,
+                    'waktu'                        => $now,
+                    'created_at'                   => $now,
+                    'updated_at'                   => $now,
+                ]);
+        
+                $new_void_ids[] = $this->db->insert_id();
+        
+                // === Baris 2+: Produk dalam paket ===
+                $detail_items = $this->db->get_where('pr_detail_transaksi', [
+                    'pr_detail_transaksi_paket_id' => $paket->id
+                ])->result();
+        
+                foreach ($detail_items as $produk) {
+                    $master_produk = $this->db->get_where('pr_produk', ['id' => $produk->pr_produk_id])->row();
+        
+                    // Tandai produk sebagai BATAL
+                    $this->db->where('id', $produk->id)->update('pr_detail_transaksi', ['status' => 'BATAL']);
+        
+                    $this->db->insert('pr_void', [
+                        'pr_transaksi_id'              => $transaksi_id_terakhir,
+                        'kode_void'                    => $kode_void,
+                        'no_transaksi'                 => $transaksi->no_transaksi,
+                        'detail_transaksi_id'          => $produk->id,
+                        'detail_transaksi_paket_id'    => $paket->id,
+                        'nama_produk'                  => $master_produk ? $master_produk->nama_produk : 'Produk Paket',
+                        'pr_produk_id'                 => $produk->pr_produk_id,
+                        'jumlah'                       => $produk->jumlah,
+                        'harga'                        => 0,
+                        'catatan'                      => 'Item Paket',
+                        'alasan'                       => $alasan,
+                        'void_by'                      => $user_id,
+                        'waktu'                        => $now,
+                        'created_at'                   => $now,
+                        'updated_at'                   => $now,
+                    ]);
+        
+                    $new_void_ids[] = $this->db->insert_id();
+                }
+            }
+        }
+        
+
     }
 
     // ✅ Cek apakah semua item dalam transaksi sudah di-void
@@ -1035,76 +1328,228 @@ public function void_batch($items, $alasan)
             ->get()
             ->result_array();
 
+        $paket_data = $this->db
+            ->where('pr_transaksi_id', $transaksi_id_terakhir)
+            ->get('pr_detail_transaksi_paket')
+            ->result_array();
+        
+
+
         if (!empty($void_data)) {
             $this->Api_model->kirim_data('pr_void', $void_data);
+            $this->Api_model->insert_log_sync('pr_void', $void_data);
+
+        }
+
+        if (!empty($paket_data)) {
+            $this->Api_model->kirim_data('pr_detail_transaksi_paket', $paket_data);
+            $this->Api_model->insert_log_sync('pr_detail_transaksi_paket', $paket_data);
+
         }
 
         if (!empty($transaksi_data)) {
             $this->Api_model->kirim_data('pr_transaksi', $transaksi_data);
+            $this->Api_model->insert_log_sync('pr_transaksi', $transaksi_data);
+
         }
 
         if (!empty($detail_data)) {
             $this->Api_model->kirim_data('pr_detail_transaksi', $detail_data);
+            $this->Api_model->insert_log_sync('pr_detail_transaksi', $detail_data);
+
         }
 
         if (!empty($extra_data)) {
             $this->Api_model->kirim_data('pr_detail_extra', $extra_data);
+            $this->Api_model->insert_log_sync('pr_detail_extra', $extra_data);
+
         }
     }
 
     return $new_void_ids;
 }
 
-public function generate_void_struk($transaksi, $produk_void, $printer, $struk_data, $lokasi)
+// public function generate_void_struk($transaksi, $produk_void, $printer, $struk_data, $lokasi)
 
+// {
+//     $out = '';
+//     $width = 32; // atau dari printer setting kalau mau dinamis
+//     $waktu_void = date('d-m-Y H:i'); // waktu saat ini
+
+//     if (empty($produk_void)) {
+//         return '';
+//     }
+
+//     $no_transaksi = $transaksi['no_transaksi'] ?? '-';
+//     $customer = $transaksi['customer'] ?? '-';
+//     $nomor_meja = $transaksi['nomor_meja'] ?? '-';
+//     $kasir_order = $transaksi['kasir_order'] ?? '-';
+//     $alasan_void = $produk_void[0]['alasan'] ?? '-'; // alasan tetap ambil dari produk_void
+
+
+//     $divisi_id = $printer['divisi'];
+//     $lokasi = strtoupper($printer['lokasi_printer']);
+//     $isChecker = ($lokasi == 'CHECKER');
+
+    
+//     // --- Tambahkan Judul [KITCHEN ORDER], dst ---
+//     $out .= $this->center_text("[ $lokasi VOID ]", $width) . "\n";
+//     $out .= str_repeat("-", $width) . "\n";
+
+//     $out .= "No: " . $no_transaksi . "\n";
+//     $out .= "Order: " . $kasir_order . "\n";
+//     $out .= "Customer: " . $customer . "\n";
+//     $out .= "Meja: " . $nomor_meja . "\n";
+//     $out .= "Void: " . $waktu_void . "\n";
+
+//     $out .= str_repeat("-", $width) . "\n";
+
+//     // --- Item Void ---
+//     foreach ($produk_void as $item) {
+//         $jumlah = intval($item['jumlah']);
+//         $harga = intval($item['harga']);
+
+//         //TAMBAHAN VOID PAKET
+//         $line_left = "{$jumlah}x ";
+//         $line_left .= !empty($item['nama_extra']) ? "> {$item['nama_extra']}" : "{$item['nama_produk']}";
+
+
+//         if (!empty($item['nama_extra'])) {
+//             $line_left = "> {$jumlah}x {$item['nama_extra']}";
+//         } else {
+//             $line_left = "{$jumlah}x {$item['nama_produk']}";
+//         }
+
+//         $line_right = number_format($harga, 0, ',', '.');
+//         $out .= $this->format_struk_line($line_left, $line_right, $width) . "\n";
+//     }
+
+//     $out .= str_repeat("-", $width) . "\n";
+//     $out .= "Alasan: " . $alasan_void . "\n";
+//     $out .= str_repeat("-", $width) . "\n";
+//     $out .= date('d/m/Y H:i:s') . "\n";
+
+//     return $out;
+// }
+
+public function generate_void_struk($transaksi, $produk_void, $printer, $struk_data, $lokasi)
 {
     $out = '';
-    $width = 32; // atau dari printer setting kalau mau dinamis
-    $waktu_void = date('d-m-Y H:i'); // waktu saat ini
+    $width = 32;
+    $waktu_void = date('d-m-Y H:i');
 
-    if (empty($produk_void)) {
-        return '';
-    }
+    if (empty($produk_void)) return '';
 
     $no_transaksi = $transaksi['no_transaksi'] ?? '-';
     $customer = $transaksi['customer'] ?? '-';
     $nomor_meja = $transaksi['nomor_meja'] ?? '-';
     $kasir_order = $transaksi['kasir_order'] ?? '-';
-    $alasan_void = $produk_void[0]['alasan'] ?? '-'; // alasan tetap ambil dari produk_void
+    $alasan_void = $produk_void[0]['alasan'] ?? '-';
 
-
-    $divisi_id = $printer['divisi'];
     $lokasi = strtoupper($printer['lokasi_printer']);
-    $isChecker = ($lokasi == 'CHECKER');
 
-    
-    // --- Tambahkan Judul [KITCHEN ORDER], dst ---
+    // === HEADER ===
     $out .= $this->center_text("[ $lokasi VOID ]", $width) . "\n";
     $out .= str_repeat("-", $width) . "\n";
-
     $out .= "No: " . $no_transaksi . "\n";
     $out .= "Order: " . $kasir_order . "\n";
     $out .= "Customer: " . $customer . "\n";
     $out .= "Meja: " . $nomor_meja . "\n";
     $out .= "Void: " . $waktu_void . "\n";
-
     $out .= str_repeat("-", $width) . "\n";
 
-    // --- Item Void ---
-foreach ($produk_void as $item) {
-    $jumlah = intval($item['jumlah']);
-    $harga = intval($item['harga']);
+// === GROUP PRODUK PAKET DAN NON-PAKET ===
+$paket_group = [];
+$non_paket = [];
 
+foreach ($produk_void as $item) {
+    $jumlah = intval($item['jumlah'] ?? 0);
+    $harga = intval($item['harga'] ?? 0);
+
+    // Cek apakah extra
     if (!empty($item['nama_extra'])) {
-        $line_left = "> {$jumlah}x {$item['nama_extra']}";
-    } else {
-        $line_left = "{$jumlah}x {$item['nama_produk']}";
+        $non_paket[] = [
+            'type' => 'extra',
+            'nama' => $item['nama_extra'],
+            'jumlah' => $jumlah,
+            'harga' => $harga
+        ];
+        continue;
     }
 
-    $line_right = number_format($harga, 0, ',', '.');
-    $out .= $this->format_struk_line($line_left, $line_right, $width) . "\n";
+    // Jika produk bagian dari paket
+    if (!empty($item['detail_transaksi_paket_id'])) {
+        $paket_id = $item['detail_transaksi_paket_id'];
+
+        // Ambil nama paket dari DB hanya jika belum tersimpan
+        if (!isset($paket_group[$paket_id])) {
+            $nama_paket = $this->db
+                ->select('pp.nama_paket')
+                ->from('pr_detail_transaksi_paket dp')
+                ->join('pr_produk_paket pp', 'pp.id = dp.pr_produk_paket_id')
+                ->where('dp.id', $paket_id)
+                ->get()->row('nama_paket') ?? 'Paket';
+
+            $paket_group[$paket_id] = [
+                'nama_paket' => $nama_paket,
+                'jumlah' => $jumlah,
+                'harga' => $harga,
+                'isi' => []
+            ];
+        }
+
+        // Tambahkan item ke isi paket
+        $paket_group[$paket_id]['isi'][] = [
+            'nama' => $item['nama_produk'],
+            'jumlah' => $jumlah
+        ];
+    } else {
+        // Produk reguler
+        $non_paket[] = [
+            'type' => 'produk',
+            'nama' => $item['nama_produk'],
+            'jumlah' => $jumlah,
+            'harga' => $harga
+        ];
+    }
 }
 
+
+    // === CETAK PRODUK PAKET ===
+    foreach ($paket_group as $paket) {
+        $nama_paket = $paket['nama_paket'] ?? 'Paket';
+        $jumlah = $paket['jumlah'] ?? 1;
+    
+        // ✅ Format: 1x Paket : Nama Paket
+        $line_left = "{$jumlah}x Paket : {$nama_paket}";
+        $out .= $line_left . "\n";
+    
+        // Cetak isi paket
+        foreach ($paket['isi'] as $isi) {
+            $out .= "  * {$isi['nama']} (x{$isi['jumlah']})\n";
+        }
+    
+        $out .= str_repeat("-", $width) . "\n";
+    }
+    
+
+    // === CETAK PRODUK REGULER DAN EXTRA ===
+    foreach ($non_paket as $np) {
+        $nama = $np['nama'] ?? '-';
+        $jumlah = intval($np['jumlah'] ?? 1);
+        $harga = intval($np['harga'] ?? 0);
+
+        if ($np['type'] == 'extra') {
+            $line_left = "> {$jumlah}x {$nama}";
+        } else {
+            $line_left = "{$jumlah}x {$nama}";
+        }
+
+        $line_right = number_format($harga, 0, ',', '.');
+        $out .= $this->format_struk_line($line_left, $line_right, $width) . "\n";
+    }
+
+    // === FOOTER ===
     $out .= str_repeat("-", $width) . "\n";
     $out .= "Alasan: " . $alasan_void . "\n";
     $out .= str_repeat("-", $width) . "\n";
@@ -1112,6 +1557,7 @@ foreach ($produk_void as $item) {
 
     return $out;
 }
+
 
 public function cetak_void($transaksi_id) {
     $produk_void = $this->db

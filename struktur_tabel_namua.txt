@@ -1,101 +1,1589 @@
-abs_absensi : id, pegawai_id, tanggal, waktu, latitude, longitude, foto, shift_id, jenis_absen, lokasi_id, verified_by, verified_at, updated_at
-abs_absensi_pending : id, pegawai_id, shift_id, jenis_absen, tanggal, waktu, created_by, status, verified_by, verified_at, created_at, updated_at
-abs_arsip_gaji : id, tanggal_awal, tanggal_akhir, pegawai_id, nama_pegawai, nomor_rekening, nama_bank, divisi, jabatan1, jabatan2, total_kehadiran, total_menit, total_jam, gaji_pokok, tunjangan, total_lembur, tambahan_lain, potongan, deposit, bayar_kasbon, total_penerimaan, pembulatan_penerimaan, created_at, updated_at
-abs_deposit : id, pegawai_id, tanggal, nilai, jenis, keterangan, created_at, updated_at
-abs_divisi : id, nama_divisi, created_at, updated_at
-abs_jabatan : id, divisi_id, nama_jabatan, created_at, updated_at
-abs_jadwal_shift : id, pegawai_id, tanggal, shift_id, created_at, updated_at
-abs_kasbon : id, pegawai_id, tanggal, nilai, keterangan, jenis, created_at, updated_at
-abs_lembur : id, pegawai_id, tanggal, lama_lembur, alasan, nilai_lembur_id, total_gaji_lembur, created_at, updated_at
-abs_lokasi_absensi : id, nama_lokasi, latitude, longitude, range, status, created_at, updated_at
-abs_nilai_lembur : id, nilai_per_jam, created_at, updated_at
-abs_pegawai : id, nama, divisi_id, jabatan1_id, jabatan2_id, gaji_pokok, gaji_per_jam, tunjangan, tanggal_kontrak_awal, durasi_kontrak, tambahan_lain, username, password, avatar, kode_user, tanggal_kontrak_akhir, nomor_rekening, nama_bank_id, is_kasir, created_at, updated_at
-abs_potongan : id, pegawai_id, tanggal, nilai, keterangan, created_at, updated_at
-abs_rekap_absensi : id, tanggal, pegawai_id, shift_id, jam_masuk, jam_pulang, terlambat, pulang_cepat, lama_menit_kerja, total_gaji, verified_by, verified_at, created_at, updated_at
-abs_rekening_bank : id, nama_bank, created_at, updated_at
-abs_shift : id, divisi_id, kode_shift, nama_shift, jam_mulai, jam_selesai, created_at, updated_at
-abs_tambahan_lain : id, pegawai_id, tanggal, nilai_tambahan, keterangan, created_at, updated_at
-bl_daily_bar : id, tanggal_pembelian, bl_db_belanja_id, bl_db_purchase_id, kuantitas, total_harga, hpp, created_at, updated_at
-bl_daily_inventory : id, tanggal_pembelian, bl_purchase_id, created_at, updated_at
-bl_daily_kitchen : id, tanggal_pembelian, bl_db_belanja_id, bl_db_purchase_id, kuantitas, total_harga, hpp, hpp_average, created_at, updated_at
-bl_db_belanja : id, nama_barang, nama_bahan_baku, id_kategori, id_tipe_produksi, is_gudang, tanggal_update, created_at, updated_at
-bl_db_purchase : id, bl_db_belanja_id, merk, keterangan, ukuran, unit, pack, harga_satuan, hpp, tanggal, created_at, updated_at
-bl_divisi : id, nama_divisi, created_at, updated_at
-bl_gudang : id, bl_db_belanja_id, bl_db_purchase_id, stok_awal, stok_masuk, stok_keluar, stok_terbuang, stok_penyesuaian, stok_akhir, tanggal, created_at, updated_at
-bl_gudang_bc 250121 : id, bl_db_belanja_id, bl_db_purchase_id, stok_awal, stok_masuk, stok_keluar, stok_terbuang, stok_penyesuaian, stok_akhir, tanggal, created_at, updated_at
-bl_gudang_januari : id, bl_db_belanja_id, bl_db_purchase_id, stok_awal, stok_masuk, stok_keluar, stok_terbuang, stok_penyesuaian, stok_akhir, tanggal, created_at, updated_at
-bl_jenis_pengeluaran : id, nama_jenis_pengeluaran, created_at, updated_at
-bl_kas : id, bl_rekening_id, tanggal, jumlah, created_at, updated_at
-bl_kategori : id, nama_kategori, created_at, updated_at
-bl_mutasi_kas : id, tanggal, bl_rekening_id, jenis_mutasi, jumlah, keterangan, created_at, updated_at
-bl_mutasi_kas_rekening : id, tanggal, bl_rekening_id_sumber, bl_rekening_id_tujuan, jumlah, keterangan, created_at, updated_at
-bl_penjualan_majoo : tanggal, no_nota, waktu_order, waktu_bayar, outlet, jenis_order, penjualan, metode_pembayaran, rekening_id, penyesuaian, selisih, keterangan, created_at, updated_at
-bl_penjualan_produk : tanggal, produk, sku, kategori, jenis_produk, jumlah, nilai, jumlah_refund, nilai_refund, penjualan, created_at, updated_at
-bl_penyesuaian : id, tanggal, bl_db_belanja_id, bl_db_purchase_id, kuantitas, alasan, created_at, updated_at
-bl_persediaan_awal : id, tanggal, bl_db_belanja_id, bl_db_purchase_id, kuantitas, total_unit, total_harga, hpp, created_at, updated_at
-bl_produk : id, nama_produk, kategori, satuan, harga_jual, sku, divisi_id, created_at, updated_at
-bl_purchase : id, tanggal, jenis_pengeluaran, bl_db_belanja_id, bl_db_purchase_id, kuantitas, total_unit, total_harga, hpp, status, pengusul, metode_pembayaran, created_at, updated_at
-bl_purchase_bar : id, tanggal, jenis_pengeluaran, nama_barang, nama_bahan_baku, kategori_id, tipe_produksi_id, merk, keterangan, ukuran, unit, pack, harga_satuan, kuantitas, total_unit, total_harga, hpp, metode_pembayaran, status, pengusul, catatan, created_at, updated_at
-bl_purchase_kitchen : id, tanggal, jenis_pengeluaran, nama_barang, nama_bahan_baku, kategori_id, tipe_produksi_id, merk, keterangan, ukuran, unit, pack, harga_satuan, kuantitas, total_unit, total_harga, hpp, metode_pembayaran, status, pengusul, catatan, created_at, updated_at
-bl_purchase_pending : id, tanggal_pembelian, jenis_pengeluaran, nama_barang, nama_bahan_baku, kategori_id, tipe_produksi_id, merk, keterangan, ukuran, unit, pack, harga_satuan, kuantitas, total_unit, total_harga, hpp, metode_pembayaran, status, pengusul, catatan, created_at, updated_at
-bl_refund : id, kode, tanggal, nilai, rekening, keterangan, created_at, updated_at
-bl_rekap_rekening : id, tanggal, rekening_id, nilai, created_at, updated_at
-bl_rekening : id, nama_rekening, created_at, updated_at
-bl_stok_opname : id, kategori_id, bl_db_belanja_id, bl_db_purchase_id, tipe, merk, ukuran, keterangan, unit, pack, harga, stok_awal, stok_masuk, stok_keluar, stok_terbuang, stok_penyesuaian, stok_akhir, unit_total, nilai_total, tanggal, created_at, updated_at
-bl_stok_opname_januari : id, kategori_id, bl_db_belanja_id, bl_db_purchase_id, tipe, merk, ukuran, keterangan, unit, pack, harga, stok_awal, stok_masuk, stok_keluar, stok_terbuang, stok_penyesuaian, stok_akhir, unit_total, nilai_total, tanggal, created_at, updated_at
-bl_stok_penyesuaian : id, tanggal, bl_db_purchase_id, kuantitas, alasan, created_at, updated_at
-bl_stok_terbuang : id, tanggal, bl_db_purchase_id, kuantitas, alasan, created_at, updated_at
-bl_store_request : id, tanggal, jenis_pengeluaran, bl_db_purchase_id, kuantitas, created_at, updated_at
-bl_store_request_bar : id, tanggal, jenis_pengeluaran, bl_db_purchase_id, kuantitas, catatan, status, created_at, updated_at
-bl_store_request_kitchen : id, tanggal, jenis_pengeluaran, bl_db_purchase_id, kuantitas, catatan, status, created_at, updated_at
-bl_tipe_produksi : id, nama_tipe_produksi, created_at, updated_at
-generated_tabel : id, pegawai_id, nama, pesan, tanggal, kode_shift, jam_masuk, jam_pulang, status_masuk, status_pulang, created_at, updated_at
-kode_user : id, kode_user, created_at, updated_at
-messages : id, user_id, message, created_at, updated_at
-pr_base : id, nama_base, deskripsi, satuan, hpp, created_at, updated_at
-pr_customer : id, nama, kode_pelanggan, jenis_kelamin, tanggal_lahir, alamat, telepon, email, foto, created_at, updated_at, level
-pr_customer_poin : id, customer_id, transaksi_id, jumlah_poin, jenis, sumber, tanggal_kedaluwarsa, status, created_at, updated_at
-pr_detail_extra : id, detail_transaksi_id, pr_produk_extra_id, jumlah, harga, subtotal, sku, satuan, hpp, created_at, updated_at, status
-pr_detail_transaksi : id, pr_transaksi_id, pr_produk_id, detail_unit_id, jumlah, harga, catatan, is_printed, status, created_at, updated_at, is_checked
-pr_divisi : id, nama_divisi, urutan_tampilan, created_at, updated_at
-pr_extra : id, nama_extra, sku, satuan, hpp, harga_jual, created_at, updated_at
-pr_jenis_order : id, jenis_order, created_at, updated_at
-pr_kasir_shift : id, kasir_id, modal_awal, waktu_mulai, total_penjualan, total_pending, modal_akhir, selisih, waktu_tutup, total_pendapatan, keterangan, status, created_at, updated_at, transaksi_selesai, transaksi_pending
-pr_kategori : id, nama_kategori, pr_divisi_id, urutan, status, created_at, updated_at
-pr_log_stok_bahan_baku : id, bahan_id, divisi_id, jenis_transaksi, jumlah, hpp, tanggal, keterangan, created_at, updated_at
-pr_log_voucher : id, voucher_id, transaksi_id, detail_transaksi_id, customer_id, kode_voucher, jumlah_diskon, sisa_voucher, created_at, updated_at
-pr_lokasi_printer : id, nama_lokasi, created_at, updated_at
-pr_meja : id, nama_meja, posisi_x, posisi_y, kapasitas, zona, bentuk, created_at, updated_at
-pr_meja_pembatas : id, zona, posisi_x, posisi_y, lebar, tinggi, orientasi, created_at, updated_at
-pr_metode_pembayaran : id, metode_pembayaran, bl_rekening_id, created_at, updated_at
-pr_pembayaran : id, transaksi_id, metode_id, jumlah, waktu_bayar, keterangan, kasir_id, created_at, updated_at
-pr_pengaturan : id, nama_outlet, alamat, email, no_telepon, logo, text_header, text_footer, show_header_text, show_footer_text, show_logo, show_outlet, show_address, show_email, show_phone, show_invoice, show_cashier_order, show_order_time, show_payment_time, show_cashier_payment, show_customer, show_order_type, show_table_number, printer_name, printer_type, created_at, updated_at
-pr_poin : id, jenis_point, produk_id, min_pembelian, nilai_point, kedaluwarsa_hari, created_at, updated_at
-pr_printer : id, lokasi_printer, divisi, printer_name, port, created_at, updated_at, python_port
-pr_printer_setting : id, divisi_id, nama_outlet, alamat, kota, provinsi, telepon, custom_header, logo_url, tampilkan_logo, tampilkan_kolom, created_at, updated_at
-pr_produk : id, nama_produk, sku, deskripsi, kategori_id, satuan, hpp, harga_jual, monitor_persediaan, tampil, foto, created_at, updated_at
-pr_produk_extra : id, sku, nama_extra, satuan, harga, hpp, status, created_at, updated_at
-pr_produksi_base : id, pr_base_id, jumlah_dihasilkan, divisi_id, catatan, created_at
-pr_refund : id, kode_refund, pr_transaksi_id, no_transaksi, pr_detail_transaksi_id, pr_produk_id, nama_produk, detail_extra_id, produk_extra_id, nama_extra, jumlah, harga, catatan, alasan, refund_by, metode_pembayaran_id, waktu_refund, created_at, updated_at
-pr_resep_base : id, pr_base_id, bahan_id, jumlah, satuan, hpp, hpp_dinamis, created_at, updated_at
-pr_resep_produk : id, pr_produk_id, jenis, bahan_id, jumlah, satuan, hpp, hpp_dinamis, created_at, updated_at
-pr_reservasi : id, customer_id, nama_customer, no_hp, tanggal, jam, jumlah_orang, catatan, total_bayar, created_at, updated_at, status
-pr_reservasi_detail : id, reservasi_id, produk_id, qty, catatan, harga, created_at, updated_at
-pr_reservasi_meja : id, reservasi_id, meja_id, tanggal, created_at, updated_at
-pr_stok_bahan_baku : id, bahan_id, divisi_id, stok_awal, stok_masuk, stok_keluar, stok_penyesuaian, stok_sisa, hpp, created_at, updated_at
-pr_stok_base : id, pr_base_id, divisi_id, jumlah, satuan, hpp, created_at, updated_at
-pr_struk : id, nama_outlet, alamat, email, no_telepon, custom_header, custom_footer, logo, created_at, updated_at
-pr_struk_tampilan : id, printer_id, show_logo, show_outlet, show_alamat, show_no_telepon, show_custom_header, show_invoice, show_kasir_order, show_kasir_bayar, show_no_transaksi, show_customer, show_nomor_meja, show_waktu_order, show_waktu_bayar, show_custom_footer, created_at, updated_at
-pr_transaksi : id, customer_id, tanggal, no_transaksi, waktu_order, waktu_bayar, jenis_order_id, customer, nomor_meja, total_penjualan, kasir_order, kasir_bayar, kode_voucher, diskon, total_pembayaran, sisa_pembayaran, status_pembayaran, created_at, updated_at
-pr_void : id, kode_void, pr_transaksi_id, no_transaksi, detail_transaksi_id, pr_produk_id, nama_produk, detail_extra_id, produk_extra_id, nama_extra, jumlah, harga, catatan, alasan, void_by, waktu, created_at, updated_at, is_printed
-pr_voucher : id, kode_voucher, jenis, nilai, min_pembelian, produk_id, jumlah_gratis, max_diskon, maksimal_voucher, sisa_voucher, status, tanggal_mulai, tanggal_berakhir, created_at, updated_at, pr_transaksi_id, customer_id
-schedule : id, group_id, message, send_time, status, created_at, updated_at
-users : id, username, password, created_at, updated_at
+=============================
+TABEL: abs_absensi
+=============================
+- id (int(11))
+- pegawai_id (int(11))
+- tanggal (date)
+- waktu (time)
+- latitude (decimal(10,8))
+- longitude (decimal(11,8))
+- foto (varchar(255))
+- shift_id (int(11))
+- jenis_absen (enum('masuk','pulang'))
+- lokasi_id (int(11))
+- verified_by (int(11))
+- verified_at (datetime)
+- updated_at (datetime)
+- created_at (datetime)
 
-pr_promo_voucher_auto: id 	nama_promo 	tipe_trigger 	nilai 	produk_ids 	masa_berlaku 	jenis 	nilai_voucher 	min_pembelian 	produk_id 	max_diskon 	aktif 	maksimal_voucher 	created_at 	updated_at 	
+=============================
+TABEL: abs_absensi_pending
+=============================
+- id (int(11))
+- pegawai_id (int(11))
+- shift_id (int(11))
+- jenis_absen (enum('masuk','pulang'))
+- tanggal (date)
+- waktu (time)
+- created_by (int(11))
+- status (enum('pending','verified','rejected'))
+- verified_by (int(11))
+- verified_at (datetime)
+- created_at (timestamp)
+- updated_at (timestamp)
 
-pr_redeem_log: id, customer_id, redeem_setting_id, jenis, jumlah_digunakan, voucher_id, created_at, updated_at
+=============================
+TABEL: abs_arsip_gaji
+=============================
+- id (int(11))
+- tanggal_awal (date)
+- tanggal_akhir (date)
+- pegawai_id (int(11))
+- nama_pegawai (varchar(255))
+- nomor_rekening (varchar(50))
+- nama_bank (varchar(100))
+- divisi (varchar(100))
+- jabatan1 (varchar(100))
+- jabatan2 (varchar(100))
+- total_kehadiran (int(11))
+- total_menit (int(11))
+- total_jam (decimal(10,2))
+- gaji_pokok (decimal(15,2))
+- tunjangan (decimal(15,2))
+- total_lembur (decimal(15,2))
+- tambahan_lain (decimal(15,2))
+- potongan (decimal(15,2))
+- deposit (decimal(15,2))
+- bayar_kasbon (decimal(15,2))
+- total_penerimaan (decimal(15,2))
+- pembulatan_penerimaan (decimal(15,2))
+- created_at (timestamp)
+- updated_at (datetime)
 
-pr_produk_paket :	id 	nama_paket 	harga_paket 	keterangan 	status 	divisi_id 	created_at 	updated_at 
-pr_produk_paket_detail:	id 	pr_produk_paket_id 	pr_produk_id 	qty 	created_at 	updated_at
-pr_detail_transaksi_paket : id 	pr_transaksi_id 	pr_detail_transaksi_id 	pr_produk_paket_id 	harga 	jumlah 	catatan 	created_at 	updated_at 	
+=============================
+TABEL: abs_deposit
+=============================
+- id (int(11))
+- pegawai_id (int(11))
+- tanggal (date)
+- nilai (decimal(10,2))
+- jenis (enum('setor','tarik'))
+- keterangan (varchar(255))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: abs_divisi
+=============================
+- id (int(11))
+- nama_divisi (varchar(50))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: abs_jabatan
+=============================
+- id (int(11))
+- divisi_id (int(11))
+- nama_jabatan (varchar(50))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: abs_jadwal_shift
+=============================
+- id (int(11))
+- pegawai_id (int(11))
+- tanggal (date)
+- shift_id (int(11))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: abs_kasbon
+=============================
+- id (int(11))
+- pegawai_id (int(11))
+- tanggal (date)
+- nilai (decimal(15,2))
+- keterangan (varchar(255))
+- jenis (enum('kasbon','bayar'))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: abs_lembur
+=============================
+- id (int(11))
+- pegawai_id (int(11))
+- tanggal (date)
+- lama_lembur (int(11))
+- alasan (text)
+- nilai_lembur_id (int(11))
+- total_gaji_lembur (decimal(10,2))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: abs_lokasi_absensi
+=============================
+- id (int(11))
+- nama_lokasi (varchar(100))
+- latitude (varchar(50))
+- longitude (varchar(50))
+- range (int(11))
+- status (tinyint(1))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: abs_nilai_lembur
+=============================
+- id (int(11))
+- nilai_per_jam (decimal(10,2))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: abs_pegawai
+=============================
+- id (int(11))
+- nama (varchar(100))
+- divisi_id (int(11))
+- jabatan1_id (int(11))
+- jabatan2_id (int(11))
+- gaji_pokok (decimal(15,2))
+- gaji_per_jam (decimal(15,2))
+- tunjangan (decimal(15,2))
+- tanggal_kontrak_awal (date)
+- durasi_kontrak (int(11))
+- tambahan_lain (decimal(15,2))
+- username (varchar(50))
+- password (varchar(255))
+- avatar (varchar(255))
+- kode_user (varchar(20))
+- tanggal_kontrak_akhir (date)
+- nomor_rekening (varchar(50))
+- nama_bank_id (int(11))
+- is_kasir (tinyint(1))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: abs_potongan
+=============================
+- id (int(11))
+- pegawai_id (int(11))
+- tanggal (date)
+- nilai (decimal(10,2))
+- keterangan (varchar(255))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: abs_rekap_absensi
+=============================
+- id (int(11))
+- tanggal (date)
+- pegawai_id (int(11))
+- shift_id (int(11))
+- jam_masuk (time)
+- jam_pulang (time)
+- terlambat (int(11))
+- pulang_cepat (int(11))
+- lama_menit_kerja (int(11))
+- total_gaji (decimal(10,2))
+- verified_by (int(11))
+- verified_at (datetime)
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: abs_rekening_bank
+=============================
+- id (int(11))
+- nama_bank (varchar(255))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: abs_shift
+=============================
+- id (int(11))
+- divisi_id (int(11))
+- kode_shift (varchar(50))
+- nama_shift (varchar(255))
+- jam_mulai (time)
+- jam_selesai (time)
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: abs_tambahan_lain
+=============================
+- id (int(11))
+- pegawai_id (int(11))
+- tanggal (date)
+- nilai_tambahan (decimal(10,2))
+- keterangan (varchar(255))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: aset_data
+=============================
+- id (int(11))
+- nama_aset (varchar(255))
+- kode_aset (varchar(100))
+- kategori_id (int(11))
+- lokasi (varchar(255))
+- kondisi (varchar(100))
+- status (varchar(100))
+- tanggal_perolehan (date)
+- nilai_beli (decimal(15,2))
+- nilai_penyusutan (decimal(15,2))
+- catatan (text)
+- lampiran (varchar(255))
+- created_at (datetime)
+- updated_at (datetime)
+- divisi_id (int(11))
+
+=============================
+TABEL: aset_divisi
+=============================
+- id (int(11))
+- nama_divisi (varchar(100))
+- keterangan (text)
+- is_active (tinyint(1))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: aset_kategori
+=============================
+- id (int(11))
+- nama_kategori (varchar(100))
+- deskripsi (text)
+- is_active (tinyint(1))
+- created_at (datetime)
+- updated_at (datetime)
+- divisi_id (int(11))
+
+=============================
+TABEL: aset_lampiran
+=============================
+- id (int(11))
+- aset_id (int(11))
+- file_path (varchar(255))
+- keterangan (varchar(255))
+- uploaded_at (datetime)
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: aset_penghapusan
+=============================
+- id (int(11))
+- aset_id (int(11))
+- tanggal_penghapusan (date)
+- alasan (text)
+- nilai_sisa (decimal(15,2))
+- metode_penghapusan (varchar(100))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: aset_riwayat
+=============================
+- id (int(11))
+- aset_id (int(11))
+- aktivitas (varchar(255))
+- deskripsi (text)
+- tanggal (datetime)
+- user_id (int(11))
+- updated_at (datetime)
+- created_at (datetime)
+
+=============================
+TABEL: bl_daily_bar
+=============================
+- id (int(11))
+- tanggal_pembelian (date)
+- bl_db_belanja_id (int(11))
+- bl_db_purchase_id (int(11))
+- kuantitas (int(11))
+- total_harga (decimal(15,2))
+- hpp (decimal(15,2))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: bl_daily_inventory
+=============================
+- id (int(11))
+- tanggal_pembelian (date)
+- bl_purchase_id (int(11))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: bl_daily_kitchen
+=============================
+- id (int(11))
+- tanggal_pembelian (date)
+- bl_db_belanja_id (int(11))
+- bl_db_purchase_id (int(11))
+- kuantitas (int(11))
+- total_harga (decimal(15,2))
+- hpp (decimal(15,2))
+- hpp_average (decimal(15,2))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: bl_db_belanja
+=============================
+- id (int(11))
+- nama_barang (varchar(100))
+- nama_bahan_baku (varchar(100))
+- id_kategori (int(11))
+- id_tipe_produksi (int(11))
+- is_gudang (int(11))
+- tanggal_update (date)
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: bl_db_purchase
+=============================
+- id (int(11))
+- bl_db_belanja_id (int(11))
+- merk (varchar(100))
+- keterangan (varchar(255))
+- ukuran (float)
+- unit (varchar(50))
+- pack (varchar(50))
+- harga_satuan (decimal(10,2))
+- hpp (decimal(10,2))
+- tanggal (date)
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: bl_divisi
+=============================
+- id (int(11))
+- nama_divisi (varchar(50))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: bl_gudang
+=============================
+- id (int(11))
+- bl_db_belanja_id (int(11))
+- bl_db_purchase_id (int(11))
+- stok_awal (decimal(10,2))
+- stok_masuk (decimal(10,2))
+- stok_keluar (decimal(10,2))
+- stok_terbuang (decimal(10,2))
+- stok_penyesuaian (decimal(10,2))
+- stok_akhir (decimal(10,2))
+- tanggal (date)
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: bl_gudang_bc 250121
+=============================
+- id (int(11))
+- bl_db_belanja_id (int(11))
+- bl_db_purchase_id (int(11))
+- stok_awal (decimal(10,2))
+- stok_masuk (decimal(10,2))
+- stok_keluar (decimal(10,2))
+- stok_terbuang (decimal(10,2))
+- stok_penyesuaian (decimal(10,2))
+- stok_akhir (decimal(10,2))
+- tanggal (date)
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: bl_gudang_januari
+=============================
+- id (int(11))
+- bl_db_belanja_id (int(11))
+- bl_db_purchase_id (int(11))
+- stok_awal (decimal(10,2))
+- stok_masuk (decimal(10,2))
+- stok_keluar (decimal(10,2))
+- stok_terbuang (decimal(10,2))
+- stok_penyesuaian (decimal(10,2))
+- stok_akhir (decimal(10,2))
+- tanggal (date)
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: bl_jenis_pengeluaran
+=============================
+- id (int(11))
+- nama_jenis_pengeluaran (varchar(100))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: bl_kas
+=============================
+- id (int(11))
+- bl_rekening_id (int(11))
+- tanggal (date)
+- jumlah (decimal(15,2))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: bl_kategori
+=============================
+- id (int(11))
+- nama_kategori (varchar(100))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: bl_mutasi_kas
+=============================
+- id (int(11))
+- tanggal (date)
+- bl_rekening_id (int(11))
+- jenis_mutasi (enum('masuk','keluar'))
+- jumlah (decimal(15,2))
+- keterangan (text)
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: bl_mutasi_kas_rekening
+=============================
+- id (int(11))
+- tanggal (date)
+- bl_rekening_id_sumber (int(11))
+- bl_rekening_id_tujuan (int(11))
+- jumlah (decimal(15,2))
+- keterangan (text)
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: bl_penjualan_majoo
+=============================
+- tanggal (date)
+- no_nota (varchar(50))
+- waktu_order (varchar(50))
+- waktu_bayar (varchar(50))
+- outlet (varchar(100))
+- jenis_order (varchar(100))
+- penjualan (decimal(15,2))
+- metode_pembayaran (varchar(100))
+- rekening_id (int(11))
+- penyesuaian (int(10))
+- selisih (int(10))
+- keterangan (varchar(50))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: bl_penjualan_produk
+=============================
+- tanggal (date)
+- produk (varchar(255))
+- sku (varchar(100))
+- kategori (varchar(255))
+- jenis_produk (varchar(255))
+- jumlah (int(11))
+- nilai (decimal(15,2))
+- jumlah_refund (int(11))
+- nilai_refund (decimal(15,2))
+- penjualan (decimal(15,2))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: bl_penyesuaian
+=============================
+- id (int(11))
+- tanggal (date)
+- bl_db_belanja_id (int(11))
+- bl_db_purchase_id (int(11))
+- kuantitas (int(11))
+- alasan (varchar(255))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: bl_persediaan_awal
+=============================
+- id (int(11))
+- tanggal (date)
+- bl_db_belanja_id (int(11))
+- bl_db_purchase_id (int(11))
+- kuantitas (int(11))
+- total_unit (decimal(10,2))
+- total_harga (decimal(15,2))
+- hpp (decimal(15,2))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: bl_produk
+=============================
+- id (int(11))
+- nama_produk (varchar(255))
+- kategori (varchar(255))
+- satuan (varchar(100))
+- harga_jual (decimal(15,2))
+- sku (varchar(100))
+- divisi_id (int(255))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: bl_purchase
+=============================
+- id (int(11))
+- tanggal (date)
+- jenis_pengeluaran (int(11))
+- bl_db_belanja_id (int(11))
+- bl_db_purchase_id (int(11))
+- kuantitas (int(11))
+- total_unit (float)
+- total_harga (decimal(10,2))
+- hpp (decimal(10,2))
+- status (enum('pending','verified','rejected'))
+- pengusul (enum('purchase','bar','kitchen'))
+- metode_pembayaran (int(11))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: bl_purchase_bar
+=============================
+- id (int(11))
+- tanggal (date)
+- jenis_pengeluaran (int(11))
+- nama_barang (varchar(255))
+- nama_bahan_baku (varchar(255))
+- kategori_id (int(11))
+- tipe_produksi_id (int(11))
+- merk (varchar(255))
+- keterangan (text)
+- ukuran (decimal(10,2))
+- unit (varchar(255))
+- pack (varchar(255))
+- harga_satuan (decimal(10,2))
+- kuantitas (int(11))
+- total_unit (decimal(10,2))
+- total_harga (decimal(10,2))
+- hpp (decimal(10,2))
+- metode_pembayaran (int(11))
+- status (enum('pending','verified','rejected'))
+- pengusul (varchar(255))
+- catatan (text)
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: bl_purchase_kitchen
+=============================
+- id (int(11))
+- tanggal (date)
+- jenis_pengeluaran (int(11))
+- nama_barang (varchar(255))
+- nama_bahan_baku (varchar(255))
+- kategori_id (int(11))
+- tipe_produksi_id (int(11))
+- merk (varchar(255))
+- keterangan (text)
+- ukuran (decimal(10,2))
+- unit (varchar(255))
+- pack (varchar(255))
+- harga_satuan (decimal(10,2))
+- kuantitas (int(11))
+- total_unit (decimal(10,2))
+- total_harga (decimal(10,2))
+- hpp (decimal(10,2))
+- metode_pembayaran (int(11))
+- status (enum('pending','verified','rejected'))
+- pengusul (varchar(255))
+- catatan (text)
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: bl_purchase_pending
+=============================
+- id (int(11))
+- tanggal_pembelian (date)
+- jenis_pengeluaran (int(11))
+- nama_barang (varchar(255))
+- nama_bahan_baku (varchar(255))
+- kategori_id (int(11))
+- tipe_produksi_id (int(11))
+- merk (varchar(255))
+- keterangan (text)
+- ukuran (decimal(10,2))
+- unit (varchar(255))
+- pack (varchar(255))
+- harga_satuan (decimal(10,2))
+- kuantitas (int(11))
+- total_unit (decimal(10,2))
+- total_harga (decimal(10,2))
+- hpp (decimal(10,2))
+- metode_pembayaran (int(11))
+- status (enum('pending','verified','rejected'))
+- pengusul (varchar(255))
+- catatan (text)
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: bl_refund
+=============================
+- id (int(11))
+- kode (varchar(50))
+- tanggal (date)
+- nilai (decimal(15,2))
+- rekening (int(11))
+- keterangan (text)
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: bl_rekap_rekening
+=============================
+- id (int(11))
+- tanggal (date)
+- rekening_id (int(11))
+- nilai (decimal(15,2))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: bl_rekening
+=============================
+- id (int(11))
+- nama_rekening (varchar(100))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: bl_stok_opname
+=============================
+- id (int(11))
+- kategori_id (int(11))
+- bl_db_belanja_id (int(11))
+- bl_db_purchase_id (int(11))
+- tipe (varchar(255))
+- merk (varchar(255))
+- ukuran (float)
+- keterangan (varchar(200))
+- unit (varchar(50))
+- pack (varchar(50))
+- harga (float)
+- stok_awal (float)
+- stok_masuk (float)
+- stok_keluar (float)
+- stok_terbuang (float)
+- stok_penyesuaian (float)
+- stok_akhir (float)
+- unit_total (float)
+- nilai_total (float)
+- tanggal (date)
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: bl_stok_opname_januari
+=============================
+- id (int(11))
+- kategori_id (int(11))
+- bl_db_belanja_id (int(11))
+- bl_db_purchase_id (int(11))
+- tipe (varchar(255))
+- merk (varchar(255))
+- ukuran (float)
+- keterangan (varchar(200))
+- unit (varchar(50))
+- pack (varchar(50))
+- harga (float)
+- stok_awal (float)
+- stok_masuk (float)
+- stok_keluar (float)
+- stok_terbuang (float)
+- stok_penyesuaian (float)
+- stok_akhir (float)
+- unit_total (float)
+- nilai_total (float)
+- tanggal (date)
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: bl_stok_penyesuaian
+=============================
+- id (int(11))
+- tanggal (date)
+- bl_db_purchase_id (int(11))
+- kuantitas (int(11))
+- alasan (text)
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: bl_stok_terbuang
+=============================
+- id (int(11))
+- tanggal (date)
+- bl_db_purchase_id (int(11))
+- kuantitas (int(11))
+- alasan (text)
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: bl_store_request
+=============================
+- id (int(11))
+- tanggal (date)
+- jenis_pengeluaran (varchar(255))
+- bl_db_purchase_id (int(11))
+- kuantitas (float)
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: bl_store_request_bar
+=============================
+- id (int(11))
+- tanggal (date)
+- jenis_pengeluaran (varchar(50))
+- bl_db_purchase_id (int(11))
+- kuantitas (int(11))
+- catatan (text)
+- status (enum('pending','verified','rejected'))
+- created_at (timestamp)
+- updated_at (timestamp)
+
+=============================
+TABEL: bl_store_request_kitchen
+=============================
+- id (int(11))
+- tanggal (date)
+- jenis_pengeluaran (varchar(50))
+- bl_db_purchase_id (int(11))
+- kuantitas (int(11))
+- catatan (text)
+- status (enum('pending','verified','rejected'))
+- created_at (timestamp)
+- updated_at (timestamp)
+
+=============================
+TABEL: bl_tipe_produksi
+=============================
+- id (int(11))
+- nama_tipe_produksi (varchar(100))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: generated_tabel
+=============================
+- id (int(11))
+- pegawai_id (int(11))
+- nama (varchar(255))
+- pesan (text)
+- tanggal (date)
+- kode_shift (varchar(50))
+- jam_masuk (time)
+- jam_pulang (time)
+- status_masuk (enum('pending','sent'))
+- status_pulang (enum('pending','sent'))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: kode_user
+=============================
+- id (int(11))
+- kode_user (varchar(50))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: member_news
+=============================
+- id (int(11))
+- judul (varchar(100))
+- gambar (varchar(255))
+- deskripsi (text)
+- urutan (int(11))
+- is_active (tinyint(1))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: member_promo
+=============================
+- id (int(11))
+- judul (varchar(100))
+- gambar (varchar(255))
+- deskripsi (text)
+- urutan (int(11))
+- is_active (tinyint(1))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: messages
+=============================
+- id (int(11))
+- user_id (int(11))
+- message (text)
+- created_at (timestamp)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_base
+=============================
+- id (int(11))
+- nama_base (varchar(100))
+- deskripsi (text)
+- satuan (varchar(20))
+- hpp (decimal(12,2))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_customer
+=============================
+- id (int(11))
+- nama (varchar(255))
+- kode_pelanggan (varchar(20))
+- jenis_kelamin (varchar(20))
+- tanggal_lahir (date)
+- alamat (text)
+- telepon (varchar(15))
+- email (varchar(100))
+- foto (varchar(255))
+- created_at (datetime)
+- updated_at (datetime)
+- level (varchar(20))
+
+=============================
+TABEL: pr_customer_poin
+=============================
+- id (int(11))
+- customer_id (int(11))
+- transaksi_id (int(11))
+- jumlah_poin (int(11))
+- jenis (enum('per_produk','per_pembelian','penukaran'))
+- sumber (varchar(255))
+- tanggal_kedaluwarsa (date)
+- status (enum('aktif','digunakan','kedaluwarsa'))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_customer_stamp
+=============================
+- id (int(11))
+- pr_transaksi_id (int(11))
+- customer_id (int(11))
+- promo_stamp_id (int(11))
+- jumlah_stamp (int(11))
+- last_stamp_at (datetime)
+- masa_berlaku (date)
+- status (enum('aktif','kadaluarsa','ditukar'))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_detail_extra
+=============================
+- id (int(11))
+- detail_transaksi_id (int(11))
+- pr_produk_extra_id (int(11))
+- jumlah (int(11))
+- harga (int(11))
+- subtotal (int(11))
+- sku (varchar(50))
+- satuan (varchar(50))
+- hpp (int(11))
+- created_at (timestamp)
+- updated_at (timestamp)
+- status (enum('BERHASIL','BATAL','REFUND'))
+
+=============================
+TABEL: pr_detail_transaksi
+=============================
+- id (int(11))
+- pr_transaksi_id (int(11))
+- pr_produk_id (int(11))
+- detail_unit_id (varchar(64))
+- pr_detail_transaksi_paket_id (int(11))
+- jumlah (int(11))
+- harga (decimal(12,2))
+- catatan (text)
+- is_printed (int(10))
+- status (enum('BERHASIL','BATAL','REFUND'))
+- created_at (datetime)
+- updated_at (datetime)
+- is_checked (tinyint(1))
+
+=============================
+TABEL: pr_detail_transaksi_paket
+=============================
+- id (int(11))
+- pr_transaksi_id (int(11))
+- pr_produk_paket_id (int(11))
+- detail_unit_paket_id (varchar(100))
+- harga (int(11))
+- jumlah (int(11))
+- catatan (text)
+- status (enum('BERHASIL','BATAL','REFUND'))
+- created_at (datetime)
+- updated_at (datetime)
+- is_printed (tinyint(1))
+
+=============================
+TABEL: pr_divisi
+=============================
+- id (int(11))
+- nama_divisi (varchar(100))
+- urutan_tampilan (int(3))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_extra
+=============================
+- id (int(11))
+- nama_extra (varchar(255))
+- sku (varchar(50))
+- satuan (varchar(50))
+- hpp (decimal(10,2))
+- harga_jual (decimal(10,2))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_jenis_order
+=============================
+- id (int(11))
+- jenis_order (varchar(50))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_kasir_shift
+=============================
+- id (int(11))
+- kasir_id (int(11))
+- modal_awal (decimal(15,2))
+- waktu_mulai (datetime)
+- total_penjualan (decimal(15,2))
+- total_pending (decimal(15,2))
+- modal_akhir (decimal(15,2))
+- selisih (decimal(15,2))
+- waktu_tutup (datetime)
+- total_pendapatan (decimal(15,2))
+- keterangan (text)
+- status (enum('OPEN','CLOSE'))
+- created_at (timestamp)
+- updated_at (timestamp)
+- transaksi_selesai (int(11))
+- transaksi_pending (int(11))
+
+=============================
+TABEL: pr_kasir_shift_log
+=============================
+- id (int(11))
+- shift_id (int(11))
+- tipe (enum('penjualan','refund'))
+- metode_id (int(11))
+- rekening_id (int(11))
+- nama (varchar(100))
+- nominal (decimal(15,2))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_kategori
+=============================
+- id (int(11))
+- nama_kategori (varchar(100))
+- pr_divisi_id (int(11))
+- urutan (int(11))
+- status (tinyint(1))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_log_stok_bahan_baku
+=============================
+- id (int(11))
+- bahan_id (int(11))
+- divisi_id (int(11))
+- jenis_transaksi (enum('purchase','store_request','penyesuaian','penjualan'))
+- jumlah (decimal(10,2))
+- hpp (decimal(15,2))
+- tanggal (date)
+- keterangan (varchar(255))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_log_voucher
+=============================
+- id (int(11))
+- voucher_id (int(11))
+- transaksi_id (int(11))
+- detail_transaksi_id (int(11))
+- customer_id (int(11))
+- kode_voucher (varchar(50))
+- jumlah_diskon (int(11))
+- sisa_voucher (int(11))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_lokasi_printer
+=============================
+- id (int(11))
+- nama_lokasi (varchar(100))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_meja
+=============================
+- id (int(11))
+- nama_meja (varchar(50))
+- posisi_x (int(11))
+- posisi_y (int(11))
+- kapasitas (int(11))
+- zona (enum('indoor','semi_indoor','teras','outdoor'))
+- bentuk (enum('persegi','panjang','panjang2','bulat'))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_meja_pembatas
+=============================
+- id (int(11))
+- zona (enum('indoor','semi_indoor','teras','outdoor'))
+- posisi_x (int(11))
+- posisi_y (int(11))
+- lebar (int(11))
+- tinggi (int(11))
+- orientasi (enum('horizontal','vertikal'))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_metode_pembayaran
+=============================
+- id (int(11))
+- metode_pembayaran (varchar(50))
+- bl_rekening_id (int(11))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_pembayaran
+=============================
+- id (int(11))
+- transaksi_id (int(11))
+- metode_id (int(11))
+- jumlah (decimal(12,0))
+- waktu_bayar (datetime)
+- keterangan (varchar(255))
+- kasir_id (int(11))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_pengaturan
+=============================
+- id (int(11))
+- nama_outlet (varchar(255))
+- alamat (text)
+- email (varchar(100))
+- no_telepon (varchar(50))
+- logo (varchar(255))
+- text_header (text)
+- text_footer (text)
+- show_header_text (tinyint(1))
+- show_footer_text (tinyint(1))
+- show_logo (tinyint(1))
+- show_outlet (tinyint(1))
+- show_address (tinyint(1))
+- show_email (tinyint(1))
+- show_phone (tinyint(1))
+- show_invoice (tinyint(1))
+- show_cashier_order (tinyint(1))
+- show_order_time (tinyint(1))
+- show_payment_time (tinyint(1))
+- show_cashier_payment (tinyint(1))
+- show_customer (tinyint(1))
+- show_order_type (tinyint(1))
+- show_table_number (tinyint(1))
+- printer_name (varchar(255))
+- printer_type (enum('usb','bluetooth'))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_poin
+=============================
+- id (int(11))
+- jenis_point (enum('per_produk','per_pembelian'))
+- produk_id (int(11))
+- min_pembelian (decimal(10,2))
+- nilai_point (int(11))
+- kedaluwarsa_hari (int(11))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_printer
+=============================
+- id (int(11))
+- lokasi_printer (varchar(50))
+- divisi (int(11))
+- printer_name (varchar(100))
+- port (varchar(50))
+- created_at (datetime)
+- updated_at (datetime)
+- python_port (int(11))
+
+=============================
+TABEL: pr_printer_setting
+=============================
+- id (int(11))
+- divisi_id (int(11))
+- nama_outlet (varchar(255))
+- alamat (text)
+- kota (varchar(100))
+- provinsi (varchar(100))
+- telepon (varchar(50))
+- custom_header (text)
+- logo_url (text)
+- tampilkan_logo (enum('normal','penuh','tidak'))
+- tampilkan_kolom (text)
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_produk
+=============================
+- id (int(11))
+- nama_produk (varchar(255))
+- sku (varchar(50))
+- deskripsi (text)
+- kategori_id (int(11))
+- satuan (varchar(50))
+- hpp (decimal(10,2))
+- harga_jual (decimal(10,2))
+- monitor_persediaan (int(1))
+- tampil (int(1))
+- foto (varchar(255))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_produk_extra
+=============================
+- id (int(11))
+- sku (varchar(50))
+- nama_extra (varchar(100))
+- satuan (varchar(50))
+- harga (int(11))
+- hpp (int(11))
+- status (enum('aktif','nonaktif'))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_produk_paket
+=============================
+- id (int(11))
+- nama_paket (varchar(100))
+- harga_paket (int(11))
+- keterangan (text)
+- status (tinyint(1))
+- divisi_id (int(11))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_produk_paket_detail
+=============================
+- id (int(11))
+- pr_produk_paket_id (int(11))
+- pr_produk_id (int(11))
+- qty (int(11))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_produksi_base
+=============================
+- id (int(11))
+- pr_base_id (int(11))
+- jumlah_dihasilkan (decimal(10,2))
+- divisi_id (int(11))
+- catatan (text)
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_promo_stamp
+=============================
+- id (int(11))
+- nama_promo (varchar(100))
+- deskripsi (text)
+- minimal_pembelian (int(11))
+- berlaku_kelipatan (tinyint(1))
+- produk_berlaku (int(11))
+- total_stamp_target (int(11))
+- hadiah (text)
+- masa_berlaku_hari (int(11))
+- aktif (tinyint(1))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_promo_voucher_auto
+=============================
+- id (int(11))
+- nama_promo (varchar(100))
+- tipe_trigger (enum('nominal','produk'))
+- nilai (int(11))
+- produk_trigger (int(11))
+- masa_berlaku (int(11))
+- jenis (enum('persentase','nominal'))
+- nilai_voucher (int(11))
+- min_pembelian (int(11))
+- produk_id (int(11))
+- max_diskon (int(11))
+- aktif (tinyint(1))
+- maksimal_voucher (int(11))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_redeem_log
+=============================
+- id (int(11))
+- customer_id (int(11))
+- redeem_setting_id (int(11))
+- jenis (enum('poin','stamp'))
+- jumlah_digunakan (int(11))
+- voucher_id (int(11))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_redeem_setting
+=============================
+- id (int(11))
+- nama_redeem (varchar(255))
+- jenis (enum('poin','stamp'))
+- jumlah_dibutuhkan (int(11))
+- jenis_voucher (enum('produk','diskon'))
+- tipe_diskon (enum('nominal','persentase'))
+- nilai_voucher (int(11))
+- max_diskon (decimal(10,2))
+- produk_id (int(11))
+- masa_berlaku (int(11))
+- is_active (tinyint(1))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_refund
+=============================
+- id (int(11))
+- kode_refund (varchar(20))
+- pr_transaksi_id (int(11))
+- no_transaksi (varchar(50))
+- pr_detail_transaksi_id (int(11))
+- pr_produk_id (int(11))
+- nama_produk (varchar(255))
+- detail_extra_id (int(11))
+- produk_extra_id (int(11))
+- nama_extra (varchar(255))
+- jumlah (int(11))
+- harga (int(11))
+- catatan (text)
+- alasan (text)
+- refund_by (varchar(100))
+- metode_pembayaran_id (int(11))
+- waktu_refund (datetime)
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_resep_base
+=============================
+- id (int(11))
+- pr_base_id (int(11))
+- bahan_id (int(11))
+- jumlah (decimal(10,2))
+- satuan (varchar(20))
+- hpp (decimal(15,2))
+- hpp_dinamis (decimal(15,2))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_resep_produk
+=============================
+- id (int(11))
+- pr_produk_id (int(11))
+- jenis (enum('bahan_baku','base'))
+- bahan_id (int(11))
+- jumlah (decimal(10,2))
+- satuan (varchar(20))
+- hpp (decimal(15,2))
+- hpp_dinamis (decimal(15,2))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_reservasi
+=============================
+- id (int(11))
+- customer_id (int(11))
+- nama_customer (varchar(100))
+- no_hp (varchar(15))
+- tanggal (date)
+- jam (time)
+- jumlah_orang (int(11))
+- catatan (text)
+- total_bayar (decimal(10,2))
+- created_at (timestamp)
+- updated_at (datetime)
+- status (enum('menunggu','diterima','selesai','batal'))
+
+=============================
+TABEL: pr_reservasi_detail
+=============================
+- id (int(11))
+- reservasi_id (int(11))
+- produk_id (int(11))
+- qty (int(11))
+- catatan (text)
+- harga (decimal(10,2))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_reservasi_meja
+=============================
+- id (int(11))
+- reservasi_id (int(11))
+- meja_id (int(11))
+- tanggal (date)
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_stamp_log
+=============================
+- id (int(11))
+- customer_id (int(11))
+- promo_stamp_id (int(11))
+- transaksi_id (int(11))
+- jenis (enum('tambah','tukar'))
+- jumlah (int(11))
+- keterangan (text)
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_stok_bahan_baku
+=============================
+- id (int(11))
+- bahan_id (int(11))
+- divisi_id (int(11))
+- stok_awal (decimal(10,2))
+- stok_masuk (decimal(10,2))
+- stok_keluar (decimal(10,2))
+- stok_penyesuaian (decimal(10,2))
+- stok_sisa (decimal(10,2))
+- hpp (decimal(15,2))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_stok_base
+=============================
+- id (int(11))
+- pr_base_id (int(11))
+- divisi_id (int(11))
+- jumlah (decimal(12,2))
+- satuan (varchar(20))
+- hpp (decimal(12,2))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_struk
+=============================
+- id (int(11))
+- nama_outlet (varchar(100))
+- alamat (text)
+- email (varchar(100))
+- no_telepon (varchar(20))
+- custom_header (text)
+- custom_footer (text)
+- logo (varchar(255))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_struk_tampilan
+=============================
+- id (int(11))
+- printer_id (int(11))
+- show_logo (tinyint(1))
+- show_outlet (tinyint(1))
+- show_alamat (tinyint(1))
+- show_no_telepon (tinyint(1))
+- show_custom_header (tinyint(1))
+- show_invoice (tinyint(1))
+- show_kasir_order (tinyint(1))
+- show_kasir_bayar (tinyint(1))
+- show_no_transaksi (tinyint(1))
+- show_customer (tinyint(1))
+- show_nomor_meja (tinyint(1))
+- show_waktu_order (tinyint(1))
+- show_waktu_bayar (tinyint(1))
+- show_custom_footer (tinyint(1))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_sync_log
+=============================
+- id (int(11))
+- table_name (varchar(100))
+- id_table (int(11))
+- data (longtext)
+- status (enum('PENDING','FAILED','SENT'))
+- error_msg (text)
+- created_at (datetime)
+- sent_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_transaksi
+=============================
+- id (int(11))
+- customer_id (int(11))
+- tanggal (date)
+- no_transaksi (varchar(20))
+- waktu_order (datetime)
+- waktu_bayar (datetime)
+- jenis_order_id (int(11))
+- customer (varchar(100))
+- nomor_meja (varchar(100))
+- total_penjualan (decimal(12,2))
+- kasir_order (int(11))
+- kasir_bayar (int(11))
+- kode_voucher (varchar(50))
+- diskon (int(11))
+- total_pembayaran (int(11))
+- sisa_pembayaran (decimal(12,0))
+- status_pembayaran (enum('BELUM_LUNAS','DP','LUNAS','BATAL','REFUND'))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: pr_void
+=============================
+- id (int(11))
+- kode_void (varchar(50))
+- pr_transaksi_id (int(11))
+- no_transaksi (varchar(100))
+- detail_transaksi_id (int(11))
+- detail_transaksi_paket_id (int(11))
+- pr_produk_id (int(11))
+- nama_produk (varchar(255))
+- detail_extra_id (int(11))
+- produk_extra_id (int(11))
+- nama_extra (varchar(255))
+- jumlah (int(11))
+- harga (int(11))
+- catatan (text)
+- alasan (text)
+- void_by (int(11))
+- waktu (timestamp)
+- created_at (datetime)
+- updated_at (datetime)
+- is_printed (tinyint(1))
+
+=============================
+TABEL: pr_voucher
+=============================
+- id (int(11))
+- kode_voucher (varchar(50))
+- jenis (enum('persentase','nominal','gratis_produk','cashback','min_pembelian'))
+- nilai (int(11))
+- min_pembelian (int(11))
+- produk_id (int(11))
+- jumlah_gratis (int(11))
+- max_diskon (int(11))
+- maksimal_voucher (int(11))
+- sisa_voucher (int(11))
+- status (enum('aktif','nonaktif'))
+- tanggal_mulai (date)
+- tanggal_berakhir (date)
+- created_at (datetime)
+- updated_at (datetime)
+- pr_transaksi_id (int(11))
+- customer_id (int(11))
+
+=============================
+TABEL: schedule
+=============================
+- id (int(11))
+- group_id (varchar(255))
+- message (text)
+- send_time (datetime)
+- status (enum('pending','sent'))
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: spbu
+=============================
+- id (int(11))
+- kode (varchar(20))
+- nama (varchar(100))
+- alamat (text)
+- created_at (datetime)
+- updated_at (datetime)
+
+=============================
+TABEL: users
+=============================
+- id (int(11))
+- username (varchar(100))
+- password (varchar(255))
+- created_at (timestamp)
+- updated_at (datetime)
+

@@ -1679,6 +1679,7 @@
                         pr_produk_id: $(this).data("id"),
                         jumlah: $(this).find(".qty").val(),
                         harga: $(this).find(".qty").data("harga"),
+                        catatan: $(this).find(".catatan").val(), // ✅ tambahkan catatan
                         is_paket: 1,
                         pr_produk_paket_id: $(this).data("paket-id"),
                         paket_items: $(this).data("paket-items")
@@ -2102,61 +2103,82 @@
 
                     const paketMap = {};
 
+                    // 1. Kelompokkan produk paket berdasarkan detail_unit_paket_id
                     activeItems.forEach((item) => {
                         const isPaketItem = item.pr_detail_transaksi_paket_id;
+                        const isAktif = !item.status || item.status === '';
 
-                        if (isPaketItem) {
-                            if (!paketMap[isPaketItem]) {
-                                paketMap[isPaketItem] = {
+                        if (isPaketItem && isAktif) {
+                            const unitKey = item.detail_unit_paket_id;
+
+                            if (!paketMap[unitKey]) {
+                                // Ambil data dari produk utama (harga > 0)
+                                const isMaster = parseInt(item.harga) > 0;
+
+                                paketMap[unitKey] = {
                                     nama_paket: item.nama_paket,
                                     pr_produk_id: item.pr_produk_paket_id,
+                                    // harga: isMaster ? item.harga :
+                                    // 0, // hanya dari produk utama
                                     harga: item.harga_paket,
                                     jumlah: item.jumlah_paket,
-                                    paket_items: []
+                                    // jumlah: isMaster ? item.jumlah :
+                                    // 0, // hanya dihitung 1x dari produk utama
+                                    paket_id: item.pr_detail_transaksi_paket_id,
+                                    paket_items: {}
                                 };
                             }
 
-                            paketMap[isPaketItem].paket_items.push({
-                                pr_produk_id: item.pr_produk_id,
-                                nama_produk: item.nama_produk,
-                                jumlah: item.jumlah,
-                                extra: item.extra || []
-                            });
+                            const pid = item.pr_produk_id;
+                            if (!paketMap[unitKey].paket_items[pid]) {
+                                paketMap[unitKey].paket_items[pid] = {
+                                    pr_produk_id: pid,
+                                    nama_produk: item.nama_produk,
+                                    jumlah: 0,
+                                    extra: item.extra || []
+                                };
+                            }
+
+                            // Jumlah isi produk selalu dijumlahkan
+                            paketMap[unitKey].paket_items[pid].jumlah += parseInt(
+                                item.jumlah);
                         }
                     });
 
 
+
                     // 🔁 Render produk paket terlebih dahulu
-                    Object.entries(paketMap).forEach(([paketId, paket], i) => {
+                    Object.entries(paketMap).forEach(([unitId, paket], i) => {
                         const uid = Date.now() + "_p_" + i;
                         extraData[uid] = []; // Paket tidak bisa di-extra manual
 
+                        const items_html = Object.values(paket.paket_items).map(
+                            prod =>
+                            `<li class="text-muted small">↳ ${prod.nama_produk} (${prod.jumlah})</li>`
+                        ).join('');
+
                         let row = `
-                        <tr data-id="${paket.pr_produk_id}" data-uid="${uid}" data-is-paket="1" 
-                            data-paket-id="${paketId}" data-paket-items='${JSON.stringify(paket.paket_items)}'>
-                            <td>${paket.nama_paket}</td>
-                            <td>${formatRupiah(paket.harga)}</td>
-                            <td>
-                                <input type="number" class="form-control qty" value="${paket.jumlah}" 
-                                    data-harga="${paket.harga}" readonly>
-                            </td>
-                            <td class="total">${formatRupiah(paket.jumlah * paket.harga)}</td>
-                            <td><button class="btn btn-secondary btn-sm" disabled>Extra Nonaktif</button></td>
-                            <td><input type="text" class="form-control" readonly value="Paket"></td>
-                            <td></td>
-                        </tr>
-                        <tr class="extra-row" data-parent="${uid}">
-                            <td colspan="7">
-                                <ul class="list-extra pl-4 mb-0 text-muted small">
-                                    ${
-                                        paket.paket_items.map(prod =>
-                                            `<li class="text-muted small">↳ ${prod.nama_produk} (${prod.jumlah})</li>`
-                                        ).join('')
-                                    }
-                                </ul>
-                            </td>
-                        </tr>
-                    `;
+        <tr data-id="${paket.pr_produk_id}" data-uid="${uid}" data-is-paket="1" 
+            data-paket-id="${paket.paket_id}" data-paket-items='${JSON.stringify(Object.values(paket.paket_items))}'>
+            <td>${paket.nama_paket}</td>
+            <td>${formatRupiah(paket.harga)}</td>
+            <td>
+                <input type="number" class="form-control qty" value="${paket.jumlah}" 
+                    data-harga="${paket.harga}" readonly>
+            </td>
+            <td class="total">${formatRupiah(paket.jumlah * paket.harga)}</td>
+            <td><button class="btn btn-secondary btn-sm" disabled>Extra Nonaktif</button></td>
+            <td><input type="text" class="form-control" readonly value="Paket"></td>
+            <td></td>
+        </tr>
+        <tr class="extra-row" data-parent="${uid}">
+            <td colspan="7">
+                <ul class="list-extra pl-4 mb-0 text-muted small">
+                    ${items_html}
+                </ul>
+            </td>
+        </tr>
+    `;
                         $("#order-list").append(row);
                     });
 
@@ -2312,6 +2334,141 @@
 
 
         /// PEMBAYARAN
+        //         $("#rincian-pesanan").click(function() {
+        //             const selected = $(".pesanan-item.selected");
+        //             if (!selected.length) {
+        //                 alert("Pilih salah satu pesanan!");
+        //                 return;
+        //             }
+
+        //             const transaksi_id = selected.data("id");
+
+        //             $.post(base_url + "kasir/get_detail_transaksi_aktif", {
+        //                 transaksi_id
+        //             }, function(res) {
+        //                 console.log(res); // ⬅️ Tambahkan ini                
+        //                 // // Info transaksi
+        //                 $("#rinci-no-transaksi").text(res.no_transaksi);
+        //                 $("#rinci-customer").text(res.customer || "-");
+        //                 $("#rinci-jenis-order").text(res.jenis_order || "-");
+        //                 $("#rinci-meja").text(res.nomor_meja || "-");
+        //                 $("#rinci-voucher").text(res.kode_voucher || "-");
+        //                 $("#rinci-diskon").text("Rp " + (res.diskon || 0).toLocaleString("id-ID"));
+
+        //                 totalPenjualanAwal = parseInt(res.total_penjualan || res.total_pembayaran || 0);
+        //                 $("#rinci-total").text(totalPenjualanAwal.toLocaleString("id-ID"));
+
+        //                 // ⬇️ Tambahan ini:
+        //                 $("#rinci-tagihan").text(totalPenjualanAwal.toLocaleString("id-ID"));
+
+        //                 // ⬅️ Tambahkan ini di SINI
+        //                 rinciOrderItems = res.items;
+
+
+        //                 let itemHtml = '';
+        //                 const grouped = {};
+
+        //                 res.items.forEach(item => {
+        //                     const groupKey = item.pr_detail_transaksi_paket_id || item
+        //                         .detail_unit_id || item.id;
+
+        //                     if (!grouped[groupKey]) {
+        //                         grouped[groupKey] = {
+        //                             nama_produk: item.nama_paket || item.nama_produk,
+        //                             harga: item.nama_paket ? parseInt(item.harga_paket) :
+        //                                 parseInt(item.harga),
+        //                             jumlah: 0,
+        //                             extra: {},
+        //                             is_paket: !!item.nama_paket,
+        //                             items: []
+        //                         };
+        //                     }
+
+        //                     if (item.nama_paket) {
+        //                         // ✅ Hanya set jumlah sekali (ambil dari paket)
+        //                         if (grouped[groupKey].jumlah === 0) {
+        //                             grouped[groupKey].jumlah = parseInt(item.jumlah);
+        //                         }
+
+        //                         // ✅ Tambah produk isi paket
+        //                         grouped[groupKey].items.push({
+        //                             nama_produk: item.nama_produk,
+        //                             jumlah: item.jumlah
+        //                         });
+        //                     } else {
+        //                         grouped[groupKey].jumlah += parseInt(item.jumlah);
+        //                     }
+
+        //                     // ✅ Handle extra
+        //                     if (item.extra?.length) {
+        //                         item.extra.forEach(extra => {
+        //                             const key = extra.nama;
+        //                             if (!grouped[groupKey].extra[key]) {
+        //                                 grouped[groupKey].extra[key] = {
+        //                                     nama: extra.nama,
+        //                                     harga: parseInt(extra.harga),
+        //                                     jumlah: 0
+        //                                 };
+        //                             }
+        //                             grouped[groupKey].extra[key].jumlah += parseInt(
+        //                                 extra.jumlah);
+        //                         });
+        //                     }
+        //                 });
+
+
+        //                 // 🔁 RENDER KE TABEL
+        //                 Object.values(grouped).forEach(item => {
+        //                     itemHtml += `
+        // <tr>
+        //     <td>${item.nama_produk}</td>
+        //     <td class="text-center">Rp ${item.harga.toLocaleString('id-ID')}</td>
+        //     <td class="text-center">${item.jumlah}</td>
+        //     <td class="text-right">Rp ${(item.harga * item.jumlah).toLocaleString('id-ID')}</td>
+        // </tr>`;
+
+        //                     // Detail isi paket
+        //                     if (item.is_paket && item.items) {
+        //                         item.items.forEach(sub => {
+        //                             itemHtml += `
+        // <tr class="text-muted small">
+        //     <td class="pl-4">↳ ${sub.nama_produk}</td>
+        //     <td class="text-center">Rp 0</td>
+        //     <td class="text-center">${sub.jumlah}</td>
+        //     <td class="text-right">Rp 0</td>
+        // </tr>`;
+        //                         });
+        //                     }
+
+        //                     // Extra
+        //                     if (item.extra) {
+        //                         Object.values(item.extra).forEach(extra => {
+        //                             itemHtml += `
+        // <tr class="text-muted small">
+        //     <td class="pl-4">➕ ${extra.nama}</td>
+        //     <td class="text-center">Rp ${extra.harga.toLocaleString('id-ID')}</td>
+        //     <td class="text-center">${extra.jumlah}</td>
+        //     <td class="text-right">Rp ${(extra.harga * extra.jumlah).toLocaleString('id-ID')}</td>
+        // </tr>`;
+        //                         });
+        //                     }
+        //                 });
+
+        //                 $("#rinci-item-list").html(itemHtml);
+
+
+        //                 // pastikan total bayar tampil benar juga
+        //                 $("#rinci-total").text(parseInt(res.total_pembayaran || res.total_penjualan ||
+        //                     0).toLocaleString("id-ID"));
+
+        //                 $("#modalRincianPesanan").modal("show");
+
+        //                 // simpan transaksi_id ke tombol Bayar
+        //                 $("#btn-buka-bayar").data("id", transaksi_id);
+        //             }, "json");
+        //         });
+
+
         $("#rincian-pesanan").click(function() {
             const selected = $(".pesanan-item.selected");
             if (!selected.length) {
@@ -2324,8 +2481,7 @@
             $.post(base_url + "kasir/get_detail_transaksi_aktif", {
                 transaksi_id
             }, function(res) {
-                console.log(res); // ⬅️ Tambahkan ini                
-                // // Info transaksi
+                // Info utama
                 $("#rinci-no-transaksi").text(res.no_transaksi);
                 $("#rinci-customer").text(res.customer || "-");
                 $("#rinci-jenis-order").text(res.jenis_order || "-");
@@ -2334,79 +2490,64 @@
                 $("#rinci-diskon").text("Rp " + (res.diskon || 0).toLocaleString("id-ID"));
 
                 totalPenjualanAwal = parseInt(res.total_penjualan || res.total_pembayaran || 0);
-                $("#rinci-total").text(totalPenjualanAwal.toLocaleString("id-ID"));
-
-                // ⬇️ Tambahan ini:
                 $("#rinci-tagihan").text(totalPenjualanAwal.toLocaleString("id-ID"));
 
-                // ⬅️ Tambahkan ini di SINI
                 rinciOrderItems = res.items;
-
 
                 let itemHtml = '';
                 const grouped = {};
 
                 res.items.forEach(item => {
-                    const groupKey = item.pr_detail_transaksi_paket_id || item
-                        .detail_unit_id || item.id;
+                    const groupKey = item.is_paket ? item.detail_unit_paket_id : (item
+                        .detail_unit_id || item.id);
 
                     if (!grouped[groupKey]) {
                         grouped[groupKey] = {
-                            nama_produk: item.nama_paket || item.nama_produk,
-                            harga: item.nama_paket ? parseInt(item.harga_paket) :
-                                parseInt(item.harga),
+                            nama_produk: item.nama_produk,
+                            harga: item.harga,
                             jumlah: 0,
-                            extra: {},
-                            is_paket: !!item.nama_paket,
-                            items: []
+                            is_paket: item.is_paket == 1,
+                            items: item.produk_dalam ?? [],
+                            extra: {}
                         };
                     }
 
-                    if (item.nama_paket) {
-                        // ✅ Hanya set jumlah sekali (ambil dari paket)
-                        if (grouped[groupKey].jumlah === 0) {
-                            grouped[groupKey].jumlah = parseInt(item.jumlah);
-                        }
-
-                        // ✅ Tambah produk isi paket
-                        grouped[groupKey].items.push({
-                            nama_produk: item.nama_produk,
-                            jumlah: item.jumlah
-                        });
+                    if (item.is_paket == 1) {
+                        grouped[groupKey].jumlah = item
+                            .jumlah; // ✅ gunakan jumlah dari paket
                     } else {
                         grouped[groupKey].jumlah += parseInt(item.jumlah);
                     }
 
-                    // ✅ Handle extra
+
+                    // Tambahkan extra
                     if (item.extra?.length) {
                         item.extra.forEach(extra => {
-                            const key = extra.nama;
-                            if (!grouped[groupKey].extra[key]) {
-                                grouped[groupKey].extra[key] = {
+                            const k = extra.nama;
+                            if (!grouped[groupKey].extra[k]) {
+                                grouped[groupKey].extra[k] = {
                                     nama: extra.nama,
                                     harga: parseInt(extra.harga),
                                     jumlah: 0
                                 };
                             }
-                            grouped[groupKey].extra[key].jumlah += parseInt(
-                                extra.jumlah);
+                            grouped[groupKey].extra[k].jumlah += parseInt(extra
+                                .jumlah);
                         });
                     }
                 });
 
-
-                // 🔁 RENDER KE TABEL
+                // Render ke tabel
                 Object.values(grouped).forEach(item => {
                     itemHtml += `
-<tr>
-    <td>${item.nama_produk}</td>
-    <td class="text-center">Rp ${item.harga.toLocaleString('id-ID')}</td>
-    <td class="text-center">${item.jumlah}</td>
-    <td class="text-right">Rp ${(item.harga * item.jumlah).toLocaleString('id-ID')}</td>
-</tr>`;
+                                <tr>
+                                    <td>${item.nama_produk}</td>
+                                    <td class="text-center">Rp ${item.harga.toLocaleString('id-ID')}</td>
+                                    <td class="text-center">${item.jumlah}</td>
+                                    <td class="text-right">Rp ${(item.harga * item.jumlah).toLocaleString('id-ID')}</td>
+                                </tr>`;
 
-                    // Detail isi paket
-                    if (item.is_paket && item.items) {
+                    if (item.is_paket && item.items.length > 0) {
                         item.items.forEach(sub => {
                             itemHtml += `
 <tr class="text-muted small">
@@ -2418,7 +2559,7 @@
                         });
                     }
 
-                    // Extra
+
                     if (item.extra) {
                         Object.values(item.extra).forEach(extra => {
                             itemHtml += `
@@ -2433,74 +2574,9 @@
                 });
 
                 $("#rinci-item-list").html(itemHtml);
-
-
-
-                // // Grouping berdasarkan detail_unit_id
-                // const grouped = {};
-
-                // res.items.forEach(item => {
-                //     if (!grouped[item.detail_unit_id]) {
-                //         grouped[item.detail_unit_id] = {
-                //             nama_produk: item.nama_produk,
-                //             harga: parseInt(item.harga),
-                //             jumlah: 0,
-                //             extra: {},
-                //         };
-                //     }
-                //     grouped[item.detail_unit_id].jumlah += parseInt(item.jumlah);
-
-                //     // Gabungkan extra
-                //     if (item.extra?.length) {
-                //         item.extra.forEach(extra => {
-                //             const key = extra.nama; // berdasarkan nama
-                //             if (!grouped[item.detail_unit_id].extra[key]) {
-                //                 grouped[item.detail_unit_id].extra[key] = {
-                //                     nama: extra.nama,
-                //                     harga: parseInt(extra.harga),
-                //                     jumlah: 0
-                //                 };
-                //             }
-                //             grouped[item.detail_unit_id].extra[key].jumlah +=
-                //                 parseInt(extra.jumlah);
-                //         });
-                //     }
-                // });
-
-
-                // let itemHtml = '';
-                // Object.values(grouped).forEach(item => {
-                //     itemHtml += `
-                //     <tr>
-                //         <td>${item.nama_produk}</td>
-                //         <td class="text-center">Rp ${item.harga.toLocaleString('id-ID')}</td>
-                //         <td class="text-center">${item.jumlah}</td>
-                //         <td class="text-right">Rp ${(item.harga * item.jumlah).toLocaleString('id-ID')}</td>
-                //     </tr>`;
-
-                //     // Loop extra
-                //     if (item.extra) {
-                //         Object.values(item.extra).forEach(extra => {
-                //             itemHtml += `
-                // <tr class="text-muted small">
-                //     <td class="pl-4">➕ ${extra.nama}</td>
-                //     <td class="text-center">Rp ${extra.harga.toLocaleString('id-ID')}</td>
-                //     <td class="text-center">${extra.jumlah}</td>
-                //     <td class="text-right">Rp ${(extra.harga * extra.jumlah).toLocaleString('id-ID')}</td>
-                // </tr>`;
-                //         });
-                //     }
-                // });
-                // $("#rinci-item-list").html(itemHtml);
-
-
-                // pastikan total bayar tampil benar juga
                 $("#rinci-total").text(parseInt(res.total_pembayaran || res.total_penjualan ||
                     0).toLocaleString("id-ID"));
-
                 $("#modalRincianPesanan").modal("show");
-
-                // simpan transaksi_id ke tombol Bayar
                 $("#btn-buka-bayar").data("id", transaksi_id);
             }, "json");
         });
@@ -3173,35 +3249,83 @@
                 <div class="list-group" id="list-group-void">
             `;
 
+                    // res.items.forEach(function(item) {
+                    //     const isBatal = item.status === 'batal';
+                    //     const disabled = isBatal ? 'disabled checked' : '';
+                    //     const classMuted = isBatal ? 'batal' : 'produk';
+
+                    //     html += `
+                    //         <label class="list-group-item d-flex justify-content-between align-items-center ${classMuted}">
+                    //             <div class="d-flex align-items-center">
+                    //                 <input class="form-check-input me-2 checkbox-void" type="checkbox" ${disabled} value="${item.id}" data-type="produk" id="produk-${item.id}">
+                    //                 <span>${item.jumlah}x ${item.nama_produk}</span>
+                    //             </div>
+                    //             <span class="badge badge-produk rounded-pill">${formatRupiah(item.harga * item.jumlah)}</span>
+                    //         </label>
+                    //      `;
+
+                    //     if (item.extra && item.extra.length > 0) {
+                    //         item.extra.forEach(function(extra) {
+                    //             html += `
+                    //         <label class="list-group-item d-flex justify-content-between align-items-center extra">
+                    //             <div class="d-flex align-items-center">
+                    //                 <input class="form-check-input me-2 checkbox-void" type="checkbox" value="${extra.id}" data-type="extra" data-parent-id="${item.id}" id="extra-${extra.id}">
+                    //                 <small>➔ ${extra.nama}</small>
+                    //             </div>
+                    //             <span class="badge badge-extra rounded-pill">${formatRupiah(extra.harga * extra.jumlah)}</span>
+                    //         </label>
+                    //              `;
+                    //         });
+                    //     }
+                    // });
+
+
                     res.items.forEach(function(item) {
                         const isBatal = item.status === 'batal';
                         const disabled = isBatal ? 'disabled checked' : '';
-                        const classMuted = isBatal ? 'batal' : 'produk';
+                        const classMuted = isBatal ? 'batal' : item.type;
 
                         html += `
-                    <label class="list-group-item d-flex justify-content-between align-items-center ${classMuted}">
-                        <div class="d-flex align-items-center">
-                            <input class="form-check-input me-2 checkbox-void" type="checkbox" ${disabled} value="${item.id}" data-type="produk" id="produk-${item.id}">
-                            <span>${item.jumlah}x ${item.nama_produk}</span>
-                        </div>
-                        <span class="badge badge-produk rounded-pill">${formatRupiah(item.harga * item.jumlah)}</span>
-                    </label>
-                `;
+        <label class="list-group-item d-flex justify-content-between align-items-center ${classMuted}">
+            <div class="d-flex align-items-center">
+                <input class="form-check-input me-2 checkbox-void" type="checkbox" ${disabled} value="${item.id}" data-type="${item.type}" id="${item.type}-${item.id}">
+                <span class="${item.type === 'paket' ? 'fw-bold text-dark' : ''}">${item.jumlah}x ${item.nama_produk}</span>
+            </div>
+            <span class="badge rounded-pill">${formatRupiah(item.harga * item.jumlah)}</span>
+        </label>
+    `;
 
+                        // Extra
                         if (item.extra && item.extra.length > 0) {
                             item.extra.forEach(function(extra) {
                                 html += `
-                            <label class="list-group-item d-flex justify-content-between align-items-center extra">
-                                <div class="d-flex align-items-center">
-                                    <input class="form-check-input me-2 checkbox-void" type="checkbox" value="${extra.id}" data-type="extra" data-parent-id="${item.id}" id="extra-${extra.id}">
-                                    <small>➔ ${extra.nama}</small>
-                                </div>
-                                <span class="badge badge-extra rounded-pill">${formatRupiah(extra.harga * extra.jumlah)}</span>
-                            </label>
-                        `;
+            <label class="list-group-item d-flex justify-content-between align-items-center extra">
+                <div class="d-flex align-items-center">
+                    <input class="form-check-input me-2 checkbox-void" type="checkbox" value="${extra.id}" data-type="extra" data-parent-id="${item.id}" id="extra-${extra.id}">
+                    <small>➔ ${extra.nama}</small>
+                </div>
+                <span class="badge badge-extra rounded-pill">${formatRupiah(extra.harga * extra.jumlah)}</span>
+            </label>
+            `;
+                            });
+                        }
+
+                        // Isi paket
+                        if (item.type === 'paket' && item.produk_dalam) {
+                            item.produk_dalam.forEach(function(isi, index) {
+                                html += `
+            <label class="list-group-item d-flex justify-content-between align-items-center isi-paket">
+                <div class="d-flex align-items-center ms-4">
+                    <input class="form-check-input me-2 checkbox-void child-of-${item.type}-${item.id}" type="checkbox" disabled>
+                    <small>${isi.jumlah}x ${isi.nama_produk}</small>
+                </div>
+                <span class="badge rounded-pill">Rp 0</span>
+            </label>
+            `;
                             });
                         }
                     });
+
 
                     html += '</div>';
                     $("#listProdukVoid").html(html);
@@ -3249,17 +3373,34 @@
 
 
         // centang produk dan extra        
+        // $(document).on('change', '.checkbox-void', function() {
+        //     const id = $(this).val();
+        //     const isChecked = $(this).is(':checked');
+        //     const type = $(this).data('type');
+
+        //     // Kalau produk utama dicentang, extra ikut
+        //     if (type === 'produk') {
+        //         $(`input[data-parent-id='${id}']`).prop('checked', isChecked);
+        //     }
+        // });
+
+
+
         $(document).on('change', '.checkbox-void', function() {
             const id = $(this).val();
             const isChecked = $(this).is(':checked');
             const type = $(this).data('type');
 
-            // Kalau produk utama dicentang, extra ikut
+            // Produk → extra ikut
             if (type === 'produk') {
                 $(`input[data-parent-id='${id}']`).prop('checked', isChecked);
             }
-        });
 
+            // Paket → centang isi-nya juga (pakai class child-of-)
+            if (type === 'paket') {
+                $(`.child-of-${type}-${id}`).prop('checked', isChecked);
+            }
+        });
 
         // Submit Void Pilihan
         $("#btnVoidPilihan").click(function() {

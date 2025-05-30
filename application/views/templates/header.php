@@ -211,12 +211,12 @@
                     <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseSeven"
                         aria-expanded="true" aria-controls="collapseSeven">
                         <i class="fas fa-fw fa-cog"></i>
-                        <span>CAMPUR</span>
+                        <span>Pengaturan</span>
                     </a>
                     <div id="collapseSeven" class="collapse" aria-labelledby="headingSeven"
                         data-parent="#accordionSidebar">
                         <div class="bg-white py-2 collapse-inner rounded">
-                            <a class="collapse-item" href="<?= site_url('/kasir') ?>"><i class="far fa-id-card"></i>
+                            <!-- <a class="collapse-item" href="<?= site_url('/kasir') ?>"><i class="far fa-id-card"></i>
                                 POS</a>
                             <a class="collapse-item" href="<?= site_url('/produk') ?>"><i class="far fa-id-card"></i>
                                 Daftar Produk</a>
@@ -227,13 +227,11 @@
                             <a class="collapse-item" href="<?= site_url('/voucher') ?>"><i class="fas fa-user-cog"></i>
                                 Daftar Voucher</a>
                             <a class="collapse-item" href="<?= site_url('/poin') ?>"><i class="fas fa-user-cog"></i>
-                                Daftar Poin</a>
-                            <a class="collapse-item" href="<?= site_url('/setting') ?>"><i class="fas fa-user-cog"></i>
-                                Pengaturan</a>
+                                Daftar Poin</a> -->
+                            <!-- <a class="collapse-item" href="<?= site_url('/setting') ?>"><i class="fas fa-user-cog"></i>
+                                Pengaturan</a> -->
                             <a class="collapse-item" href="<?= site_url('/printer') ?>"><i class="fas fa-user-cog"></i>
                                 Printer</a>
-                            <a class="collapse-item" href="<?= site_url('/setting/struk') ?>"><i
-                                    class="fas fa-user-cog"></i> Pengaturan Struk</a>
                         </div>
                     </div>
                 </li>

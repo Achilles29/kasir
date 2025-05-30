@@ -324,13 +324,17 @@ tampilan mobile semua halaman
 
 
 Ringkasan penjualan
-produk paket
-halaman produk paket
+v produk paket
+v halaman produk paket
 insert vps
-void paket
+v void paket
 refund paket
 laporan
+kosongkan keranjang lalu refresh
+revisi cetak faktur dan tanda terima untuk paket
 
+void paket belum berdiri sendiri sendiri
+cetak void paket
 
 
 halaman pending order => nomor meja, total penjualan bukan total bayar, tanggal
@@ -352,7 +356,7 @@ update lokal tabel dan folder upload
 v halaman admin member di dashboard
 halaman aset
 v halaman setting redeem
-lihat rincian produk pakett kuantiti lebih dari 1 masih muncul 1
+v lihat rincian produk pakett kuantiti lebih dari 1 masih muncul 1
 laporan detail penjualan => harga extra belum terhitung, produk paket belum terakomodir
 
 
@@ -471,5 +475,3 @@ pr_customer_stamp : id, pr_transaksi_id, customer_id , promo_stamp_id, jumlah_st
 
 
 
-
-tanyakan jika ada yang kurang jelas
