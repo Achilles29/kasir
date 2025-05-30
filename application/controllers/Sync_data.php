@@ -77,4 +77,66 @@ class Sync_data extends CI_Controller {
     }
 
 
+    public function sync_file_uploads()
+    {
+        $this->load->helper('file');
+    
+        $api_url = 'https://dashboard.namuacoffee.com/api_sinkron/daftar_file_uploads';
+        $response = file_get_contents($api_url);
+        $data = json_decode($response, true);
+    
+        if (!$data || $data['status'] !== 'success' || !isset($data['data'])) {
+            echo json_encode(['status' => 'error', 'message' => 'Gagal ambil daftar file dari VPS']);
+            return;
+        }
+    
+        $base_url_file = 'https://dashboard.namuacoffee.com/';
+    
+        $downloaded = 0;
+        $skipped = 0;
+        $failed = 0;
+    
+        foreach ($data['data'] as $file_info) {
+            $remote_file = $file_info['filename'];
+            $remote_updated = strtotime($file_info['updated_at'] ?? '2000-01-01 00:00:00');
+            $local_path = FCPATH . $remote_file;
+    
+            // Cek apakah perlu download
+            if (file_exists($local_path)) {
+                $local_updated = filemtime($local_path);
+                if ($local_updated >= $remote_updated) {
+                    $skipped++;
+                    continue; // tidak perlu download
+                }
+            }
+    
+            // Pastikan direktori lokal tersedia
+            $dir = dirname($local_path);
+            if (!is_dir($dir)) {
+                mkdir($dir, 0777, true);
+            }
+    
+            // Unduh file
+            $file_content = @file_get_contents($base_url_file . $remote_file);
+            if ($file_content !== false) {
+                write_file($local_path, $file_content);
+                @touch($local_path, $remote_updated);
+                $downloaded++;
+            } else {
+                $failed++;
+            }
+        }
+    
+        echo json_encode([
+            'status' => 'ok',
+            'message' => 'Sinkronisasi file selesai',
+            'result' => [
+                'downloaded' => $downloaded,
+                'skipped' => $skipped,
+                'failed' => $failed,
+            ]
+        ]);
+    }
+    
+
 }
