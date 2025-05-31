@@ -1987,13 +1987,15 @@
             $("#customer-id").val("");
             extraData = {};
             // Tambahkan ini untuk refresh halaman
-            location.reload();
+            // location.reload();
         }
 
 
         $("#kosongkan-keranjang").click(function() {
             if (confirm("Yakin ingin mengosongkan keranjang?")) {
                 kosongkanKeranjang();
+                location.reload();
+
             }
         });
 

@@ -56,6 +56,8 @@ mysqldump -h 89.116.171.157 -u root -p --no-data namua > namua_struktur.sql
 
 
 
+
+ ASSET
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- Hapus dari tabel paling bawah relasinya (anak)
@@ -67,9 +69,6 @@ DELETE FROM aset_penghapusan;
 DELETE FROM aset_riwayat;
 
 DELETE FROM pr_voucher;
-
--- Baru induk
-DELETE FROM pr_transaksi;
 
 -- Reset AUTO_INCREMENT semuanya
 
@@ -85,3 +84,35 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 
 mysqldump -h 89.116.171.157 -u root -p --no-data namua > namua_struktur.sql
+
+
+
+CLEAR TRANSAKSI SAJA
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- Hapus dari tabel paling bawah relasinya (anak)
+DELETE FROM pr_detail_extra;
+DELETE FROM pr_detail_transaksi;
+DELETE FROM pr_detail_transaksi_paket;
+DELETE FROM pr_kasir_shift;
+DELETE FROM pr_kasir_shift_log;
+DELETE FROM pr_pembayaran;
+DELETE FROM pr_refund;
+DELETE FROM pr_void;
+DELETE FROM pr_transaksi;
+
+-- Reset AUTO_INCREMENT semuanya
+
+ALTER TABLE pr_detail_extra AUTO_INCREMENT = 1;
+ALTER TABLE pr_detail_transaksi AUTO_INCREMENT = 1;
+ALTER TABLE pr_detail_transaksi_paket AUTO_INCREMENT = 1;
+ALTER TABLE pr_kasir_shift AUTO_INCREMENT = 1;
+ALTER TABLE pr_kasir_shift_log AUTO_INCREMENT = 1;
+ALTER TABLE pr_pembayaran AUTO_INCREMENT = 1;
+ALTER TABLE pr_refund AUTO_INCREMENT = 1;
+ALTER TABLE pr_void AUTO_INCREMENT = 1;
+ALTER TABLE pr_transaksi AUTO_INCREMENT = 1;
+
+SET FOREIGN_KEY_CHECKS = 1;
+

@@ -306,6 +306,8 @@ v    Produk Ekstra
     Produk Paket (gabungan)
 v    Master resep
 
+pengaturan struk
+
 cront status pr_voucher
 
 riwayat transaksi pelanggan yang sudah paymen saja jangan semua
