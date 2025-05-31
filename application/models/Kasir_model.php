@@ -844,196 +844,6 @@ public function get_tampilan_struk($printer_id) {
     return $this->db->get_where('pr_struk_tampilan', ['printer_id' => $printer_id])->row_array();
 }
 
-// public function generate_struk_full_by_setting($transaksi, $printer, $struk_data, $tampilan) {
-//     $out = "";
-//     $width = 32; // Panjang karakter maksimal per baris
-
-//     $divisi_id = $printer['divisi'];
-//     $lokasi = strtoupper($printer['lokasi_printer']);
-//     $isChecker = ($lokasi == 'CHECKER');
-//     $isKasir = ($lokasi == 'KASIR');
-    
-//     // Tampilkan judul lokasi printer, kecuali untuk KASIR
-//     $isKasir = strtoupper($printer['lokasi_printer']) === 'KASIR';
-//     if (!$isKasir) {
-//         $out .= $this->center_text("[ $lokasi ORDER ]", $width) . "\n";
-//         $out .= str_repeat("-", $width) . "\n";
-//     }
-
-//     // Logo hanya simbolik
-//     if (!empty($tampilan['show_logo']) && !empty($struk_data['logo'])) {
-//         $out .= "[LOGO]\n";
-//     }
-
-//     // Outlet, Alamat, Telepon => tengah
-//     if (!empty($tampilan['show_outlet'])) {
-//         $out .= $this->center_text(strtoupper($struk_data['nama_outlet']), $width) . "\n";
-//     }
-
-//     if (!empty($tampilan['show_alamat'])) {
-//         $alamat_lines = explode("\n", wordwrap($struk_data['alamat'], $width));
-//         foreach ($alamat_lines as $line) {
-//             $out .= $this->center_text($line, $width) . "\n";
-//         }
-//     }
-
-//     if (!empty($tampilan['show_no_telepon'])) {
-//         $out .= $this->center_text("Telp: " . $struk_data['no_telepon'], $width) . "\n";
-//     }
-
-//     // Header tengah
-//     if (!empty($tampilan['show_custom_header'])) {
-//         $out .= str_repeat("-", $width) . "\n";
-//         $lines = explode("\n", wordwrap($struk_data['custom_header'], $width));
-//         foreach ($lines as $line) {
-//             $out .= $this->center_text(strtoupper($line), $width) . "\n";
-//         }
-//         $out .= str_repeat("-", $width) . "\n";
-//     }
-
-//     $out .= str_repeat("-", $width) . "\n";
-
-//     if (!empty($tampilan['show_no_transaksi'])) 
-//         $out .= "No: " . $transaksi['no_transaksi'] . "\n";
-
-//     if (!empty($tampilan['show_kasir_order'])) 
-//         $out .= "Order: " . ($transaksi['kasir_order_username'] ?? '-') . "\n";
-
-//     if (!empty($tampilan['show_kasir_bayar']) && $transaksi['kasir_bayar']) 
-//         $out .= "Kasir: " . ($transaksi['kasir_bayar_username'] ?? '-') . "\n";
-
-
-//     if (!empty($tampilan['show_customer'])) 
-//         $out .= "Customer: " . $transaksi['customer'] . "\n";
-
-//     if (!empty($tampilan['show_nomor_meja'])) 
-//         $out .= "Meja: " . $transaksi['nomor_meja'] . "\n";
-
-//     if (!empty($tampilan['show_waktu_order'])) 
-//         $out .= "Order: " . date('d-m-Y H:i', strtotime($transaksi['waktu_order'])) . "\n";
-
-//     if (!empty($tampilan['show_waktu_bayar']) && $transaksi['waktu_bayar']) 
-//         $out .= "Bayar: " . date('d-m-Y H:i', strtotime($transaksi['waktu_bayar'])) . "\n";
-
-//     $out .= str_repeat("-", $width) . "\n";
-
-//     // $divisi_id = $printer['divisi'];
-//     // $isKasir = strtoupper($printer['lokasi_printer']) === 'KASIR';
-
-//     // ================= CETAK PRODUK ====================
-//     $paket_printed = [];
-//     $paket_ids_to_update = [];
-
-//     foreach ($transaksi['items'] as $item) {
-//         if (!is_null($item['status']) && strtolower($item['status']) == 'batal') continue;
-
-//         $produk = $this->db->select('k.pr_divisi_id')->from('pr_produk p')
-//             ->join('pr_kategori k', 'p.kategori_id = k.id', 'left')
-//             ->where('p.id', $item['pr_produk_id'])->get()->row_array();
-
-//         if ($divisi_id && $produk['pr_divisi_id'] != $divisi_id) continue;
-
-//         $paket_id = $item['pr_detail_transaksi_paket_id'] ?? null;
-
-//         if ($paket_id && !isset($paket_printed[$paket_id])) {
-//             $paket = $this->db
-//                 ->select('pp.nama_paket, dtp.catatan, dtp.is_printed')
-//                 ->from('pr_detail_transaksi_paket dtp')
-//                 ->join('pr_produk_paket pp', 'pp.id = dtp.pr_produk_paket_id')
-//                 ->where('dtp.id', $paket_id)
-//                 ->get()->row_array();
-
-//             if (!$paket || $paket['is_printed'] == 1) continue;
-
-//             // Cetak Nama Paket + catatan ke kanan
-//             $nama_paket = $paket['nama_paket'];
-//             $catatan = $paket['catatan'] ? " *" . $paket['catatan'] : '';
-//             $out .= $this->format_struk_line("** $nama_paket", $catatan, $width) . "\n";
-
-//             $paket_printed[$paket_id] = true;
-//             $paket_ids_to_update[] = $paket_id;
-//         }
-
-//         $prefix = $paket_id ? '  > ' : '';
-//         $line_left = "{$prefix}{$item['jumlah']}x {$item['nama_produk']}";
-//         $line_right = $isKasir ? number_format($item['harga'] * $item['jumlah'], 0, ',', '.') : '';
-//         $out .= $this->format_struk_line($line_left, $line_right, $width) . "\n";
-
-//         if (!empty($item['extra'])) {
-//             foreach ($item['extra'] as $ex) {
-//                 $nama_extra = $ex['nama_extra'] ?? 'Extra';
-//                 $line_left = "     > {$ex['jumlah']}x {$nama_extra}";
-//                 $line_right = $isKasir ? number_format($ex['harga'] * $ex['jumlah'], 0, ',', '.') : '';
-//                 $out .= $this->format_struk_line($line_left, $line_right, $width) . "\n";
-//             }
-//         }
-
-//         if (!empty($item['catatan']) && !$paket_id) {
-//             foreach (explode("\n", wordwrap("- " . $item['catatan'], $width - 2)) as $line) {
-//                 $out .= "  $line\n";
-//             }
-//         }
-//     }
-
-//     $out .= str_repeat("-", $width) . "\n";
-
-    
-//     // === RINGKASAN PEMBAYARAN ===
-//     if ($isKasir) {
-//         // $out .= str_repeat("-", $width) . "\n";
-
-//         // Subtotal Produk (tanpa diskon)
-//         $subtotal_produk = $transaksi['total_penjualan'];
-//         $out .= $this->format_struk_line('Subtotal Produk', number_format($subtotal_produk, 0, ',', '.'), $width) . "\n";
-
-//         // Diskon
-//         $diskon = intval($transaksi['diskon'] ?? 0);
-//         $out .= $this->format_struk_line('Diskon', number_format($diskon, 0, ',', '.'), $width) . "\n";
-
-//         // Total Tagihan
-//         $total_tagihan = max(0, $subtotal_produk - $diskon);
-//         $out .= $this->format_struk_line('Total Tagihan', number_format($total_tagihan, 0, ',', '.'), $width) . "\n";
-
-//         $out .= str_repeat("-", $width) . "\n";
-
-//         // Total Bayar
-//         $total_bayar = intval($transaksi['total_pembayaran'] ?? 0);
-//         $out .= $this->format_struk_line('Total Bayar', number_format($total_bayar, 0, ',', '.'), $width) . "\n";
-//     }
-//     if (!empty($tampilan['show_custom_footer'])) {
-//         $lines = explode("\n", wordwrap($struk_data['custom_footer'], $width));
-//         foreach ($lines as $line) {
-//             $out .= $this->center_text(strtoupper($line), $width) . "\n";
-//         }
-//     }
-
-//     // Tampilkan promo voucher otomatis jika ada
-//     if ($isKasir && !empty($transaksi['voucher_otomatis'])) {
-//         $out .= str_repeat("-", $width) . "\n";
-//         $out .= $this->center_text("🎁 VOUCHER PROMO 🎁", $width) . "\n";
-//         $out .= str_repeat("-", $width) . "\n";
-
-//         foreach ($transaksi['voucher_otomatis'] as $v) {
-//             $nilai_label = $v['jenis'] === 'persentase'
-//                 ? "{$v['nilai']}%"
-//                 : "Rp " . number_format($v['nilai'], 0, ',', '.');
-
-//             $out .= $this->wrap_text("Selamat anda mendapatkan Voucher senilai $nilai_label", $width) . "\n";
-//             $out .= $this->wrap_text("untuk transaksi berikutnya dengan Kode Voucher: {$v['kode_voucher']}", $width) . "\n";
-
-//             if (empty($transaksi['customer_id'])) {
-//                 $out .= $this->wrap_text("Cukup dengan daftarkan diri anda sebagai member namuacoffee", $width) . "\n";
-//             }
-
-//             $out .= $this->wrap_text("Gunakan sebelum tanggal " . date('d M Y', strtotime($v['tanggal_berakhir'])), $width) . "\n";
-//             $out .= "*S&K Berlaku\n";
-//             $out .= str_repeat("-", $width) . "\n";
-//         }
-//     }
-//     return $out;
-// }
-
-
 public function generate_struk_full_by_setting($transaksi, $printer, $struk_data, $tampilan) {
     $out = "";
     $width = 32; // Panjang karakter maksimal per baris
@@ -1107,13 +917,15 @@ public function generate_struk_full_by_setting($transaksi, $printer, $struk_data
 
     $out .= str_repeat("-", $width) . "\n";
 
-    $divisi_id = $printer['divisi'];
-    $isKasir = strtoupper($printer['lokasi_printer']) === 'KASIR';
+    // $divisi_id = $printer['divisi'];
+    // $isKasir = strtoupper($printer['lokasi_printer']) === 'KASIR';
+
+    // ================= CETAK PRODUK ====================
+    $paket_printed = [];
+    $paket_ids_to_update = [];
 
     foreach ($transaksi['items'] as $item) {
-        if (!is_null($item['status']) && strtolower($item['status']) == 'batal') {
-            continue;
-        }
+        if (!is_null($item['status']) && strtolower($item['status']) == 'batal') continue;
 
         $produk = $this->db->select('k.pr_divisi_id')->from('pr_produk p')
             ->join('pr_kategori k', 'p.kategori_id = k.id', 'left')
@@ -1121,35 +933,52 @@ public function generate_struk_full_by_setting($transaksi, $printer, $struk_data
 
         if ($divisi_id && $produk['pr_divisi_id'] != $divisi_id) continue;
 
-        $line_left = "{$item['jumlah']}x {$item['nama_produk']}";
+        $paket_id = $item['pr_detail_transaksi_paket_id'] ?? null;
+
+        if ($paket_id && !isset($paket_printed[$paket_id])) {
+            $paket = $this->db
+                ->select('pp.nama_paket, dtp.catatan, dtp.is_printed')
+                ->from('pr_detail_transaksi_paket dtp')
+                ->join('pr_produk_paket pp', 'pp.id = dtp.pr_produk_paket_id')
+                ->where('dtp.id', $paket_id)
+                ->get()->row_array();
+
+            if (!$paket || $paket['is_printed'] == 1) continue;
+
+            // Cetak Nama Paket + catatan ke kanan
+            $nama_paket = $paket['nama_paket'];
+            $catatan = $paket['catatan'] ? " *" . $paket['catatan'] : '';
+            $out .= $this->format_struk_line("** $nama_paket", $catatan, $width) . "\n";
+
+            $paket_printed[$paket_id] = true;
+            $paket_ids_to_update[] = $paket_id;
+        }
+
+        $prefix = $paket_id ? '  > ' : '';
+        $line_left = "{$prefix}{$item['jumlah']}x {$item['nama_produk']}";
         $line_right = $isKasir ? number_format($item['harga'] * $item['jumlah'], 0, ',', '.') : '';
         $out .= $this->format_struk_line($line_left, $line_right, $width) . "\n";
 
-        // Extra langsung dari $item['extra'], BUKAN query database lagi!
         if (!empty($item['extra'])) {
             foreach ($item['extra'] as $ex) {
-        //        $nama_extra = $ex['nama_extra'] ?? $ex['nama'] ?? 'Extra';
                 $nama_extra = $ex['nama_extra'] ?? 'Extra';
-                $line_left = "  > {$ex['jumlah']}x {$nama_extra}";
+                $line_left = "     > {$ex['jumlah']}x {$nama_extra}";
                 $line_right = $isKasir ? number_format($ex['harga'] * $ex['jumlah'], 0, ',', '.') : '';
                 $out .= $this->format_struk_line($line_left, $line_right, $width) . "\n";
             }
-
         }
 
-        // Note
-        if (!empty($item['catatan'])) {
-            $note_lines = explode("\n", wordwrap("- " . $item['catatan'], $width - 2));
-            foreach ($note_lines as $line) {
+        if (!empty($item['catatan']) && !$paket_id) {
+            foreach (explode("\n", wordwrap("- " . $item['catatan'], $width - 2)) as $line) {
                 $out .= "  $line\n";
             }
         }
     }
 
-
-
     $out .= str_repeat("-", $width) . "\n";
 
+    
+    // === RINGKASAN PEMBAYARAN ===
     if ($isKasir) {
         // $out .= str_repeat("-", $width) . "\n";
 
@@ -1201,11 +1030,182 @@ public function generate_struk_full_by_setting($transaksi, $printer, $struk_data
             $out .= str_repeat("-", $width) . "\n";
         }
     }
-
-
-
     return $out;
 }
+
+// generate awal
+// public function generate_struk_full_by_setting($transaksi, $printer, $struk_data, $tampilan) {
+//     $out = "";
+//     $width = 32; // Panjang karakter maksimal per baris
+
+//     $divisi_id = $printer['divisi'];
+//     $lokasi = strtoupper($printer['lokasi_printer']);
+//     $isChecker = ($lokasi == 'CHECKER');
+//     $isKasir = ($lokasi == 'KASIR');
+    
+//     // Tampilkan judul lokasi printer, kecuali untuk KASIR
+//     $isKasir = strtoupper($printer['lokasi_printer']) === 'KASIR';
+//     if (!$isKasir) {
+//         $out .= $this->center_text("[ $lokasi ORDER ]", $width) . "\n";
+//         $out .= str_repeat("-", $width) . "\n";
+//     }
+
+//     // Logo hanya simbolik
+//     if (!empty($tampilan['show_logo']) && !empty($struk_data['logo'])) {
+//         $out .= "[LOGO]\n";
+//     }
+
+//     // Outlet, Alamat, Telepon => tengah
+//     if (!empty($tampilan['show_outlet'])) {
+//         $out .= $this->center_text(strtoupper($struk_data['nama_outlet']), $width) . "\n";
+//     }
+
+//     if (!empty($tampilan['show_alamat'])) {
+//         $alamat_lines = explode("\n", wordwrap($struk_data['alamat'], $width));
+//         foreach ($alamat_lines as $line) {
+//             $out .= $this->center_text($line, $width) . "\n";
+//         }
+//     }
+
+//     if (!empty($tampilan['show_no_telepon'])) {
+//         $out .= $this->center_text("Telp: " . $struk_data['no_telepon'], $width) . "\n";
+//     }
+
+//     // Header tengah
+//     if (!empty($tampilan['show_custom_header'])) {
+//         $out .= str_repeat("-", $width) . "\n";
+//         $lines = explode("\n", wordwrap($struk_data['custom_header'], $width));
+//         foreach ($lines as $line) {
+//             $out .= $this->center_text(strtoupper($line), $width) . "\n";
+//         }
+//         $out .= str_repeat("-", $width) . "\n";
+//     }
+
+//     $out .= str_repeat("-", $width) . "\n";
+
+//     if (!empty($tampilan['show_no_transaksi'])) 
+//         $out .= "No: " . $transaksi['no_transaksi'] . "\n";
+
+//     if (!empty($tampilan['show_kasir_order'])) 
+//         $out .= "Order: " . ($transaksi['kasir_order_username'] ?? '-') . "\n";
+
+//     if (!empty($tampilan['show_kasir_bayar']) && $transaksi['kasir_bayar']) 
+//         $out .= "Kasir: " . ($transaksi['kasir_bayar_username'] ?? '-') . "\n";
+
+
+//     if (!empty($tampilan['show_customer'])) 
+//         $out .= "Customer: " . $transaksi['customer'] . "\n";
+
+//     if (!empty($tampilan['show_nomor_meja'])) 
+//         $out .= "Meja: " . $transaksi['nomor_meja'] . "\n";
+
+//     if (!empty($tampilan['show_waktu_order'])) 
+//         $out .= "Order: " . date('d-m-Y H:i', strtotime($transaksi['waktu_order'])) . "\n";
+
+//     if (!empty($tampilan['show_waktu_bayar']) && $transaksi['waktu_bayar']) 
+//         $out .= "Bayar: " . date('d-m-Y H:i', strtotime($transaksi['waktu_bayar'])) . "\n";
+
+//     $out .= str_repeat("-", $width) . "\n";
+
+//     $divisi_id = $printer['divisi'];
+//     $isKasir = strtoupper($printer['lokasi_printer']) === 'KASIR';
+
+//     foreach ($transaksi['items'] as $item) {
+//         if (!is_null($item['status']) && strtolower($item['status']) == 'batal') {
+//             continue;
+//         }
+
+//         $produk = $this->db->select('k.pr_divisi_id')->from('pr_produk p')
+//             ->join('pr_kategori k', 'p.kategori_id = k.id', 'left')
+//             ->where('p.id', $item['pr_produk_id'])->get()->row_array();
+
+//         if ($divisi_id && $produk['pr_divisi_id'] != $divisi_id) continue;
+
+//         $line_left = "{$item['jumlah']}x {$item['nama_produk']}";
+//         $line_right = $isKasir ? number_format($item['harga'] * $item['jumlah'], 0, ',', '.') : '';
+//         $out .= $this->format_struk_line($line_left, $line_right, $width) . "\n";
+
+//         // Extra langsung dari $item['extra'], BUKAN query database lagi!
+//         if (!empty($item['extra'])) {
+//             foreach ($item['extra'] as $ex) {
+//         //        $nama_extra = $ex['nama_extra'] ?? $ex['nama'] ?? 'Extra';
+//                 $nama_extra = $ex['nama_extra'] ?? 'Extra';
+//                 $line_left = "  > {$ex['jumlah']}x {$nama_extra}";
+//                 $line_right = $isKasir ? number_format($ex['harga'] * $ex['jumlah'], 0, ',', '.') : '';
+//                 $out .= $this->format_struk_line($line_left, $line_right, $width) . "\n";
+//             }
+
+//         }
+
+//         // Note
+//         if (!empty($item['catatan'])) {
+//             $note_lines = explode("\n", wordwrap("- " . $item['catatan'], $width - 2));
+//             foreach ($note_lines as $line) {
+//                 $out .= "  $line\n";
+//             }
+//         }
+//     }
+
+
+
+//     $out .= str_repeat("-", $width) . "\n";
+
+//     if ($isKasir) {
+//         // $out .= str_repeat("-", $width) . "\n";
+
+//         // Subtotal Produk (tanpa diskon)
+//         $subtotal_produk = $transaksi['total_penjualan'];
+//         $out .= $this->format_struk_line('Subtotal Produk', number_format($subtotal_produk, 0, ',', '.'), $width) . "\n";
+
+//         // Diskon
+//         $diskon = intval($transaksi['diskon'] ?? 0);
+//         $out .= $this->format_struk_line('Diskon', number_format($diskon, 0, ',', '.'), $width) . "\n";
+
+//         // Total Tagihan
+//         $total_tagihan = max(0, $subtotal_produk - $diskon);
+//         $out .= $this->format_struk_line('Total Tagihan', number_format($total_tagihan, 0, ',', '.'), $width) . "\n";
+
+//         $out .= str_repeat("-", $width) . "\n";
+
+//         // Total Bayar
+//         $total_bayar = intval($transaksi['total_pembayaran'] ?? 0);
+//         $out .= $this->format_struk_line('Total Bayar', number_format($total_bayar, 0, ',', '.'), $width) . "\n";
+//     }
+//     if (!empty($tampilan['show_custom_footer'])) {
+//         $lines = explode("\n", wordwrap($struk_data['custom_footer'], $width));
+//         foreach ($lines as $line) {
+//             $out .= $this->center_text(strtoupper($line), $width) . "\n";
+//         }
+//     }
+
+//     // Tampilkan promo voucher otomatis jika ada
+//     if ($isKasir && !empty($transaksi['voucher_otomatis'])) {
+//         $out .= str_repeat("-", $width) . "\n";
+//         $out .= $this->center_text("🎁 VOUCHER PROMO 🎁", $width) . "\n";
+//         $out .= str_repeat("-", $width) . "\n";
+
+//         foreach ($transaksi['voucher_otomatis'] as $v) {
+//             $nilai_label = $v['jenis'] === 'persentase'
+//                 ? "{$v['nilai']}%"
+//                 : "Rp " . number_format($v['nilai'], 0, ',', '.');
+
+//             $out .= $this->wrap_text("Selamat anda mendapatkan Voucher senilai $nilai_label", $width) . "\n";
+//             $out .= $this->wrap_text("untuk transaksi berikutnya dengan Kode Voucher: {$v['kode_voucher']}", $width) . "\n";
+
+//             if (empty($transaksi['customer_id'])) {
+//                 $out .= $this->wrap_text("Cukup dengan daftarkan diri anda sebagai member namuacoffee", $width) . "\n";
+//             }
+
+//             $out .= $this->wrap_text("Gunakan sebelum tanggal " . date('d M Y', strtotime($v['tanggal_berakhir'])), $width) . "\n";
+//             $out .= "*S&K Berlaku\n";
+//             $out .= str_repeat("-", $width) . "\n";
+//         }
+//     }
+
+
+
+//     return $out;
+// }
 
 // public function generate_struk_void($voids, $struk_data, $tampilan, $lokasi)
 // {

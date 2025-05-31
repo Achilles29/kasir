@@ -8,30 +8,131 @@ class Sync_data extends CI_Controller {
         $this->load->model('Api_model');
     }
 
+
+    public function index()
+{
+  $data['title'] = "Sinkronisasi Data Server";
+ 
+  $this->load->view('templates/header', $data);
+  $this->load->view('sync_data/index');
+  $this->load->view('templates/footer');
+}
+    
+    // semua data tabel
     public function ambil_full() {
+        ini_set('max_execution_time', 3000);
         $tables = [
-            'pr_voucher',
-            'pr_struk_tampilan',
-            'pr_struk',
-            'pr_produk_extra',
-            'pr_produk',
-            'pr_printer_setting',
-            'pr_printer',
-            'pr_poin',
-            'pr_pengaturan',
-            'pr_metode_pembayaran',
-            'pr_lokasi_printer',
-            'pr_kategori',
-            'pr_jenis_order',
-            'pr_extra',
+            'abs_divisi',
+            'abs_jabatan',
+            'abs_rekening_bank',
+            'abs_pegawai',
+            'abs_absensi',
+            'abs_absensi_pending',
+            'abs_arsip_gaji',
+            'abs_deposit',
+            'abs_shift',
+            'abs_jadwal_shift',
+            'abs_kasbon',
+            'abs_lembur',
+            'abs_lokasi_absensi',
+            'abs_nilai_lembur',
+            'abs_potongan',
+            'abs_rekap_absensi',
+            'abs_tambahan_lain',
+            'aset_data',
+            'aset_divisi',
+            'aset_kategori',
+            'aset_lampiran',
+            'aset_penghapusan',
+            'aset_riwayat',
+            'bl_daily_bar',
+            'bl_daily_inventory',
+            'bl_daily_kitchen',
+            'bl_db_belanja',
+            'bl_db_purchase',
+            'bl_divisi',
+            'bl_gudang',
+            'bl_gudang_bc 250121',
+            'bl_gudang_januari',
+            'bl_jenis_pengeluaran',
+            'bl_kas',
+            'bl_kategori',
+            'bl_mutasi_kas',
+            'bl_mutasi_kas_rekening',
+            'bl_penjualan_majoo',
+            'bl_penjualan_produk',
+            'bl_penyesuaian',
+            'bl_persediaan_awal',
+            'bl_produk',
+            'bl_purchase',
+            'bl_purchase_bar',
+            'bl_purchase_kitchen',
+            'bl_purchase_pending',
+            'bl_refund',
+            'bl_rekap_rekening',
+            'bl_rekening',
+            'bl_stok_opname',
+            'bl_stok_opname_januari',
+            'bl_stok_penyesuaian',
+            'bl_stok_terbuang',
+            'bl_store_request',
+            'bl_store_request_bar',
+            'bl_store_request_kitchen',
+            'bl_tipe_produksi',
+            'generated_tabel',
+            'kode_user',
+            'member_news',
+            'member_promo',
+            'pr_base',
+            'pr_customer',
+            'pr_customer_poin',
+            'pr_customer_stamp',
+//            'pr_detail_extra',
+//            'pr_detail_transaksi',
+//            'pr_detail_transaksi_paket',
             'pr_divisi',
-            'pr_promo_stamp',
-            'pr_promo_voucher_auto',
+            'pr_extra',
+            'pr_jenis_order',
+//            'pr_kasir_shift',
+//            'pr_kasir_shift_log',
+            'pr_kategori',
+            'pr_log_stok_bahan_baku',
+//            'pr_log_voucher',
+            'pr_lokasi_printer',
+            'pr_meja',
+            'pr_meja_pembatas',
+            'pr_metode_pembayaran',
+//            'pr_pembayaran',
+            'pr_pengaturan',
+            'pr_poin',
+//            'pr_printer',
+            'pr_printer_setting',
+            'pr_produk',
+            'pr_produk_extra',
             'pr_produk_paket',
             'pr_produk_paket_detail',
-
-            'pr_customer'
+            'pr_produksi_base',
+            'pr_promo_stamp',
+            'pr_promo_voucher_auto',
+            'pr_redeem_log',
+            'pr_redeem_setting',
+//            'pr_refund',
+            'pr_resep_base',
+            'pr_resep_produk',
+            'pr_reservasi',
+            'pr_reservasi_detail',
+            'pr_reservasi_meja',
+            'pr_stamp_log',
+            'pr_stok_bahan_baku',
+            'pr_stok_base',
+            'pr_struk',
+            'pr_struk_tampilan',
+//            'pr_sync_log',
+//            'pr_transaksi',
+//            'pr_void',
+            'pr_voucher',
         ];
+        
 
         $result = [];
 
@@ -77,7 +178,7 @@ class Sync_data extends CI_Controller {
     }
 
 
-
+    // Data POS Kasir
     public function ambil_semua() {
         $tables = [
 
@@ -149,7 +250,274 @@ class Sync_data extends CI_Controller {
         ]);
     }
 
+    // Data Produk
+    public function ambil_produk() {
+        $tables = [
 
+            'pr_produk',
+            'pr_produk_extra',
+            'pr_produk_paket',
+            'pr_produk_paket_detail',
+        ];
+
+        $result = [];
+
+        foreach ($tables as $table) {
+            $response = $this->Api_model->ambil_data($table);
+            
+            if ($response && $response['status'] === 'success' && isset($response['data'])) {
+                $total_inserted = 0;
+                $total_updated = 0;
+
+                foreach ($response['data'] as $row) {
+                    if (!isset($row['id'])) continue;
+
+                    $existing = $this->db->get_where($table, ['id' => $row['id']])->row_array();
+
+                    if (!$existing) {
+                        // Data baru
+                        $this->db->insert($table, $row);
+                        $total_inserted++;
+                    } else {
+                        // Data sudah ada → cek updated_at
+                        $vps_updated = strtotime($row['updated_at'] ?? '2000-01-01 00:00:00');
+                        $local_updated = strtotime($existing['updated_at'] ?? '2000-01-01 00:00:00');
+
+                        if ($vps_updated > $local_updated) {
+                            $this->db->where('id', $row['id'])->update($table, $row);
+                            $total_updated++;
+                        }
+                    }
+                }
+
+                $result[$table] = "inserted: $total_inserted, updated: $total_updated";
+            } else {
+                $result[$table] = '❌ gagal ambil data';
+            }
+        }
+
+        echo json_encode([
+            'status' => 'ok',
+            'message' => 'Data umum berhasil disinkronkan.',
+            'result' => $result
+        ]);
+    }
+
+    public function ambil_promo() {
+        $tables = [
+            'member_news',
+            'member_promo',
+            'pr_poin',
+            'pr_promo_stamp',
+            'pr_promo_voucher_auto',
+            'pr_redeem_log',
+            'pr_redeem_setting',
+            'pr_stamp_log',
+            'pr_voucher',
+        ];
+        
+
+        $result = [];
+
+        foreach ($tables as $table) {
+            $response = $this->Api_model->ambil_data($table);
+            
+            if ($response && $response['status'] === 'success' && isset($response['data'])) {
+                $total_inserted = 0;
+                $total_updated = 0;
+
+                foreach ($response['data'] as $row) {
+                    if (!isset($row['id'])) continue;
+
+                    $existing = $this->db->get_where($table, ['id' => $row['id']])->row_array();
+
+                    if (!$existing) {
+                        // Data baru
+                        $this->db->insert($table, $row);
+                        $total_inserted++;
+                    } else {
+                        // Data sudah ada → cek updated_at
+                        $vps_updated = strtotime($row['updated_at'] ?? '2000-01-01 00:00:00');
+                        $local_updated = strtotime($existing['updated_at'] ?? '2000-01-01 00:00:00');
+
+                        if ($vps_updated > $local_updated) {
+                            $this->db->where('id', $row['id'])->update($table, $row);
+                            $total_updated++;
+                        }
+                    }
+                }
+
+                $result[$table] = "inserted: $total_inserted, updated: $total_updated";
+            } else {
+                $result[$table] = '❌ gagal ambil data';
+            }
+        }
+
+        echo json_encode([
+            'status' => 'ok',
+            'message' => 'Data umum berhasil disinkronkan.',
+            'result' => $result
+        ]);
+    }
+
+
+
+    // semua data Absen
+    public function ambil_absen() {
+        $tables = [
+            'abs_divisi',
+            'abs_jabatan',
+            'abs_rekening_bank',
+            'kode_user',
+            'abs_pegawai',
+            'abs_absensi',
+            'abs_absensi_pending',
+            'abs_arsip_gaji',
+            'abs_deposit',
+            'abs_jadwal_shift',
+            'abs_kasbon',
+            'abs_lembur',
+            'abs_lokasi_absensi',
+            'abs_nilai_lembur',
+            'abs_potongan',
+            'abs_rekap_absensi',
+            'abs_shift',
+            'abs_tambahan_lain'
+
+        ];
+        
+
+        $result = [];
+
+        foreach ($tables as $table) {
+            $response = $this->Api_model->ambil_data($table);
+            
+            if ($response && $response['status'] === 'success' && isset($response['data'])) {
+                $total_inserted = 0;
+                $total_updated = 0;
+
+                foreach ($response['data'] as $row) {
+                    if (!isset($row['id'])) continue;
+
+                    $existing = $this->db->get_where($table, ['id' => $row['id']])->row_array();
+
+                    if (!$existing) {
+                        // Data baru
+                        $this->db->insert($table, $row);
+                        $total_inserted++;
+                    } else {
+                        // Data sudah ada → cek updated_at
+                        $vps_updated = strtotime($row['updated_at'] ?? '2000-01-01 00:00:00');
+                        $local_updated = strtotime($existing['updated_at'] ?? '2000-01-01 00:00:00');
+
+                        if ($vps_updated > $local_updated) {
+                            $this->db->where('id', $row['id'])->update($table, $row);
+                            $total_updated++;
+                        }
+                    }
+                }
+
+                $result[$table] = "inserted: $total_inserted, updated: $total_updated";
+            } else {
+                $result[$table] = '❌ gagal ambil data';
+            }
+        }
+
+        echo json_encode([
+            'status' => 'ok',
+            'message' => 'Data umum berhasil disinkronkan.',
+            'result' => $result
+        ]);
+    }
+
+
+    // semua Belanja
+    public function ambil_belanja() {
+        $tables = [
+            'bl_daily_bar',
+            'bl_daily_inventory',
+            'bl_daily_kitchen',
+            'bl_db_belanja',
+            'bl_db_purchase',
+            'bl_divisi',
+            'bl_gudang',
+            'bl_gudang_bc 250121',
+            'bl_gudang_januari',
+            'bl_jenis_pengeluaran',
+            'bl_kas',
+            'bl_kategori',
+            'bl_mutasi_kas',
+            'bl_mutasi_kas_rekening',
+            'bl_penjualan_majoo',
+            'bl_penjualan_produk',
+            'bl_penyesuaian',
+            'bl_persediaan_awal',
+            'bl_produk',
+            'bl_purchase',
+            'bl_purchase_bar',
+            'bl_purchase_kitchen',
+            'bl_purchase_pending',
+            'bl_refund',
+            'bl_rekap_rekening',
+            'bl_rekening',
+            'bl_stok_opname',
+            'bl_stok_opname_januari',
+            'bl_stok_penyesuaian',
+            'bl_stok_terbuang',
+            'bl_store_request',
+            'bl_store_request_bar',
+            'bl_store_request_kitchen',
+            'bl_tipe_produksi'
+
+        ];
+        
+
+        $result = [];
+
+        foreach ($tables as $table) {
+            $response = $this->Api_model->ambil_data($table);
+            
+            if ($response && $response['status'] === 'success' && isset($response['data'])) {
+                $total_inserted = 0;
+                $total_updated = 0;
+
+                foreach ($response['data'] as $row) {
+                    if (!isset($row['id'])) continue;
+
+                    $existing = $this->db->get_where($table, ['id' => $row['id']])->row_array();
+
+                    if (!$existing) {
+                        // Data baru
+                        $this->db->insert($table, $row);
+                        $total_inserted++;
+                    } else {
+                        // Data sudah ada → cek updated_at
+                        $vps_updated = strtotime($row['updated_at'] ?? '2000-01-01 00:00:00');
+                        $local_updated = strtotime($existing['updated_at'] ?? '2000-01-01 00:00:00');
+
+                        if ($vps_updated > $local_updated) {
+                            $this->db->where('id', $row['id'])->update($table, $row);
+                            $total_updated++;
+                        }
+                    }
+                }
+
+                $result[$table] = "inserted: $total_inserted, updated: $total_updated";
+            } else {
+                $result[$table] = '❌ gagal ambil data';
+            }
+        }
+
+        echo json_encode([
+            'status' => 'ok',
+            'message' => 'Data umum berhasil disinkronkan.',
+            'result' => $result
+        ]);
+    }
+
+
+
+    // File uploads
     public function sync_file_uploads()
     {
         $this->load->helper('file');
@@ -211,6 +579,7 @@ class Sync_data extends CI_Controller {
             ]
         ]);
     }
+    
     
     public function sync_file_uploads_direct()
     {

@@ -236,11 +236,18 @@
                     </div>
                 </li>
 
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a class="nav-link" href="/sync_data/ambil_semua">
                         <i class="fas fa-fw fa-chart-area"></i>
                         <span>Sinkronisasi Server</span></a>
+                </li> -->
+
+                <li class="nav-item">
+                    <a class="nav-link" href="<?= site_url('/sync_data') ?>">
+                        <i class="fas fa-fw fa-chart-area"></i>
+                        <span>Sinkronisasi Data Server</span></a>
                 </li>
+
 
                 <li class="nav-item">
                     <a class="nav-link" href="/retry_sync">
