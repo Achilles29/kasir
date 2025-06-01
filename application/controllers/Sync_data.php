@@ -262,15 +262,16 @@ class Sync_data extends CI_Controller {
         ]);
     }
 
-
     // Data POS Transaksi
     public function ambil_transaksi() {
         $tables = [
 
             'pr_customer_poin',
             'pr_customer_stamp',
-            'pr_detail_extra',
+            'pr_transaksi'
             'pr_detail_transaksi',
+
+            'pr_detail_extra',
             'pr_detail_transaksi_paket',
             'pr_kasir_shift',
             'pr_kasir_shift_log',
@@ -288,7 +289,6 @@ class Sync_data extends CI_Controller {
             'pr_void',
             'pr_voucher',
             
-            'pr_transaksi'
         ];
 
         $result = [];
