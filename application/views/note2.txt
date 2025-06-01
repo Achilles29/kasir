@@ -260,7 +260,7 @@ hitung tutup shift nambah ketika di reopen
 pass wifi di bill
 fitur kembalian
 rincina pembayaran scroll
-
+laporan detail filter default bukan hari ini
 
 
 CLEAR
