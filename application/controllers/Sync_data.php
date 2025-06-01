@@ -268,7 +268,7 @@ class Sync_data extends CI_Controller {
 
             'pr_customer_poin',
             'pr_customer_stamp',
-            'pr_transaksi'
+            'pr_transaksi',
             'pr_detail_transaksi',
 
             'pr_detail_extra',
@@ -287,7 +287,7 @@ class Sync_data extends CI_Controller {
             'pr_redeem_setting',
             'pr_stamp_log',
             'pr_void',
-            'pr_voucher',
+            'pr_voucher'
             
         ];
 
