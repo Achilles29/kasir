@@ -264,7 +264,7 @@ class Sync_data extends CI_Controller {
 
 
     // Data POS Transaksi
-    public function ambil_semua() {
+    public function ambil_transaksi() {
         $tables = [
 
 
