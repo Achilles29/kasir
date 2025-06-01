@@ -259,7 +259,7 @@ hitung tutup shift masih hitung refund
 hitung tutup shift nambah ketika di reopen
 pass wifi di bill
 fitur kembalian
-
+rincina pembayaran scroll
 
 
 
