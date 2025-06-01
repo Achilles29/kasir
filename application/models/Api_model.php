@@ -9,8 +9,8 @@ public function __construct()
     $this->load->database(); // WAJIB kalau kamu insert ke DB dari model ini
 }
 
-    private $api_url = 'https://dashboard.namuacoffee.com/api_sinkron/';
-//    private $api_url = 'https://kasir.namuacoffee.com/api_sinkron/';
+//  private $api_url = 'https://dashboard.namuacoffee.com/api_sinkron/';
+   private $api_url = 'https://kasir.namuacoffee.com/api_sinkron/';
 
     
 public function kirim_data($table, $data, $log_enabled = true) {

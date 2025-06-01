@@ -846,13 +846,15 @@ public function get_tampilan_struk($printer_id) {
 
 public function generate_struk_full_by_setting($transaksi, $printer, $struk_data, $tampilan) {
     $out = "";
-    $width = 32; // Panjang karakter maksimal per baris
+#    $width = 32; // Panjang karakter maksimal per baris
 
     $divisi_id = $printer['divisi'];
     $lokasi = strtoupper($printer['lokasi_printer']);
     $isChecker = ($lokasi == 'CHECKER');
     $isKasir = ($lokasi == 'KASIR');
-    
+
+    $width = $isKasir ? 48 : 32;
+
     // Tampilkan judul lokasi printer, kecuali untuk KASIR
     $isKasir = strtoupper($printer['lokasi_printer']) === 'KASIR';
     if (!$isKasir) {

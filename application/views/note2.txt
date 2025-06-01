@@ -249,6 +249,20 @@ v lihat rincian produk pakett kuantiti lebih dari 1 masih muncul 1
 laporan detail penjualan => harga extra belum terhitung, produk paket belum terakomodir
 
 
+urgent
+pengaturan voucher
+pengaturan poin (tgl tanggal_kedaluwarsa)
+laporan penjualan detail, harusnya total pembayaran bukan total penjualan
+tutup kasir dihitung total pembayaran bukan total penjualan
+voucher auto transaksi 1000 kok dapat voucher
+hitung tutup shift masih hitung refund
+hitung tutup shift nambah ketika di reopen
+pass wifi di bill
+fitur kembalian
+
+
+
+
 CLEAR
 pr_transaksi berisi : id 	customer_id 	tanggal 	no_transaksi 	waktu_order 	waktu_bayar 	jenis_order_id 	customer 	nomor_meja 	total_penjualan 	kasir_order 	kasir_bayar 	kode_voucher 	diskon 	total_pembayaran 	sisa_pembayaran 	status_pembayaran 	created_at 	updated_at 	
 
