@@ -275,6 +275,7 @@ class Sync_data extends CI_Controller {
             'pr_detail_transaksi_paket',
             'pr_kasir_shift',
             'pr_kasir_shift_log',
+            'pr_voucher'
             'pr_log_voucher',
             'pr_pembayaran',
             'pr_refund',
@@ -287,7 +288,6 @@ class Sync_data extends CI_Controller {
             'pr_redeem_setting',
             'pr_stamp_log',
             'pr_void',
-            'pr_voucher'
             
         ];
 
