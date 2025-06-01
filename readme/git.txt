@@ -31,3 +31,32 @@ cd /www/wwwroot/kasir
 
 git pull origin main
     
+
+////////////////////
+//// git absen ////
+//////////////////
+git clone https://github.com/Achilles29/absen.git absen
+
+git@github.com:Achilles29/absen.git
+
+echo "# absen" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git branch -M main
+git remote add origin git@github.com:Achilles29/absen.git
+git push -u origin main
+
+git remote add origin git@github.com:Achilles29/absen.git
+git branch -M main
+git push -u origin main
+
+
+
+
+
+git clone https://github.com/Achilles29/dashboard.git dashboard
+git remote add origin https://github.com/Achilles29/member.git
+
+
+git clone https://github.com/Achilles29/member.git member

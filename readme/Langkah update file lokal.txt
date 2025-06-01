@@ -1,0 +1,76 @@
+LANGKAH 1
+
+Langkah
+
+Buka terminal
+
+cd /opt/lampp/htdocs/kasir
+git pull origin main
+
+
+kalau LANGKAH diatas nggak bisa KE LANGKAH 2, Kalau bisa langsung ke LANGKAH 3
+======================
+
+
+
+LANGKAH 2
+masuk folder /opt/lampp/htdocs/
+
+rename folder kasir jadi kasir_backup
+
+Buka terminal
+cd /opt/lampp/htdocs/kasir
+git clone https://github.com/Achilles29/kasir.git kasir
+===================================================
+
+
+LANGKAH 3
+buka browser:
+
+http://localhost/phpmyadmin/
+
+pilih namua(di kiri)
+pilih SQL (di atas)
+
+jalankan:
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- Hapus dari tabel paling bawah relasinya (anak)
+DELETE FROM pr_detail_extra;
+DELETE FROM pr_detail_transaksi;
+DELETE FROM pr_detail_transaksi_paket;
+DELETE FROM pr_kasir_shift;
+DELETE FROM pr_kasir_shift_log;
+DELETE FROM pr_pembayaran;
+DELETE FROM pr_refund;
+DELETE FROM pr_void;
+DELETE FROM pr_transaksi;
+
+-- Reset AUTO_INCREMENT semuanya
+
+ALTER TABLE pr_detail_extra AUTO_INCREMENT = 1;
+ALTER TABLE pr_detail_transaksi AUTO_INCREMENT = 1;
+ALTER TABLE pr_detail_transaksi_paket AUTO_INCREMENT = 1;
+ALTER TABLE pr_kasir_shift AUTO_INCREMENT = 1;
+ALTER TABLE pr_kasir_shift_log AUTO_INCREMENT = 1;
+ALTER TABLE pr_pembayaran AUTO_INCREMENT = 1;
+ALTER TABLE pr_refund AUTO_INCREMENT = 1;
+ALTER TABLE pr_void AUTO_INCREMENT = 1;
+ALTER TABLE pr_transaksi AUTO_INCREMENT = 1;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+===================================
+
+LANGKAH 4
+
+kalau sudah buka http://localhost/kasir/
+
+login
+buka menu SInkronisasi Data Server (kiri)
+pilih Sinkronisasi Seluruh Tabel Full
+tunggu agak lama sampai selesai.
+kalau sudah logout, ganti login akun kasir
+
+

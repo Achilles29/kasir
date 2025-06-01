@@ -116,3 +116,6 @@ ALTER TABLE pr_transaksi AUTO_INCREMENT = 1;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
+
+
+mysql -u root -p namua < namua.sql

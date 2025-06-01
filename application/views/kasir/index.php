@@ -3253,82 +3253,82 @@
                 <div class="list-group" id="list-group-void">
             `;
 
+                    res.items.forEach(function(item) {
+                        const isBatal = item.status === 'batal';
+                        const disabled = isBatal ? 'disabled checked' : '';
+                        const classMuted = isBatal ? 'batal' : 'produk';
+
+                        html += `
+                            <label class="list-group-item d-flex justify-content-between align-items-center ${classMuted}">
+                                <div class="d-flex align-items-center">
+                                    <input class="form-check-input me-2 checkbox-void" type="checkbox" ${disabled} value="${item.id}" data-type="produk" id="produk-${item.id}">
+                                    <span>${item.jumlah}x ${item.nama_produk}</span>
+                                </div>
+                                <span class="badge badge-produk rounded-pill">${formatRupiah(item.harga * item.jumlah)}</span>
+                            </label>
+                         `;
+
+                        if (item.extra && item.extra.length > 0) {
+                            item.extra.forEach(function(extra) {
+                                html += `
+                            <label class="list-group-item d-flex justify-content-between align-items-center extra">
+                                <div class="d-flex align-items-center">
+                                    <input class="form-check-input me-2 checkbox-void" type="checkbox" value="${extra.id}" data-type="extra" data-parent-id="${item.id}" id="extra-${extra.id}">
+                                    <small>➔ ${extra.nama}</small>
+                                </div>
+                                <span class="badge badge-extra rounded-pill">${formatRupiah(extra.harga * extra.jumlah)}</span>
+                            </label>
+                                 `;
+                            });
+                        }
+                    });
+
+
                     // res.items.forEach(function(item) {
                     //     const isBatal = item.status === 'batal';
                     //     const disabled = isBatal ? 'disabled checked' : '';
-                    //     const classMuted = isBatal ? 'batal' : 'produk';
+                    //     const classMuted = isBatal ? 'batal' : item.type;
 
                     //     html += `
                     //         <label class="list-group-item d-flex justify-content-between align-items-center ${classMuted}">
                     //             <div class="d-flex align-items-center">
-                    //                 <input class="form-check-input me-2 checkbox-void" type="checkbox" ${disabled} value="${item.id}" data-type="produk" id="produk-${item.id}">
-                    //                 <span>${item.jumlah}x ${item.nama_produk}</span>
+                    //                 <input class="form-check-input me-2 checkbox-void" type="checkbox" ${disabled} value="${item.id}" data-type="${item.type}" id="${item.type}-${item.id}">
+                    //                 <span class="${item.type === 'paket' ? 'fw-bold text-dark' : ''}">${item.jumlah}x ${item.nama_produk}</span>
                     //             </div>
-                    //             <span class="badge badge-produk rounded-pill">${formatRupiah(item.harga * item.jumlah)}</span>
+                    //             <span class="badge rounded-pill">${formatRupiah(item.harga * item.jumlah)}</span>
                     //         </label>
-                    //      `;
+                    //     `;
 
+                    //     // Extra
                     //     if (item.extra && item.extra.length > 0) {
                     //         item.extra.forEach(function(extra) {
                     //             html += `
-                    //         <label class="list-group-item d-flex justify-content-between align-items-center extra">
-                    //             <div class="d-flex align-items-center">
-                    //                 <input class="form-check-input me-2 checkbox-void" type="checkbox" value="${extra.id}" data-type="extra" data-parent-id="${item.id}" id="extra-${extra.id}">
-                    //                 <small>➔ ${extra.nama}</small>
-                    //             </div>
-                    //             <span class="badge badge-extra rounded-pill">${formatRupiah(extra.harga * extra.jumlah)}</span>
-                    //         </label>
-                    //              `;
+                    //     <label class="list-group-item d-flex justify-content-between align-items-center extra">
+                    //         <div class="d-flex align-items-center">
+                    //             <input class="form-check-input me-2 checkbox-void" type="checkbox" value="${extra.id}" data-type="extra" data-parent-id="${item.id}" id="extra-${extra.id}">
+                    //             <small>➔ ${extra.nama}</small>
+                    //         </div>
+                    //         <span class="badge badge-extra rounded-pill">${formatRupiah(extra.harga * extra.jumlah)}</span>
+                    //     </label>
+                    //     `;
+                    //         });
+                    //     }
+
+                    //     // Isi paket
+                    //     if (item.type === 'paket' && item.produk_dalam) {
+                    //         item.produk_dalam.forEach(function(isi, index) {
+                    //             html += `
+                    //             <label class="list-group-item d-flex justify-content-between align-items-center isi-paket">
+                    //                 <div class="d-flex align-items-center ms-4">
+                    //                     <input class="form-check-input me-2 checkbox-void child-of-${item.type}-${item.id}" type="checkbox" disabled>
+                    //                     <small>${isi.jumlah}x ${isi.nama_produk}</small>
+                    //                 </div>
+                    //                 <span class="badge rounded-pill">Rp 0</span>
+                    //             </label>
+                    //             `;
                     //         });
                     //     }
                     // });
-
-
-                    res.items.forEach(function(item) {
-                        const isBatal = item.status === 'batal';
-                        const disabled = isBatal ? 'disabled checked' : '';
-                        const classMuted = isBatal ? 'batal' : item.type;
-
-                        html += `
-        <label class="list-group-item d-flex justify-content-between align-items-center ${classMuted}">
-            <div class="d-flex align-items-center">
-                <input class="form-check-input me-2 checkbox-void" type="checkbox" ${disabled} value="${item.id}" data-type="${item.type}" id="${item.type}-${item.id}">
-                <span class="${item.type === 'paket' ? 'fw-bold text-dark' : ''}">${item.jumlah}x ${item.nama_produk}</span>
-            </div>
-            <span class="badge rounded-pill">${formatRupiah(item.harga * item.jumlah)}</span>
-        </label>
-    `;
-
-                        // Extra
-                        if (item.extra && item.extra.length > 0) {
-                            item.extra.forEach(function(extra) {
-                                html += `
-            <label class="list-group-item d-flex justify-content-between align-items-center extra">
-                <div class="d-flex align-items-center">
-                    <input class="form-check-input me-2 checkbox-void" type="checkbox" value="${extra.id}" data-type="extra" data-parent-id="${item.id}" id="extra-${extra.id}">
-                    <small>➔ ${extra.nama}</small>
-                </div>
-                <span class="badge badge-extra rounded-pill">${formatRupiah(extra.harga * extra.jumlah)}</span>
-            </label>
-            `;
-                            });
-                        }
-
-                        // Isi paket
-                        if (item.type === 'paket' && item.produk_dalam) {
-                            item.produk_dalam.forEach(function(isi, index) {
-                                html += `
-            <label class="list-group-item d-flex justify-content-between align-items-center isi-paket">
-                <div class="d-flex align-items-center ms-4">
-                    <input class="form-check-input me-2 checkbox-void child-of-${item.type}-${item.id}" type="checkbox" disabled>
-                    <small>${isi.jumlah}x ${isi.nama_produk}</small>
-                </div>
-                <span class="badge rounded-pill">Rp 0</span>
-            </label>
-            `;
-                            });
-                        }
-                    });
 
 
                     html += '</div>';
@@ -3492,6 +3492,7 @@
                 }
             }, "json");
         }
+
 
 
         // TUTUP SHIFT

@@ -1310,6 +1310,7 @@ public function void_batch($items, $alasan)
     $transaksi_id_terakhir = null;
 
     foreach ($items as $item) {
+        log_message('debug', 'VOID ITEM: ' . json_encode($item));
         if (!isset($item['type'])) {
             continue;
         }
@@ -1483,62 +1484,60 @@ public function void_batch($items, $alasan)
     $this->db->trans_complete();
     
         // 🔥 Sinkronisasi ke VPS
-    if ($this->db->trans_status()) {
-        $this->load->model('Api_model');
-
-        // Ambil ulang data untuk dikirim
-        $void_data = $this->db->where_in('id', $new_void_ids)->get('pr_void')->result_array();
-        $transaksi_data = $this->db->get_where('pr_transaksi', ['id' => $transaksi_id_terakhir])->row_array();
-
-        $detail_data = $this->db
-            ->get_where('pr_detail_transaksi', ['pr_transaksi_id' => $transaksi_id_terakhir])
-            ->result_array();
-
-        $extra_data = $this->db
-            ->select('e.*')
-            ->from('pr_detail_extra e')
-            ->join('pr_detail_transaksi dt', 'dt.id = e.detail_transaksi_id')
-            ->where('dt.pr_transaksi_id', $transaksi_id_terakhir)
-            ->get()
-            ->result_array();
-
-        $paket_data = $this->db
-            ->where('pr_transaksi_id', $transaksi_id_terakhir)
-            ->get('pr_detail_transaksi_paket')
-            ->result_array();
+        if ($this->db->trans_status()) {
+            $this->load->model('Api_model');
         
-
-
-        if (!empty($void_data)) {
-            $this->Api_model->kirim_data('pr_void', $void_data);
-            $this->Api_model->insert_log_sync('pr_void', $void_data);
-
+            // Ambil ulang data untuk dikirim
+            $void_data = [];
+            if (!empty($new_void_ids)) {
+                $void_data = $this->db->where_in('id', $new_void_ids)->get('pr_void')->result_array();
+            }
+        
+            $transaksi_data = $this->db->get_where('pr_transaksi', ['id' => $transaksi_id_terakhir])->row_array();
+        
+            $detail_data = $this->db
+                ->get_where('pr_detail_transaksi', ['pr_transaksi_id' => $transaksi_id_terakhir])
+                ->result_array();
+        
+            $extra_data = $this->db
+                ->select('e.*')
+                ->from('pr_detail_extra e')
+                ->join('pr_detail_transaksi dt', 'dt.id = e.detail_transaksi_id')
+                ->where('dt.pr_transaksi_id', $transaksi_id_terakhir)
+                ->get()
+                ->result_array();
+        
+            $paket_data = $this->db
+                ->where('pr_transaksi_id', $transaksi_id_terakhir)
+                ->get('pr_detail_transaksi_paket')
+                ->result_array();
+        
+            if (!empty($void_data)) {
+                $this->Api_model->kirim_data('pr_void', $void_data);
+                $this->Api_model->insert_log_sync('pr_void', $void_data);
+            }
+        
+            if (!empty($paket_data)) {
+                $this->Api_model->kirim_data('pr_detail_transaksi_paket', $paket_data);
+                $this->Api_model->insert_log_sync('pr_detail_transaksi_paket', $paket_data);
+            }
+        
+            if (!empty($transaksi_data)) {
+                $this->Api_model->kirim_data('pr_transaksi', $transaksi_data);
+                $this->Api_model->insert_log_sync('pr_transaksi', $transaksi_data);
+            }
+        
+            if (!empty($detail_data)) {
+                $this->Api_model->kirim_data('pr_detail_transaksi', $detail_data);
+                $this->Api_model->insert_log_sync('pr_detail_transaksi', $detail_data);
+            }
+        
+            if (!empty($extra_data)) {
+                $this->Api_model->kirim_data('pr_detail_extra', $extra_data);
+                $this->Api_model->insert_log_sync('pr_detail_extra', $extra_data);
+            }
         }
-
-        if (!empty($paket_data)) {
-            $this->Api_model->kirim_data('pr_detail_transaksi_paket', $paket_data);
-            $this->Api_model->insert_log_sync('pr_detail_transaksi_paket', $paket_data);
-
-        }
-
-        if (!empty($transaksi_data)) {
-            $this->Api_model->kirim_data('pr_transaksi', $transaksi_data);
-            $this->Api_model->insert_log_sync('pr_transaksi', $transaksi_data);
-
-        }
-
-        if (!empty($detail_data)) {
-            $this->Api_model->kirim_data('pr_detail_transaksi', $detail_data);
-            $this->Api_model->insert_log_sync('pr_detail_transaksi', $detail_data);
-
-        }
-
-        if (!empty($extra_data)) {
-            $this->Api_model->kirim_data('pr_detail_extra', $extra_data);
-            $this->Api_model->insert_log_sync('pr_detail_extra', $extra_data);
-
-        }
-    }
+        
 
     return $new_void_ids;
 }
